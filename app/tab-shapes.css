@@ -1,0 +1,111 @@
+/* What shapes Claude in the one-picture pattern (task 33). Everything is scoped to .s-g, the page's own class. */
+
+/* the picture: written by you (solid edge), written by Claude (dashed), came with the apps (grey) */
+.s-g .a-plate.lit .a-top{stroke:var(--ink-2);stroke-width:1.3}
+.s-g .a-plate.lit .a-side{stroke:var(--amt-4)}
+.s-g .a-plate.none .a-top,.s-g .a-plate.none .a-side{fill-opacity:1;stroke:var(--ink-2);stroke-dasharray:6 4}
+.s-g .a-plate.dim .a-top{fill:var(--amt-1);stroke:var(--amt-3)}
+.s-g .a-plate.dim .a-side.l{fill:#D6DBE2}.s-g .a-plate.dim .a-side.r{fill:#C9CFD8}
+.s-g .a-plate.sel .a-top,.s-g .a-plate.sel .a-side,.s-g .a-plate:focus-visible .a-top{stroke:var(--ink);stroke-width:2.2}
+.s-g .g-pin:focus{outline:none}
+.s-g .g-pin:focus-visible circle{stroke:var(--ink);stroke-width:2.6}
+.s-g .a-stage .w-mh h3{min-width:0}
+.s-g .s-proj{margin-left:0}
+/* the project picker sits above the picture, so the picture's header keeps one line with its hint */
+.s-g .s-above{display:flex;align-items:center;margin:0 4px 14px}
+.s-g .g-lead{min-height:0;margin-bottom:10px}  /* the picker takes the room the lead keeps for a second line */
+.s-g .s-above .s-proj summary{font-size:var(--t-md);padding:6px 12px}
+.s-g .s-above .s-proj summary b{font-size:var(--t-md)}
+.s-g .s-proj-list{left:0;right:auto}
+
+/* the key under the picture */
+.s-g .a-key{font-size:var(--t-sm);color:var(--muted);gap:16px;padding:10px 26px 12px}
+.s-g .a-key span{gap:7px}
+.s-sw{display:inline-block;width:18px;height:12px;border-radius:3px}
+.s-sw.mine{background:#fff;border:1.5px solid var(--ink-2)}
+.s-sw.claude{background:#fff;border:1.5px dashed var(--ink-2)}
+.s-sw.other{background:var(--amt-1);border:1px solid var(--amt-3)}
+.s-g .s-pin-key{background:var(--mod);color:var(--lit-ink);border:1.5px solid var(--lit);box-shadow:none}
+
+/* the one line under the picture */
+.s-g .g-strip{font:var(--t-md) var(--sans);color:var(--ink-2);white-space:normal;gap:14px}
+.s-g .g-strip b{font-weight:600}
+.s-strip-q{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* the panel */
+.s-g .g-panel .w-badge{background:var(--mod);color:var(--lit-ink);border:1.5px solid var(--lit);box-shadow:none}
+.s-g .g-panel .g-body{gap:16px;margin-top:10px}
+.s-what{margin:0;font-size:var(--t-base);line-height:1.5;color:var(--ink-2)}
+.s-size{display:grid;gap:6px;padding:12px 14px;background:var(--mod-2);border:1px solid var(--rim);border-radius:var(--r-md)}
+.s-fig{margin:0;display:flex;align-items:baseline;gap:8px}
+.s-fig b{font:700 var(--t-3xl)/1 var(--mono);color:var(--ink);font-variant-numeric:tabular-nums}
+.s-fig span{font-size:var(--t-md);color:var(--muted)}
+.s-share{display:block;height:6px;background:var(--mod-3);border:1px solid var(--rim);border-radius:3px;overflow:hidden}
+.s-share i{display:block;height:100%;background:var(--amt-5)}
+.s-size small{font-size:var(--t-sm);line-height:1.45;color:var(--muted)}
+.s-calm{margin:0;font-size:var(--t-base);color:var(--muted)}
+.s-sec{display:flex;flex-direction:column;gap:10px;padding-top:14px;border-top:1px solid var(--rule)}
+.s-q{margin:0;display:flex;align-items:center;gap:8px;font:600 var(--t-lg)/1.3 var(--sans);color:var(--ink)}
+.s-ans{margin:0;font-size:var(--t-base);line-height:1.5;color:var(--ink)}
+.s-act{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding-top:4px}
+.s-act .q-lead{flex:1 1 100%;font-size:var(--t-md)}
+/* the plate's main actions, right under its size, before the sections that explain them */
+.s-todo{display:grid;gap:10px}
+.s-todo .s-act{padding:10px 12px;background:var(--mod-2);border:1px solid var(--rim);border-radius:var(--r-md)}
+.s-todo .q-lead{color:var(--ink-2)}
+.s-find b[tabindex]{text-decoration:underline dotted var(--muted);text-underline-offset:3px;cursor:help}
+.s-sec.s-flash,.s-find.s-flash{border-radius:var(--r-md)}
+.s-finds{display:grid;gap:8px}
+.s-find{display:grid;grid-template-columns:22px minmax(0,1fr);gap:8px;align-items:start;padding:9px 11px;background:var(--mod-2);border:1px solid var(--rim);border-radius:var(--r-md);font-size:var(--t-md);color:var(--ink-2)}
+.s-find>.w-badge{margin-top:1px}
+.s-find b{color:var(--ink);font-weight:600;line-height:1.35}
+.s-find p{margin:4px 0 0;line-height:1.45}
+.s-find .s-fix{margin-top:6px;font-size:var(--t-md)}
+.s-dot{width:8px;height:8px;margin:6px 0 0 5px;border-radius:50%;background:var(--amt-4)}
+.s-g .s-flow{max-width:420px}
+.s-g .s-bars div{grid-template-columns:minmax(80px,130px) 1fr auto}
+.s-muted{color:var(--muted)}
+
+/* the corrections table, one block per row so it fits the panel */
+.s-tstack{margin:0}
+.s-tstack thead{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.s-tstack,.s-tstack tbody,.s-tstack tr,.s-tstack th,.s-tstack td{display:block;width:auto}
+.s-tstack tr{padding:10px 12px;margin-bottom:8px;background:var(--mod-2);border:1px solid var(--rim);border-radius:var(--r-md)}
+.s-tstack th,.s-tstack td{padding:0;border:0}
+.s-tstack tbody th{width:auto;font-size:var(--t-base);margin-bottom:4px}
+.s-tstack td{font-size:var(--t-md);line-height:1.45;color:var(--ink-2)}
+.s-tstack td.s-num,.s-tstack td[data-k="In your main rule file"]{display:inline-block;margin-right:14px;font-family:var(--sans)}
+.s-tstack td.s-num::after{content:" times"}
+.s-tstack td[data-k="Why it may still happen"]{margin-top:4px}
+.s-tstack td.s-help{margin-top:6px;color:var(--ink);border-left:3px solid var(--amt-3);padding-left:10px}
+
+.s-foot{margin-top:4px}
+
+/* narrower windows: under 1180 the panel sits under the picture and keeps a steady height between plates, and the
+   picture keeps its own height so it never runs over the header or the key */
+@media (max-width:1180px){
+  .s-g .g-stage{height:auto}
+  .s-g .g-canvas{flex:none;height:clamp(460px,64vw,700px)}
+  .s-g .g-canvas .a-svg{height:100%;width:auto;max-width:100%;max-height:100%}
+  .s-g .g-panel{min-height:620px;position:relative;top:0}  /* keeps its corner screws on its own corners */
+}
+/* Your AI's instructions, one app at a time (release 1, Oct 16) */
+.s-g .w-mh .s-app{margin-left:auto}
+.s-sw.none{background:var(--mod-2);border:1.5px dashed var(--amt-3)}
+.s-cw .s-empty{padding:48px 26px;max-width:560px}
+.s-cx .g-body small{overflow-wrap:anywhere}
+/* Codex's and Cowork's pages keep the project menu's row, so switching apps moves nothing (steady check) */
+.s-above .s-same{display:inline-flex;align-items:center;min-height:34px;padding:0 12px;border:1px solid var(--rim);border-radius:10px;background:var(--mod-2);font-size:var(--t-sm);color:var(--muted)}
+.s-g .s-above{height:38px;display:flex;align-items:center}
+/* release 1 QA: the switch stays put for every app (finding 2); Cowork's page keeps the full width; empty layers dotted
+   and faint, Codex's own notes dashed, as the key says (finding 10) */
+.s-g .g-stage>.w-mh h3{min-width:392px}
+.s-cw .g-grid{width:100%}.s-cw .g-canvas{min-height:560px;width:100%}
+.s-cx .a-plate.none:not(.lit) .a-top,.s-cx .a-plate.none:not(.lit) .a-side{stroke:var(--amt-3);stroke-dasharray:1 4;fill:var(--mod-2)}
+.s-sw.none{background:var(--mod-2);border:1.5px dotted var(--amt-3)}
+.s-cx .s-h4{margin:14px 0 4px;font-size:var(--t-lg);font-weight:600}
+.q-tag.hot{border-color:var(--lit-line);background:var(--lit-soft);color:var(--lit-ink);font-style:normal}
+/* a page with little in its picture still takes the full width (the page grid shrinks a centered child to its content) */
+.g-page.s-g{width:100%}
+/* below 1180 the picture keeps one height for every app, so the panel under it doesn't jump (recheck E) */
+@media (max-width:1180px){.s-g .g-stage{min-height:800px}}

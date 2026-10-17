@@ -1,0 +1,140 @@
+/* Your work in the one-picture pattern (task 33): the stage from stage.js, with this tab's chips, machine, strip and panel.
+   Everything is scoped under .g-page.y-page, so the older Your work rules in style.css (three columns, floating card) stay
+   out of the way without being deleted. */
+
+.g-page.y-page{display:block;max-width:1420px;margin:0 auto}
+
+/* the projects, as chips above the picture: always one line, so switching weeks never moves the picture (QA run 3) */
+.y-page .y-chiprow{display:flex;align-items:center;gap:8px;margin:0 4px 16px;min-width:0}
+.y-page .y-list{display:flex;flex-direction:row;flex-wrap:nowrap;align-items:center;gap:8px;flex:0 0 calc(100% - 140px);min-width:0;margin:-4px;padding:4px 4px 8px;margin-bottom:-8px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;background:none;border:0;box-shadow:none}
+.y-page .y-list::-webkit-scrollbar{display:none}
+/* when the chips are wider than the row, the row scrolls sideways and its right edge fades */
+.y-page .y-list.over{-webkit-mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent);mask-image:linear-gradient(90deg,#000 calc(100% - 36px),transparent)}
+.y-page .y-proj{display:inline-flex;align-items:center;gap:8px;flex:none;padding:7px 12px;border:1px solid var(--rim-2);border-radius:var(--r-md);background:var(--mod-2);box-shadow:none;font:inherit;color:var(--ink);cursor:pointer}
+.y-page .y-proj:hover{border-color:var(--amt-3)}
+.y-page .y-proj.on{padding:7px 12px;border:1px solid var(--ink);background:var(--mod);box-shadow:0 0 0 1px var(--ink),0 6px 14px -10px rgba(21,23,27,.45)}
+.y-page .y-proj i{width:7px;height:7px;border-radius:50%;background:var(--amt-3);flex:none}
+.y-page .y-proj.on i{background:var(--ink)}
+.y-page .y-proj b{display:inline;font-size:var(--t-md);font-weight:600;white-space:nowrap}
+.y-page .y-proj span{flex:none;font:var(--t-sm) var(--mono);color:var(--muted)}
+.y-page .y-proj.on span{color:var(--ink-2)}
+.y-page .y-morewrap{position:relative;flex:none;max-width:132px}
+.y-page .y-more{border:1px dashed var(--amt-3);border-radius:var(--r-md);padding:7px 12px;font-size:var(--t-md);color:var(--ink-2);background:none;white-space:nowrap}
+.y-page .y-more:hover,.y-page .y-more[aria-expanded="true"]{color:var(--ink);border-color:var(--ink-2)}
+/* the rest of the projects open in a small list over the page, so nothing under it moves */
+.y-page .y-morelist{position:absolute;z-index:40;top:calc(100% + 6px);left:0;display:flex;flex-direction:column;gap:6px;width:max-content;min-width:240px;max-width:min(360px,calc(100vw - 32px));max-height:320px;overflow-y:auto;padding:8px;background:var(--mod);border:1px solid var(--rim-2);border-radius:var(--r-lg);box-shadow:var(--sh-float)}
+.y-page .y-morelist .y-proj{width:100%}
+.y-page .y-morelist .y-proj b{flex:1;text-align:left;white-space:normal}
+@media (max-width:760px){.y-page .y-morelist{left:auto;right:0}}
+
+/* the picture's header */
+.y-page .a-stage .w-mh h3{min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.y-page .y-chats{margin-left:auto;font:600 var(--t-sm) var(--mono);color:var(--ink);white-space:nowrap}
+.y-page .a-stage .w-mh .w-mh-note{margin-left:16px;white-space:nowrap}
+
+/* the machine inside the dotted canvas */
+.y-page .a-canvas{align-items:stretch;padding:0}
+.y-page .y-machine{flex:1;min-width:0;display:flex;flex-direction:column}
+/* the board takes the canvas's height and no more; a busy project draws its boxes tighter, so the last ones never reach the key (QA run 3) */
+.y-page .y-machine .y-board{flex:1;min-height:0;padding-top:14px;padding-bottom:12px}
+.y-page .y-board.dense .w-helpers,.y-page .y-board.dense .y-ports{gap:7px}
+.y-page .y-board.dense .w-helper{padding:7px 14px}
+.y-page .y-board.dense .y-port{padding:7px 12px}
+.y-page .y-board.dense .w-app{padding:12px 16px}
+.y-page .y-board .w-empty{margin:0;font-size:var(--t-md);line-height:1.45}
+.y-page .w-app.sel,.y-page .w-helper.sel,.y-page .y-port.sel{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink),0 8px 18px -12px rgba(21,23,27,.45)}
+
+/* the key and the days strip under the picture */
+.y-page .a-key{font-size:var(--t-sm);color:var(--muted);padding:10px 26px 10px}
+.y-page .g-strip{padding:10px 26px}
+.y-page .g-strip .y-days{display:flex;align-items:center;gap:18px;width:100%;margin:0;padding:0;background:none;border:0;border-radius:0}
+.y-page .g-strip .y-days-h{display:inline;flex:none;color:var(--muted)}
+.y-page .g-strip .y-track{position:static;display:flex;gap:14px;padding:0}
+.y-page .g-strip .y-track::before{display:none}
+.y-page .g-strip .y-day{display:inline-flex;align-items:center;gap:5px}
+.y-page .g-strip .y-day i{width:10px;height:10px}
+.y-page .g-strip .y-day.hit i{border-width:2.5px}
+.y-page .g-strip .y-day small{font:var(--t-sm) var(--mono)}
+.y-page .g-strip .y-day em.sr{position:absolute;width:1px;height:1px;padding:0;border:0;overflow:hidden;clip:rect(0 0 0 0)}
+.y-page .y-hitkey{font:600 var(--t-sm) var(--sans);display:inline-flex;align-items:center;gap:6px;color:var(--lit-ink);font-weight:600}
+.y-page .y-hitkey i{width:10px;height:10px;border-radius:50%;border:2.5px solid var(--lit);background:var(--mod);box-sizing:border-box}
+.y-page .y-days-n{margin-left:auto;color:var(--ink)}
+
+/* the panel: same frame for the receipt and for a picked part; the stage scrolls its body */
+.y-page .g-panel h3{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.y-page .g-panel .a-line{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.y-page .g-panel .g-body{margin-top:14px}
+
+/* the receipt, without its own module: the share, then the way to every chat, then the lines */
+.y-page .y-paid{display:block;flex:none;padding:0;background:none;border:0;box-shadow:none}
+.y-page .y-paid .w-receipt{margin:0;border:1px solid var(--rim);border-radius:var(--r-md);box-shadow:none;padding:14px 16px 12px;animation:none}
+.y-page .y-paid .w-r-line:last-of-type{margin-bottom:8px}
+.y-page .y-r-first .y-big{font-size:var(--t-xl)}
+.y-page .y-full{display:block;width:100%;margin-top:10px;font-family:var(--sans)}
+.y-page .y-price{cursor:help;text-decoration:underline dotted var(--amt-3);text-underline-offset:3px}
+
+/* the suggestion, under the receipt, as tall as its words */
+.y-page .y-sug{display:flex;flex-direction:column;align-items:stretch;gap:8px;flex:none;margin:0;padding:14px 16px;max-width:none;background:var(--mod-2);border:1px solid var(--rim);border-radius:var(--r-lg);box-shadow:none}
+.y-page .y-sug-h{display:flex;align-items:center;gap:8px}
+.y-page .y-sug-h small{margin:0;color:var(--muted)}
+.y-page .y-sug p{margin:0;font-size:var(--t-base);line-height:1.45;color:var(--ink)}
+.y-page .y-sug.quiet{padding:10px 14px;background:none;border-style:dashed}
+.y-page .y-sug.quiet p{display:flex;align-items:center;gap:8px;font-size:var(--t-md);color:var(--muted)}
+.y-page .y-sug .w-btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:4px}
+/* "What you could do" opens in place, under its own button, never over the sentence */
+.y-page .y-sug .y-how[open]{flex-basis:100%}
+.y-page .y-sug .y-how summary{display:inline-block}
+.y-page .y-sug .y-how .w-pop{position:static;width:auto;margin-top:8px;box-shadow:none;border-color:var(--rim-2)}
+.y-page .y-sug .w-pop p{font-size:var(--t-md);color:var(--ink-2)}
+
+/* a picked part: the figure, its two buttons, then the words */
+.y-page .y-peek{position:static;width:auto;left:auto;right:auto;z-index:auto;display:flex;flex-direction:column;gap:12px;flex:none}
+.y-page .y-peek p{margin:0;font-size:var(--t-base);line-height:1.5;color:var(--ink-2)}
+.y-page .y-peek .y-pk-n{color:var(--muted);font-size:var(--t-md)}
+.y-page .y-stat{display:grid;gap:2px;padding:14px 16px;border:1px solid var(--rim);border-radius:var(--r-lg);background:var(--mod-2)}
+.y-page .y-stat b{font:600 var(--t-2xl)/1.15 var(--mono);color:var(--ink)}
+.y-page .y-stat small{font-size:var(--t-sm);color:var(--muted)}
+.y-page .y-stat span{margin-top:6px;font-size:var(--t-md);color:var(--ink-2)}
+.y-page .y-pk-btns{display:flex;gap:8px;flex-wrap:wrap;margin:0;padding:0}
+.y-page .y-peek .y-pk-go{margin-top:0;flex:1}
+.y-page .y-mlist{list-style:none;margin:0;padding:0;border-top:1px solid var(--rule)}
+.y-page .y-mlist li{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px solid var(--rule);font-size:var(--t-md);color:var(--ink)}
+.y-page .y-mlist li span{min-width:0;overflow-wrap:anywhere}
+.y-page .y-mlist li b{flex:none;font:var(--t-sm) var(--mono);color:var(--ink-2)}
+
+@media (max-width:1360px){
+  .y-page .g-strip .y-days{gap:12px}
+  .y-page .g-strip .y-track{gap:9px}
+}
+@media (max-width:760px){
+  .y-page .g-strip .y-days{flex-wrap:wrap;row-gap:8px}
+  .y-page .g-strip{white-space:normal}
+}
+/* a picked app: what it didn't use fades, nothing moves (his note Oct 14, QA run 4 finding 2) */
+.y-board .w-app.dim,.y-board .w-helper.dim,.y-board .y-port.dim{opacity:.32;transition:opacity var(--quick)}
+.y-board .w-app.dim:hover,.y-board .w-helper.dim:hover,.y-board .y-port.dim:hover{opacity:.7}
+.y-wires .w-wire.dim{opacity:.16}
+.y-wires .y-bracket.dim,.y-wires .y-hubdot.dim{opacity:.2}
+
+/* the header's chats and subagent runs on this project stay on one line, so the picture never moves (camera fix batch, Oct 15) */
+.y-page .y-chats{white-space:nowrap}
+/* a long project name never pushes the picture down at 1280 (QA run 8, finding 12) */
+.y-page .g-stage>.w-mh{flex-wrap:nowrap}.y-page .g-stage>.w-mh h3{min-width:0;flex:0 1 auto;overflow:hidden}.y-page .g-stage>.w-mh h3{display:block;white-space:nowrap;text-overflow:ellipsis}.y-page .g-stage>.w-mh h3 .w-led{display:inline-block;vertical-align:middle;margin-right:10px}.y-page .g-stage>.w-mh .w-mh-note{flex:none}
+/* All weeks on Your work (release 2): every project, and one project's chats */
+.y-all{display:flex;flex-direction:column;padding:6px 0}
+.y-allrow{display:grid;grid-template-columns:minmax(0,1fr) 160px 90px;align-items:center;gap:14px;padding:9px 22px;border:0;border-bottom:1px solid var(--rule);background:none;text-align:left;font:inherit;color:inherit;cursor:pointer}
+.y-allrow:hover{background:var(--mod-2)}.y-allrow.sel{background:var(--mod-2);box-shadow:inset 3px 0 0 var(--ink)}
+.y-allrow b{display:block;font-weight:600}.y-allrow small{color:var(--muted);font-size:var(--t-sm)}
+.y-allbar{height:8px;border-radius:4px;background:var(--mod-3);overflow:hidden}.y-allbar i{display:block;height:100%;background:var(--amt-4)}
+.y-allusd{text-align:right;font:600 var(--t-sm) var(--mono)}
+.y-chats-list{list-style:none;margin:0;padding:0}.y-chats-list li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--rule)}
+.y-chats-list b{display:block;font-weight:600;font-size:var(--t-base)}.y-chats-list small{color:var(--muted);font-size:var(--t-sm)}.y-chats-list select{max-width:130px;flex:none}
+.y-allpage .g-canvas{overflow:auto}.y-allpage .y-all{width:100%;background:var(--mod)}
+/* release 2 fix round: the note row stands where the chips stand on This week and Last week, so the stage doesn't move;
+   the list scrolls inside the picture at every width; groups in the panel get air between them */
+.y-allpage .y-allnote{min-height:35.5px;margin-bottom:16px;color:var(--muted);font-size:var(--t-base)}
+@media (max-width:1180px){.y-allpage .g-canvas{max-height:560px}}
+.y-allpage .g-panel .g-grp+.g-grp,.y-allpage .g-panel .g-grp+.g-note{margin-top:16px}
+.y-allpage .y-chats-list li:last-child{border-bottom:0}
+/* QA recheck: the list's white runs the whole length of the list, not only the first screenful */
+.y-allpage .g-canvas>.y-all{flex:none;min-height:100%}.y-allpage .y-allrow{flex:none}

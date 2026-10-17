@@ -1,0 +1,588 @@
+{
+ "skills": [
+  {
+   "name": "prd-template",
+   "full": "prd-template",
+   "where": "yours (every project)",
+   "plugin": null,
+   "path": null,
+   "what": "The team's product requirements template, filled from a conversation.",
+   "calls": 17,
+   "last_used": "2026-10-13",
+   "desc_len": 219
+  },
+  {
+   "name": "status-update",
+   "full": "status-update",
+   "where": "yours (every project)",
+   "plugin": null,
+   "path": null,
+   "what": "Writes the Friday status note in the team's format.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 166
+  },
+  {
+   "name": "pricing-model",
+   "full": "pricing-model",
+   "where": "yours (every project)",
+   "plugin": null,
+   "path": null,
+   "what": "Builds a pricing scenario sheet from the rate cards.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 169
+  },
+  {
+   "name": "interview-notes",
+   "full": "interview-notes",
+   "where": "yours (every project)",
+   "plugin": null,
+   "path": null,
+   "what": "Cleans up raw interview notes into the shared format.",
+   "calls": 4,
+   "last_used": "2026-09-29",
+   "desc_len": 174
+  },
+  {
+   "name": "okr-check",
+   "full": "okr-check",
+   "where": "yours (every project)",
+   "plugin": null,
+   "path": null,
+   "what": "Checks a plan against this quarter's goals.",
+   "calls": 12,
+   "last_used": "2026-10-13",
+   "desc_len": 138
+  },
+  {
+   "name": "carrier-glossary",
+   "full": "carrier-glossary",
+   "where": "one project only: Product/carrier-onboarding",
+   "plugin": null,
+   "path": null,
+   "what": "Carrier and freight terms, so drafts use the right words.",
+   "calls": 4,
+   "last_used": "2026-10-05",
+   "desc_len": 187
+  },
+  {
+   "name": "docx",
+   "full": "docx",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Makes and edits Word documents.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 97
+  },
+  {
+   "name": "pptx",
+   "full": "pptx",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Makes and edits slide decks.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 88
+  },
+  {
+   "name": "xlsx",
+   "full": "xlsx",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Makes and edits spreadsheets.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 91
+  },
+  {
+   "name": "pdf",
+   "full": "pdf",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Reads and makes PDF files.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 81
+  },
+  {
+   "name": "dataviz",
+   "full": "dataviz",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Guidance for charts and dashboards.",
+   "calls": 10,
+   "last_used": "2026-10-13",
+   "desc_len": 112
+  },
+  {
+   "name": "brand-voice",
+   "full": "brand-voice",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Writes in the company's brand voice.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 119
+  },
+  {
+   "name": "canvas-design",
+   "full": "canvas-design",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Makes posters and visual pieces.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 109
+  },
+  {
+   "name": "skill-creator",
+   "full": "skill-creator",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Helps write new skills.",
+   "calls": 4,
+   "last_used": "2026-10-16",
+   "desc_len": 82
+  },
+  {
+   "name": "meeting-notes",
+   "full": "meeting-notes",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Turns a meeting transcript into notes and actions.",
+   "calls": 3,
+   "last_used": "2026-09-14",
+   "desc_len": 163
+  },
+  {
+   "name": "competitive-brief",
+   "full": "competitive-brief",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "A one-page brief on a competitor.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 116
+  },
+  {
+   "name": "legal-review",
+   "full": "legal-review",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Flags risky clauses in a contract draft.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 132
+  },
+  {
+   "name": "hiring-rubric",
+   "full": "hiring-rubric",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Scores interview notes against a rubric.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 133
+  },
+  {
+   "name": "sql-helper",
+   "full": "sql-helper",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Writes and explains SQL queries.",
+   "calls": 3,
+   "last_used": "2026-10-16",
+   "desc_len": 106
+  },
+  {
+   "name": "roadmap-builder",
+   "full": "roadmap-builder",
+   "where": "your Claude account (synced)",
+   "plugin": null,
+   "path": null,
+   "what": "Lays out a roadmap from a list of bets.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 132
+  },
+  {
+   "name": "update-config",
+   "full": "update-config",
+   "where": "built into Claude Code (list as of Oct 10 2026)",
+   "plugin": null,
+   "path": null,
+   "what": "Changes Claude Code's own settings.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 118
+  },
+  {
+   "name": "simplify",
+   "full": "simplify",
+   "where": "built into Claude Code (list as of Oct 10 2026)",
+   "plugin": null,
+   "path": null,
+   "what": "Reviews changed code for simpler ways to do it.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 149
+  },
+  {
+   "name": "code-review",
+   "full": "code-review",
+   "where": "built into Claude Code (list as of Oct 10 2026)",
+   "plugin": null,
+   "path": null,
+   "what": "Reviews a change for bugs.",
+   "calls": 2,
+   "last_used": "2026-10-08",
+   "desc_len": 89
+  },
+  {
+   "name": "security-review",
+   "full": "security-review",
+   "where": "built into Claude Code (list as of Oct 10 2026)",
+   "plugin": null,
+   "path": null,
+   "what": "Reviews a change for security problems.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 132
+  },
+  {
+   "name": "init",
+   "full": "init",
+   "where": "built into Claude Code (list as of Oct 10 2026)",
+   "plugin": null,
+   "path": null,
+   "what": "Writes a first instruction file for a project.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 142
+  },
+  {
+   "name": "loop",
+   "full": "loop",
+   "where": "built into Claude Code (list as of Oct 10 2026)",
+   "plugin": null,
+   "path": null,
+   "what": "Runs a task again on a schedule.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 100
+  },
+  {
+   "name": "schedule",
+   "full": "schedule",
+   "where": "built into Claude Code (list as of Oct 10 2026)",
+   "plugin": null,
+   "path": null,
+   "what": "Sets up a task that runs on its own later.",
+   "calls": 0,
+   "last_used": null,
+   "desc_len": 134
+  },
+  {
+   "name": "claude-api",
+   "full": "claude-api",
+   "where": "built into Claude Code (list as of Oct 10 2026)",
+   "plugin": null,
+   "path": null,
+   "what": "Reference for building with the Claude API.",
+   "calls": 1,
+   "last_used": "2026-10-01",
+   "desc_len": 139
+  },
+  {
+   "name": "run",
+   "full": "run",
+   "where": "built into Claude Code (list as of Oct 10 2026)",
+   "plugin": null,
+   "path": null,
+   "what": "Starts the app you're building to check a change.",
+   "calls": 1,
+   "last_used": "2026-09-23",
+   "desc_len": 150
+  }
+ ],
+ "agents": [
+  {
+   "name": "spec-writer",
+   "where": "yours (every project)",
+   "plugin": null,
+   "path": "~/.claude/agents/spec-writer.md",
+   "what": "Turns a rough feature idea into a one-page spec with goals, scope and open questions.",
+   "calls": 7,
+   "last_used": "2026-10-13",
+   "model": null
+  },
+  {
+   "name": "ux-reviewer",
+   "where": "yours (every project)",
+   "plugin": null,
+   "path": "~/.claude/agents/ux-reviewer.md",
+   "what": "Reviews a screen or flow against the team's design checklist and lists problems.",
+   "calls": 5,
+   "last_used": "2026-10-13",
+   "model": null
+  },
+  {
+   "name": "research-synth",
+   "where": "yours (every project)",
+   "plugin": null,
+   "path": "~/.claude/agents/research-synth.md",
+   "what": "Pulls themes and quotes out of interview notes and survey answers.",
+   "calls": 9,
+   "last_used": "2026-10-05",
+   "model": "sonnet"
+  },
+  {
+   "name": "qa-checker",
+   "where": "yours (every project)",
+   "plugin": null,
+   "path": "~/.claude/agents/qa-checker.md",
+   "what": "Walks a build step by step and writes up what breaks.",
+   "calls": 3,
+   "last_used": "2026-10-01",
+   "model": "sonnet"
+  },
+  {
+   "name": "metrics-analyst",
+   "where": "yours (every project)",
+   "plugin": null,
+   "path": "~/.claude/agents/metrics-analyst.md",
+   "what": "Answers a numbers question from the data warehouse and shows its query.",
+   "calls": 0,
+   "last_used": null,
+   "model": null
+  },
+  {
+   "name": "release-notes",
+   "where": "yours (every project)",
+   "plugin": null,
+   "path": "~/.claude/agents/release-notes.md",
+   "what": "Writes customer-facing release notes from merged changes.",
+   "calls": 0,
+   "last_used": null,
+   "model": "sonnet"
+  },
+  {
+   "name": "interview-coder",
+   "where": "one project only: Product/customer-interviews",
+   "plugin": null,
+   "path": "~/Projects/customer-interviews/.claude/agents/interview-coder.md",
+   "what": "Tags interview transcripts with the team's codebook.",
+   "calls": 2,
+   "last_used": "2026-08-13",
+   "model": "sonnet"
+  },
+  {
+   "name": "general-purpose",
+   "where": "built into Claude Code",
+   "plugin": null,
+   "path": null,
+   "what": "Claude Code's general subagent for side tasks and research.",
+   "calls": 43,
+   "last_used": "2026-10-15",
+   "model": null
+  },
+  {
+   "name": "Explore",
+   "where": "built into Claude Code",
+   "plugin": null,
+   "path": null,
+   "what": "Claude Code's read-only subagent for searching many files.",
+   "calls": 7,
+   "last_used": "2026-10-16",
+   "model": null
+  },
+  {
+   "name": "Plan",
+   "where": "built into Claude Code",
+   "plugin": null,
+   "path": null,
+   "what": "Claude Code's subagent for planning a change before making it.",
+   "calls": 10,
+   "last_used": "2026-10-13",
+   "model": null
+  },
+  {
+   "name": "claude-code-guide",
+   "where": "built into Claude Code",
+   "plugin": null,
+   "path": null,
+   "what": "Answers questions about how Claude Code works.",
+   "calls": 4,
+   "last_used": "2026-10-02",
+   "model": null
+  },
+  {
+   "name": "statusline-setup",
+   "where": "built into Claude Code",
+   "plugin": null,
+   "path": null,
+   "what": "Sets up the status line at the bottom of Claude Code.",
+   "calls": 0,
+   "last_used": null,
+   "model": null
+  }
+ ],
+ "skills_used_not_on_disk": {},
+ "instruction_files": [
+  {
+   "path": "~/.claude/CLAUDE.md",
+   "words": 640,
+   "modified": "2026-10-04"
+  },
+  {
+   "path": "~/Projects/route-planner/CLAUDE.md",
+   "words": 420,
+   "modified": "2026-10-13"
+  },
+  {
+   "path": "~/Projects/pricing-review/CLAUDE.md",
+   "words": 260,
+   "modified": "2026-10-07"
+  },
+  {
+   "path": "~/Projects/carrier-onboarding/CLAUDE.md",
+   "words": 380,
+   "modified": "2026-10-01"
+  },
+  {
+   "path": "~/Projects/customer-interviews/CLAUDE.md",
+   "words": 310,
+   "modified": "2026-09-24"
+  },
+  {
+   "path": "~/Projects/triage-bot/CLAUDE.md",
+   "words": 520,
+   "modified": "2026-10-05"
+  },
+  {
+   "path": "~/Projects/warehouse-cleanup/AGENTS.md",
+   "words": 190,
+   "modified": "2026-10-10"
+  }
+ ],
+ "connectors": [
+  {
+   "server": "Google Drive (name inferred from its tools)",
+   "id": "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3",
+   "actions": 233,
+   "tools_seen": [
+    "create_file",
+    "read_file_content",
+    "search_files",
+    "trash_file",
+    "update_file"
+   ]
+  },
+  {
+   "server": "Gmail (name inferred from its tools)",
+   "id": "7ce592b7-fc34-a11b-0775-dca51822b09c",
+   "actions": 150,
+   "tools_seen": [
+    "create_draft",
+    "get_message",
+    "search_threads",
+    "send_message"
+   ]
+  },
+  {
+   "server": "Slack (name inferred from its tools)",
+   "id": "16090082-bf3b-0803-f060-56a7b9064367",
+   "actions": 265,
+   "tools_seen": [
+    "post_message",
+    "read_channel",
+    "search_messages"
+   ]
+  },
+  {
+   "server": "Jira (name inferred from its tools)",
+   "id": "1045d997-ae39-7eb5-26b3-06e73be5a5d6",
+   "actions": 266,
+   "tools_seen": [
+    "create_issue",
+    "get_issue",
+    "search_issues",
+    "update_issue"
+   ]
+  },
+  {
+   "server": "Figma (name inferred from its tools)",
+   "id": "b34e86dc-56eb-8283-332e-32f3ee67f9c6",
+   "actions": 349,
+   "tools_seen": [
+    "get_design_context",
+    "get_metadata",
+    "get_screenshot"
+   ]
+  },
+  {
+   "server": "Snowflake (name inferred from its tools)",
+   "id": "b7e32d8d-ff7e-61a9-26f3-e94cf28a40d5",
+   "actions": 97,
+   "tools_seen": [
+    "describe_table",
+    "list_tables",
+    "query"
+   ]
+  },
+  {
+   "server": "GitHub (name inferred from its tools)",
+   "id": "b7ed2115-0e81-8b4a-a45e-edb1f18c0374",
+   "actions": 95,
+   "tools_seen": [
+    "add_comment",
+    "get_file",
+    "list_pull_requests"
+   ]
+  },
+  {
+   "server": "claude-in-chrome",
+   "id": "claude-in-chrome",
+   "actions": 100,
+   "tools_seen": [
+    "computer",
+    "form_input",
+    "get_page_text",
+    "navigate",
+    "read_page"
+   ]
+  },
+  {
+   "server": "Claude app's own tools",
+   "id": "ccd_session",
+   "actions": 59,
+   "tools_seen": [
+    "list_sessions",
+    "set_session_title"
+   ]
+  }
+ ],
+ "hooks": [
+  "SessionStart"
+ ],
+ "rules": {
+  "allow": [],
+  "ask": [],
+  "deny": []
+ }
+}

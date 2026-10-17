@@ -1,0 +1,266 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Crossview design system</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tab-work.css">
+<link rel="stylesheet" href="tab-shapes.css">
+<link rel="stylesheet" href="tab-week.css">
+<style>
+  /* this page only: the layout of the specimen sheet. Every part shown below uses the app's own classes. */
+  .ds{max-width:1180px;margin:0 auto;padding:var(--sp-8) var(--sp-6) 64px}
+  .ds h1{margin:0;font-size:var(--t-2xl);letter-spacing:-.01em}
+  .ds .lead{margin:var(--sp-2) 0 0;color:var(--muted);max-width:760px}
+  .ds .top{display:flex;align-items:flex-end;gap:var(--sp-4);margin-bottom:var(--sp-8)}
+  .ds .top a{margin-left:auto;color:var(--ink);font-weight:600;text-underline-offset:3px;white-space:nowrap}
+  .ds section.w-mod{margin-bottom:var(--sp-6)}
+  .ds .body{padding:var(--sp-5) 26px var(--sp-6)}
+  .ds .grid{display:grid;gap:var(--sp-4)}
+  .ds .g2{grid-template-columns:repeat(2,minmax(0,1fr))}.ds .g3{grid-template-columns:repeat(3,minmax(0,1fr))}.ds .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .ds h4:not(.g-grp>h4){margin:0 0 var(--sp-2);font:600 var(--t-sm) var(--sans);color:var(--muted)}
+  .ds .job{background:var(--mod-2);border:1px solid var(--rim);border-radius:var(--r-lg);padding:var(--sp-4)}
+  .ds .job p{margin:var(--sp-2) 0 0;font-size:var(--t-md);color:var(--ink-2)}
+  .ds .job .never{color:var(--muted);font-size:var(--t-sm)}
+  .ds .sw{display:flex;flex-wrap:wrap;gap:6px;margin-top:var(--sp-3)}
+  .ds .sw{column-gap:10px;row-gap:10px}.ds .sw span{display:grid;align-content:start;gap:4px;width:66px;font:var(--t-xs) var(--mono);line-height:1.3;color:var(--muted)}
+  .ds .sw i{display:block;width:52px;height:32px;border-radius:var(--r-sm);border:1px solid rgba(0,0,0,.06)}
+  .ds .row{display:flex;flex-wrap:wrap;align-items:center;gap:var(--sp-3)}
+  .ds .cap{display:block;margin-top:6px;font:var(--t-xs) var(--mono);color:var(--muted)}
+  .ds .state{display:grid;justify-items:start;gap:6px}
+  .ds .type div{display:flex;align-items:baseline;gap:var(--sp-4);padding:6px 0;border-bottom:1px solid var(--rule)}
+  .ds .type code{width:120px;flex:none;font:var(--t-xs) var(--mono);color:var(--muted)}
+  .ds .space i{display:inline-block;height:12px;background:var(--amt-3);border-radius:2px;vertical-align:middle}
+  .ds .space div,.ds .radii div{display:flex;align-items:center;gap:var(--sp-3);font:var(--t-xs) var(--mono);color:var(--muted);margin:4px 0}
+  .ds .radii b{display:inline-block;width:44px;height:30px;background:var(--mod);border:1px solid var(--rim-2)}
+  .ds .depth{display:flex;flex-wrap:wrap;gap:var(--sp-4)}
+  .ds .depth b{display:grid;place-items:center;flex:1 1 120px;max-width:150px;height:70px;text-align:center;background:var(--mod);border:1px solid var(--rim);border-radius:var(--r-lg);font:400 var(--t-xs) var(--mono);color:var(--muted)}
+  .ds .rules li{margin:6px 0;font-size:var(--t-md)}
+  .ds .rules b{font-weight:600}
+  .ds .mini-panel{position:relative;background:var(--mod-2);border:1px solid var(--rim);border-radius:var(--r-lg);padding:14px}
+  .ds .rel{position:relative;height:150px}
+  .ds .rel .a-peek{top:14px}
+  .ds .w-dec{min-height:0}
+  .ds .w-receipt{margin:0}
+  .ds .tabs button{padding:6px 10px}  /* the narrow tab spacing the app uses at 1360 and under, so four tabs fit a half-width column */
+  .ds .marks li{display:flex;gap:8px;align-items:flex-start}.ds .marks li svg{flex:none;margin:3px 0 0 !important}
+  @media (max-width:1100px){.ds .g3,.ds .g4{grid-template-columns:repeat(2,minmax(0,1fr))}.ds .g2{grid-template-columns:1fr}}
+  @media (max-width:900px){.ds .g2,.ds .g3,.ds .g4{grid-template-columns:1fr}}
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%2315171B%27/%3E%3Crect x=%2710%27 y=%2710%27 width=%2712%27 height=%2712%27 rx=%273%27 fill=%27%23fff%27/%3E%3C/svg%3E">
+</head>
+<body class="lightpage">
+<main class="ds">
+  <div class="top"><div><h1>Agent Crossview design system, v0</h1>
+    <p class="lead">The colors, type, spacing and parts the four tabs are built from, each shown with its states. This page is updated in the same batch as any change to the design or the features. The same list, in words, is in docs/design-system-v0.md.</p></div>
+    <a data-back href="index.html">Back to Crossview</a></div>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>Every color has one job</h3><span class="w-mh-note">If a color is doing another job, it's a bug</span></header>
+    <div class="body grid g4">
+      <div class="job"><h4>Greys</h4><b>Amounts, and what ran</b><p>More is darker: bars, tiles, the money flow, wires. The darkest marks what ran or was used in the week shown.</p><p class="never">Never used to mean "important".</p>
+        <div class="sw"><span><i style="background:var(--amt-1)"></i>least</span><span><i style="background:var(--amt-2)"></i></span><span><i style="background:var(--amt-3)"></i></span><span><i style="background:var(--amt-4)"></i></span><span><i style="background:var(--amt-5)"></i>most, what ran</span></div></div>
+      <div class="job"><h4>Orange</h4><b>Something worth your attention now</b><p>A decision; a limit near or reached; a connector that can act outside your Mac; a cost nobody has entered; a limit stop in the current week.</p><p class="never">Never for "ran", selection, links, hover or decoration.</p>
+        <div class="sw"><span><i style="background:var(--lit)"></i>the dot</span><span><i style="background:var(--lit-line)"></i>edges</span><span><i style="background:var(--lit-soft)"></i>behind</span><span><i style="background:var(--lit-ink)"></i>text</span></div></div>
+      <div class="job"><h4>Blue</h4><b>Where it came from</b><p>Blue marks a group: made by you (solid blue), your account or an add-on (blue outline), one project only (light blue), came with the app (grey). In the rings, blue names the ring for your own; its length is how many.</p><p class="never">Never for what ran, what you picked or what's worth your attention.</p>
+        <div class="sw"><span><i style="background:var(--cat)"></i>made by you</span><span><i style="background:var(--mod);border:2px solid var(--cat)"></i>account, add-on</span><span><i style="background:var(--cat-line)"></i>one project</span><span><i style="background:var(--amt-2)"></i>came with the app</span><span><i style="background:var(--cat-soft)"></i>tag fill</span><span><i style="background:var(--cat-ink)"></i>tag text</span></div></div>
+      <div class="job"><h4>Ink</h4><b>Selection and focus</b><p>What you picked has an ink outline or dot; the keyboard focus ring is ink too. Text is ink, softer ink, muted or faint. Past limit stops in All weeks are small ink marks.</p><p class="never">Never a fill for bars or tiles.</p>
+        <div class="sw"><span><i style="display:grid;place-items:center;font:600 13px var(--sans);font-style:normal;background:var(--mod);border:2px solid var(--ink);color:var(--ink)">Aa</i>picked</span><span><i style="display:grid;place-items:center;font:600 13px var(--sans);font-style:normal;background:var(--mod);color:var(--ink)">Aa</i>main text</span><span><i style="display:grid;place-items:center;font:600 13px var(--sans);font-style:normal;background:var(--mod);color:var(--ink-2)">Aa</i>softer text</span><span><i style="display:grid;place-items:center;font:600 13px var(--sans);font-style:normal;background:var(--mod);color:var(--muted)">Aa</i>muted text</span><span><i style="display:grid;place-items:center;font:600 13px var(--sans);font-style:normal;background:var(--mod);color:var(--faint)">Aa</i>faint</span></div></div>
+    </div>
+    <div class="body" style="padding-top:0"><h4>Surfaces and lines</h4><div class="sw" style="margin-top:0"><span><i style="background:var(--paper)"></i>page</span><span><i style="background:var(--mod)"></i>module</span><span><i style="background:var(--mod-2)"></i>inset</span><span><i style="background:var(--mod-3)"></i>track</span><span><i style="background:var(--well)"></i>behind a switch</span><span><i style="background:var(--rim)"></i>edge</span><span><i style="background:var(--rim-2)"></i>control edge</span><span><i style="background:var(--ghost)"></i>pale dot</span></div>
+      <h4 style="margin-top:var(--sp-4)">Project colors, in All weeks</h4><div class="sw" style="margin-top:0"><span><i style="background:#7d8799"></i>biggest</span><span><i style="background:#c690bd"></i>2nd</span><span><i style="background:#6fb594"></i>3rd</span><span><i style="background:#cdb46a"></i>4th</span><span><i style="background:#9d8fd0"></i>5th</span><span><i style="background:#7fb7b8"></i>6th</span><span><i style="background:#C3C9D2"></i>the rest</span></div><p class="cap">The six biggest projects of all time get a color each, in order. Everything else shares the grey. None of the six is orange or blue, so those two keep their own jobs.</p></div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>Type, space, corners and depth</h3><span class="w-mh-note">Sans for words, mono for counts and receipts</span></header>
+    <div class="body grid g2">
+      <div class="type">
+        <div><code>24 pixels</code><span style="font-size:var(--t-2xl);font-weight:700">First sentence on a tab, page title</span></div>
+        <div><code>20 pixels</code><span style="font-size:var(--t-xl);font-weight:600">Picture title and panel title</span></div>
+        <div><code>16 pixels</code><span style="font-size:var(--t-lg);font-weight:600">Group heading in a panel, smaller module titles</span></div>
+        <div><code>14 pixels</code><span>Body text and card names</span></div>
+        <div><code>13 pixels</code><span style="font-size:var(--t-md)">Secondary lines, the reason under a finding</span></div>
+        <div><code>12 pixels</code><span style="font:var(--t-sm) var(--mono)">3 runs · Route planner redesign</span></div>
+        <div><code>11 pixels</code><span style="font:600 var(--t-xs) var(--sans);color:var(--muted)">Small label, in sentence case</span></div>
+      </div>
+      <div class="grid">
+        <div class="space"><h4>Space: steps of 4 pixels</h4>
+          <div><i style="width:4px"></i>4</div><div><i style="width:8px"></i>8: inside a group</div><div><i style="width:12px"></i>12</div><div><i style="width:16px"></i>16: inside a card</div><div><i style="width:20px"></i>20</div><div><i style="width:24px"></i>24: between modules</div><div><i style="width:32px"></i>32</div></div>
+        <div class="radii"><h4>Corners</h4><div><b style="border-radius:var(--r-xs)"></b>tiles <b style="border-radius:var(--r-sm)"></b>chips <b style="border-radius:var(--r-md)"></b>buttons</div><div><b style="border-radius:var(--r-lg)"></b>cards <b style="border-radius:var(--r-xl)"></b>modules</div></div>
+        <div><h4>Depth</h4><div class="depth"><b style="box-shadow:var(--sh-mod)">modules</b><b style="box-shadow:var(--sh-raise)">cards on a module</b><b style="box-shadow:var(--sh-float)">menus and details</b></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>Controls and their states</h3><span class="w-mh-note">Hover darkens the border; pressed moves 1px; focus is an ink ring</span></header>
+    <div class="body grid g3">
+      <div><h4>Lights</h4><div class="row"><span class="state"><i class="w-light on"></i><span class="cap">on: ran in the week shown</span></span><span class="state"><i class="w-light"></i><span class="cap">pale: didn't run</span></span><span class="state"><i class="a-st none"></i><span class="cap">dashed: never, or nothing there</span></span></div>
+        <h4 style="margin-top:var(--sp-4)">The dot beside a title</h4><div class="row"><span class="state"><i class="w-led"></i><span class="cap">something worth your attention</span></span><span class="state"><i class="w-led idle"></i><span class="cap">nothing to do</span></span></div></div>
+      <div><h4>Buttons</h4><div class="row"><span class="state"><button class="w-btn">Keep</button><span class="cap">default</span></span><span class="state"><button class="w-btn" style="border-color:var(--amt-3)">Keep</button><span class="cap">hover</span></span><span class="state"><button class="w-btn" style="transform:translateY(1px);box-shadow:inset 0 1px 0 #fff,0 1px 0 #D7DBE1">Keep</button><span class="cap">pressed</span></span><span class="state"><button class="w-btn" disabled>Keep</button><span class="cap">off</span></span><span class="state"><button class="w-btn" style="outline:2px solid var(--ink);outline-offset:2px">Keep</button><span class="cap">focus</span></span></div>
+        <h4 style="margin-top:var(--sp-4)">Small buttons and links</h4><div class="row"><button class="w-btn w-sbtn"><span aria-hidden="true">▲</span> Above</button><button class="w-btn w-sbtn" disabled><span aria-hidden="true">▼</span> Below</button><button class="w-link">Open the full receipt</button><details class="w-how"><summary>How to limit it</summary></details></div></div>
+      <div><h4>The panel's step header</h4>
+        <div class="a-ph"><div class="a-step" role="group" aria-label="Move between layers"><button class="w-btn w-sbtn"><span aria-hidden="true">▲</span> Above</button><span class="a-chip">Layer 1 of 9</span><button class="w-btn w-sbtn"><span aria-hidden="true">▼</span> Below</button></div></div>
+        <span class="cap">for pictures read top to bottom; layers count from the top, so Layer 1 of 9 is the top layer; the ↑ ↓ keys work too</span>
+        <div class="a-ph" style="margin-top:var(--sp-3)"><div class="a-step" role="group" aria-label="Move between weeks"><button class="w-btn w-sbtn"><span aria-hidden="true">◀</span> Earlier</button><span class="a-chip">Week 9 of 10</span><button class="w-btn w-sbtn">Later <span aria-hidden="true">▶</span></button></div></div>
+        <span class="cap">for weeks, read left to right; the ← → keys work too</span>
+        <h4 style="margin-top:var(--sp-4)">Tags, chips, badges</h4><div class="row"><span class="w-tag">Came with Claude Code</span><span class="w-tag cat">made by you</span><span class="a-chip">10 weeks</span><em class="w-badge s-pin-key">2</em></div></div>
+    </div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>The top bar, the app switch and the footer</h3><span class="w-mh-note">Added Oct 16</span></header>
+    <div class="body grid g2">
+      <div><h4>The tabs</h4><nav class="tabs" style="display:inline-flex" aria-label="Example tabs"><button aria-pressed="true"><i class="w-led"></i>Your week</button><button aria-pressed="false"><i class="w-led"></i>Your work</button><button aria-pressed="false"><i class="w-led"></i>Your setup</button><button aria-pressed="false"><i class="w-led"></i>Your AI's instructions</button></nav>
+        <span class="cap">Four tabs, the same on every screen. "Crossview" beside them goes back to Your week. The More menu holds Design system and Show the demo company.</span>
+        <h4 style="margin-top:var(--sp-5)">The week switch and the date chip</h4>
+        <div class="row"><div class="w-seg" role="group" aria-label="Week"><button aria-pressed="false">This week</button><button aria-pressed="false">Last week</button><button aria-pressed="true">All weeks</button></div><span class="w-asof" style="min-width:0;width:162px"><i class="w-led idle"></i><span>Aug 13 to Oct 18</span></span></div>
+        <span class="cap">Your week and Your work have all three choices. Your setup has This week and Last week. Your AI's instructions shows only when the logs were read.</span>
+        <span class="cap">The chip holds only the dates of what you're looking at. Point at it for when the logs were read.</span></div>
+      <div><h4>The app switch, in the picture's header</h4>
+        <div class="w-seg q-app" role="group" aria-label="Which app" style="display:inline-flex"><button aria-pressed="true">Claude</button><button aria-pressed="false">Codex<i class="q-app-dot" aria-label="a Codex limit stopped you"></i></button></div>
+        <span class="cap">On Your week, Claude Code, Cowork and the Claude app count as one, since they share one plan and one set of limits. The orange dot on Codex means Codex's limit stopped you in the week shown.</span>
+        <div class="w-seg s-app" role="group" aria-label="Which app" style="display:inline-flex;margin-top:var(--sp-4)"><button aria-pressed="true">Claude Code</button><button aria-pressed="false">Cowork</button><button aria-pressed="false">Codex</button></div>
+        <span class="cap">On Your setup and Your AI's instructions, each app has its own picture. Where Crossview can't see something for an app, the tab says so in one line.</span>
+        <span class="cap">Switching apps changes only the picture and the panel. Nothing else on the screen moves.</span></div>
+    </div>
+    <div class="body" style="padding-top:0"><h4>The footer, the same on every tab</h4>
+      <div class="foot" style="padding:0;margin:0;max-width:none">Built Oct 16, 10:10 am from the logs on this Mac. Crossview sends nothing anywhere. <a data-keepdemo href="reads.html">How Crossview counts</a><span data-realonly> · <a class="w-link" href="index.html#progress">How Crossview is being built</a></span></div>
+      <p class="cap">Where the numbers came from, then two links: how Crossview counts, and how it's being built. The demo shows only the first link.</p></div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>Cards for apps, subagents, projects and connectors</h3><span class="w-mh-note">Ran, didn't run, never ran, more, picked</span></header>
+    <div class="body grid g4">
+      <div class="state"><button class="w-app on"><i class="w-light"></i><span><b>Claude Code</b><small>6 chats</small></span></button><span class="cap">an app you talk to, used in the week shown</span></div>
+      <div class="state"><button class="w-helper on"><i class="w-light"></i><span><b>spec-writer</b><small>3 runs · Route planner</small></span></button><span class="cap">a subagent that ran</span></div>
+      <div class="state"><button class="w-helper idle"><i class="w-light"></i><span><b>release-notes<em class="w-badge">1</em></b><small>never ran</small></span></button><span class="cap">never ran, with a decision</span></div>
+      <div class="state"><button class="y-proj on" style="width:100%"><b>Route planner redesign</b><span>about $15 <small>of your plans</small></span><small class="y-mono">6 chats</small></button><span class="cap">picked: an ink outline</span></div>
+      <div class="state"><button class="y-port"><i class="y-jack"></i><span><b>Snowflake</b><small>43 uses this week</small></span></button><span class="cap">a connector that only reads</span></div>
+      <div class="state"><button class="y-port risky"><i class="y-jack"></i><span><b>Slack</b><small>19 uses this week · <em>can send</em></small></span></button><span class="cap">can act outside your Mac (orange jack)</span></div>
+      <div class="state"><button class="w-helper more"><span><b>+ 4 more subagents</b><small>9 runs · see them all</small></span></button><span class="cap">more, folded away</span></div>
+      <div class="state"><div class="w-oc busy" style="width:100%"><div class="w-oc-top"><b>OpenAI API</b><span class="w-oc-amt">amount unknown</span></div><small class="w-oc-where">warehouse-cleanup (busy this week)</small></div><span class="cap">a cost nobody has entered</span></div>
+    </div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>Pictures of numbers</h3><span class="w-mh-note">Rings, tiles, the can-do grid, the week line, the limit dial</span></header>
+    <div class="body grid g3">
+      <div class="mini-panel"><h4>Rings and their key, "ran this week" picked</h4>
+        <div class="stage"><div class="a-rings"><svg viewBox="0 0 120 120" width="120" height="120" role="img" aria-label="Example rings">
+          <g class="a-ring-g amt off"><circle cx="60" cy="60" r="52" class="a-ring-track"/><circle cx="60" cy="60" r="52" class="a-ring" stroke-dasharray="272 327" transform="rotate(-90 60 60)"/></g>
+          <g class="a-ring-g lit"><circle cx="60" cy="60" r="41" class="a-ring-track"/><circle cx="60" cy="60" r="41" class="a-ring" stroke-dasharray="86 258" transform="rotate(-90 60 60)"/></g>
+          <g class="a-ring-g cat off"><circle cx="60" cy="60" r="30" class="a-ring-track"/><circle cx="60" cy="60" r="30" class="a-ring" stroke-dasharray="126 188" transform="rotate(-90 60 60)"/></g>
+          <text x="60" y="62" text-anchor="middle" class="a-ring-big lit">33%</text><text x="60" y="75" text-anchor="middle" class="a-ring-sm">this week</text></svg>
+          <div class="a-ring-leg"><button class="a-leg amt" aria-pressed="false"><i></i><span>Ran at least once</span><b>10 of 12</b></button><button class="a-leg lit" aria-pressed="true"><i></i><span>Ran this week</span><b>4 of 12</b></button><button class="a-leg cat" aria-pressed="false"><i></i><span>Yours that ran</span><b>6 of 7</b></button><button class="a-leg never" aria-pressed="false"><i></i><span>Never ran</span><b>2</b></button></div></div></div></div>
+      <div class="mini-panel"><h4>Tiles, by where they came from</h4>
+        <div class="a-shelf"><div class="a-shelf-h"><span><i class="a-cat mine"></i>Made by you</span><b>5 of 6 used</b></div><div class="a-shelf-t"><i class="a-tile t4 lit"></i><i class="a-tile t3"></i><i class="a-tile t2 lit"></i><i class="a-tile t1"></i><i class="a-tile t2 on"></i><i class="a-tile t0"></i></div></div>
+        <div class="a-shelf"><div class="a-shelf-h"><span><i class="a-cat acct"></i>From your Claude account</span><b>3 of 6 used</b></div><div class="a-shelf-t"><i class="a-tile t3"></i><i class="a-tile t1 lit"></i><i class="a-tile t1"></i><i class="a-tile t0 out"></i><i class="a-tile t0 out"></i><i class="a-tile t0 out"></i></div></div>
+        <div class="a-shelf"><div class="a-shelf-h"><span><i class="a-cat built"></i>Came with Claude Code</span><b>2 of 3 used</b></div><div class="a-shelf-t"><i class="a-tile t2"></i><i class="a-tile t1"></i><i class="a-tile t0"></i></div></div>
+        <div class="a-key"><span><i class="a-tile t0"></i>never</span><span><i class="a-tile t1"></i><i class="a-tile t2"></i><i class="a-tile t3"></i><i class="a-tile t4"></i>less to more</span><span><i class="a-tile t2 lit"></i>used this week</span><span><i class="a-tile t2 on"></i>picked</span><span><i class="a-tile t0 out"></i>filtered out</span></div></div>
+      <div class="mini-panel"><h4>What each connector can do</h4>
+        <div class="a-cando" style="margin:0;padding:0;border:0"><div class="a-cd-h"><span></span><span>Read</span><span>Change</span><span>Send</span><span>Delete</span><span>Uses</span></div>
+          <div class="a-cd-r"><b><i class="a-st lit"></i>Gmail</b><i class="did"></i><i class="did hot"></i><i class="did hot"></i><i class="can hot"></i><span class="a-cd-u"><em style="width:70%"></em></span></div>
+          <div class="a-cd-r on"><b><i class="a-st dim"></i>Figma</b><i class="did"></i><i class="can hot"></i><i class="off"></i><i class="off"></i><span class="a-cd-u"><em style="width:45%"></em></span></div>
+          <div class="a-cd-r"><b><i class="a-st none"></i>Linear</b><i class="off"></i><i class="off"></i><i class="off"></i><i class="off"></i><span class="a-cd-u"><em style="width:0"></em></span></div>
+          <p class="a-cd-note"><span><i class="did"></i>has done it</span><span><i class="can"></i>allowed to, hasn't yet</span><span><i class="did hot"></i>reaches outside your Mac</span></p></div></div>
+      <div class="mini-panel"><h4>The week line</h4><div class="w-days"><span class="w-day"><small>Mon</small><i></i></span><b class="w-dash"></b><span class="w-day warn"><small>Tue</small><i></i></span><b class="w-dash"></b><span class="w-day hit"><small>Wed</small><i></i></span><b class="w-dash"></b><span class="w-day today"><small>Thu</small><i></i></span></div><span class="cap">none · close to a limit · stopped by a limit · today</span></div>
+      <div class="mini-panel"><h4>Limit dials</h4><div class="row stage">
+        <div class="w-gauge" style="width:auto"><svg viewBox="0 0 40 40" width="40" height="40" aria-hidden="true"><g transform="rotate(135 20 20)"><circle cx="20" cy="20" r="15" class="w-g-track" stroke-dasharray="70.7 94.2"/><circle cx="20" cy="20" r="15" class="w-g-fill" stroke-dasharray="28.3 94.2"/></g><circle cx="20" cy="20" r="2.6" class="w-g-hub"/></svg><div><b>40%</b><small>grey</small></div></div>
+        <div class="w-gauge hot" style="width:auto"><svg viewBox="0 0 40 40" width="40" height="40" aria-hidden="true"><g transform="rotate(135 20 20)"><circle cx="20" cy="20" r="15" class="w-g-track" stroke-dasharray="70.7 94.2"/><circle cx="20" cy="20" r="15" class="w-g-fill" stroke-dasharray="60 94.2"/></g><circle cx="20" cy="20" r="2.6" class="w-g-hub"/></svg><div><b>85%</b><small>80% and up</small></div></div>
+        <div class="w-gauge full" style="width:auto"><svg viewBox="0 0 40 40" width="40" height="40" aria-hidden="true"><g transform="rotate(135 20 20)"><circle cx="20" cy="20" r="15" class="w-g-track" stroke-dasharray="70.7 94.2"/><circle cx="20" cy="20" r="15" class="w-g-fill" stroke-dasharray="70.7 94.2"/></g><circle cx="20" cy="20" r="2.6" class="w-g-hub"/></svg><div><b>100%</b><small>reached</small></div></div></div></div>
+      <div class="mini-panel"><h4>The receipt</h4><div class="w-receipt"><div class="w-r-head"><span>Receipt</span><span>Oct 12 to 18</span></div><p class="w-r-line"><b>Plans: about $28 this week</b><small>(Claude Max $100 a month)</small></p><div class="w-r-line w-r-peruse"><small>If you'd paid per use instead</small><b class="w-r-big">about $150 <em>of work, an estimate</em></b></div></div></div>
+    </div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>All weeks: every week as one bar</h3><span class="w-mh-note">Added Oct 16 · made-up projects</span></header>
+    <div class="h-page">
+    <div class="body"><h4>The chart, on Your week with All weeks picked</h4>
+      <div style="max-width:760px">
+<svg class="h-svg" viewBox="0 0 760 280" role="img" aria-label="An example of the All weeks chart: ten weeks of made-up work, with limit stops marked"><line x1="52" y1="230" x2="760" y2="230" class="h-base"/><line x1="52" y1="155" x2="760" y2="155" class="h-grid"/><text x="46" y="159" text-anchor="end" class="h-ax">$250</text><line x1="52" y1="80" x2="760" y2="80" class="h-grid"/><text x="46" y="84" text-anchor="end" class="h-ax">$500</text><rect x="473.6" y="40" width="278.4" height="190" class="h-band"/><text x="612.8" y="30" text-anchor="middle" class="h-ax">last four weeks</text><line x1="90.8" y1="230" x2="90.8" y2="234" class="h-tick"/><rect x="73.8" y="212" width="34" height="18" fill="#7d8799"/><rect x="73.8" y="203" width="34" height="9" fill="#cdb46a"/><rect x="73.8" y="200" width="34" height="3" fill="#C3C9D2"/><text x="90.8" y="252" text-anchor="middle" class="h-ax">Aug 10</text><line x1="160.4" y1="230" x2="160.4" y2="234" class="h-tick"/><rect x="143.4" y="203" width="34" height="27" fill="#7d8799"/><rect x="143.4" y="191" width="34" height="12" fill="#c690bd"/><rect x="143.4" y="185" width="34" height="6" fill="#C3C9D2"/><line x1="230" y1="230" x2="230" y2="234" class="h-tick"/><circle cx="230" cy="225" r="2.5" class="h-none"/><line x1="299.6" y1="230" x2="299.6" y2="234" class="h-tick"/><rect x="282.6" y="206" width="34" height="24" fill="#7d8799"/><rect x="282.6" y="185" width="34" height="21" fill="#c690bd"/><rect x="282.6" y="176" width="34" height="9" fill="#6fb594"/><rect x="282.6" y="170" width="34" height="6" fill="#C3C9D2"/><line x1="369.2" y1="230" x2="369.2" y2="234" class="h-tick"/><rect x="352.2" y="194" width="34" height="36" fill="#c690bd"/><rect x="352.2" y="176" width="34" height="18" fill="#6fb594"/><rect x="352.2" y="170" width="34" height="6" fill="#cdb46a"/><rect x="352.2" y="164" width="34" height="6" fill="#C3C9D2"/><text x="369.2" y="252" text-anchor="middle" class="h-ax">Sep 7</text><line x1="438.8" y1="230" x2="438.8" y2="234" class="h-tick"/><rect x="421.8" y="185" width="34" height="45" fill="#7d8799"/><rect x="421.8" y="158" width="34" height="27" fill="#c690bd"/><rect x="421.8" y="143" width="34" height="15" fill="#6fb594"/><rect x="421.8" y="134" width="34" height="9" fill="#cdb46a"/><rect x="421.8" y="125" width="34" height="9" fill="#C3C9D2"/><path d="M432.8 117 l6 -10 l6 10 z" class="h-stop"/><line x1="508.4" y1="230" x2="508.4" y2="234" class="h-tick"/><rect x="491.4" y="194" width="34" height="36" fill="#7d8799"/><rect x="491.4" y="170" width="34" height="24" fill="#6fb594"/><rect x="491.4" y="158" width="34" height="12" fill="#cdb46a"/><rect x="491.4" y="152" width="34" height="6" fill="#C3C9D2"/><line x1="578" y1="230" x2="578" y2="234" class="h-tick"/><rect x="561" y="170" width="34" height="60" fill="#7d8799"/><rect x="561" y="128" width="34" height="42" fill="#c690bd"/><rect x="561" y="101" width="34" height="27" fill="#6fb594"/><rect x="561" y="89" width="34" height="12" fill="#cdb46a"/><rect x="561" y="80" width="34" height="9" fill="#C3C9D2"/><path d="M572 72 l6 -10 l6 10 z" class="h-stop"/><text x="587" y="71" class="h-count">2</text><rect x="573" y="47" width="10" height="10" class="h-stop-cx"/><line x1="647.6" y1="230" x2="647.6" y2="234" class="h-tick"/><rect x="630.6" y="176" width="34" height="54" fill="#7d8799"/><rect x="630.6" y="140" width="34" height="36" fill="#c690bd"/><rect x="630.6" y="122" width="34" height="18" fill="#cdb46a"/><rect x="630.6" y="95" width="34" height="27" fill="#C3C9D2"/><rect x="627.6" y="91" width="40" height="141" rx="3" class="h-pick"/><text x="647.6" y="252" text-anchor="middle" class="h-ax">Oct 5</text><line x1="717.2" y1="230" x2="717.2" y2="234" class="h-tick"/><rect x="700.2" y="203" width="34" height="27" fill="#7d8799"/><rect x="700.2" y="188" width="34" height="15" fill="#6fb594"/><rect x="700.2" y="182" width="34" height="6" fill="#C3C9D2"/><path d="M711.2 174 l6 -10 l6 10 z" class="h-stop now"/><text x="752" y="270" text-anchor="end" class="h-ax">so far</text></svg>
+        <div class="w-legend a-key" style="padding:12px 0 0"><span><i class="q-k" style="background:#7d8799"></i>Route planner redesign</span><span><i class="q-k" style="background:#c690bd"></i>Carrier onboarding flow</span><span><i class="q-k" style="background:#6fb594"></i>Customer interview synthesis</span><span><i class="q-k" style="background:#cdb46a"></i>Weekly status reports</span><span><i class="q-k" style="background:#C3C9D2"></i>Everything else</span><span><i class="h-k-tri" aria-hidden="true"></i>Claude's limit stopped you</span><span><i class="h-k-sq" aria-hidden="true"></i>Codex's limit stopped you</span></div></div>
+      <p class="cap">Each bar is what that week's work would have cost at pay-per-use prices, split by project. The bars stay narrow, so a short history still fills the width.</p></div>
+    <div class="body grid g3" style="padding-top:0">
+      <div><h4>The marks</h4><ul class="rules marks" style="margin:0;padding-left:0;list-style:none">
+        <li><svg class="h-svg" style="width:16px;height:14px;display:inline-block;vertical-align:-2px;margin-right:8px;overflow:visible" viewBox="0 0 16 14" aria-hidden="true"><path d="M2 12 l6 -10 l6 10 z" class="h-stop"/></svg>A triangle: Claude's limit stopped you that week.</li>
+        <li><svg class="h-svg" style="width:16px;height:14px;display:inline-block;vertical-align:-2px;margin-right:8px;overflow:visible" viewBox="0 0 16 14" aria-hidden="true"><rect x="3" y="2" width="10" height="10" class="h-stop-cx"/></svg>A square: Codex's limit stopped you that week.</li>
+        <li><svg class="h-svg" style="width:16px;height:14px;display:inline-block;vertical-align:-2px;margin-right:8px;overflow:visible" viewBox="0 0 16 14" aria-hidden="true"><path d="M2 12 l6 -10 l6 10 z" class="h-stop now"/></svg>Past stops are ink. Only this week's stops are orange.</li>
+        <li><svg class="h-svg" style="width:16px;height:14px;display:inline-block;vertical-align:-2px;margin-right:8px;overflow:visible" viewBox="0 0 16 14" aria-hidden="true"><text x="3" y="12" class="h-count">2</text></svg>A number beside a mark counts the stops when there was more than one.</li>
+        <li><svg class="h-svg" style="width:16px;height:14px;display:inline-block;vertical-align:-2px;margin-right:8px;overflow:visible" viewBox="0 0 16 14" aria-hidden="true"><circle cx="8" cy="9" r="2.5" class="h-none"/></svg>A week with no chats gets a small dot on the base line.</li>
+        <li><svg class="h-svg" style="width:16px;height:14px;display:inline-block;vertical-align:-2px;margin-right:8px;overflow:visible" viewBox="0 0 16 14" aria-hidden="true"><rect x="3" y="1" width="10" height="12" rx="2" class="h-pick"/></svg>The week you picked has an ink outline.</li>
+        <li><svg class="h-svg" style="width:16px;height:14px;display:inline-block;vertical-align:-2px;margin-right:8px;overflow:visible" viewBox="0 0 16 14" aria-hidden="true"><rect x="0" y="0" width="16" height="14" class="h-band"/></svg>The shaded band covers the last four weeks.</li>
+        <li><svg class="h-svg" style="width:16px;height:14px;display:inline-block;vertical-align:-2px;margin-right:8px;overflow:visible" viewBox="0 0 16 14" aria-hidden="true"></svg>"So far" sits under this week, since the week isn't over.</li>
+      </ul></div>
+      <div><h4>The panel, before you pick a week</h4>
+        <aside class="a-panel w-mod g-panel" style="height:auto;position:relative;top:0" aria-label="Example panel"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+          <header class="a-ph"><div class="a-step" role="group" aria-label="Move between weeks"><button class="w-btn w-sbtn"><span aria-hidden="true">◀</span> Earlier</button><span class="a-chip">10 weeks</span><button class="w-btn w-sbtn" disabled>Later <span aria-hidden="true">▶</span></button></div></header>
+          <h3>All weeks since Aug 13</h3><p class="a-line">Pick a week in the picture to see it here.</p>
+          <div class="g-body"><div class="g-grp"><h4>Your busiest weeks</h4><div class="g-row"><span><button class="w-link">Week of Sep 28</button></span><b>About $500</b></div><div class="g-row"><span><button class="w-link">Week of Oct 5</button></span><b>About $450</b></div><div class="g-row"><span><button class="w-link">Week of Sep 14</button></span><b>About $350</b></div></div>
+            <div class="g-grp"><h4>Limits</h4><p class="g-note">Claude's limits stopped you 4 times and Codex's once, in 3 weeks.</p></div></div></aside>
+        <p class="cap">With no week picked, the chip counts the weeks. Earlier starts on this week.</p></div>
+      <div><h4>The panel, with a week picked</h4>
+        <aside class="a-panel w-mod g-panel" style="height:auto;position:relative;top:0" aria-label="Example panel"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+          <header class="a-ph"><div class="a-step" role="group" aria-label="Move between weeks"><button class="w-btn w-sbtn"><span aria-hidden="true">◀</span> Earlier</button><span class="a-chip">Week 9 of 10</span><button class="w-btn w-sbtn">Later <span aria-hidden="true">▶</span></button></div></header>
+          <h3>Last week, Oct 5 to 11</h3><p class="a-line">About $450 at pay-per-use prices.</p>
+          <div class="g-body"><div class="q-act h-open"><button class="w-btn">Show me last week in detail</button></div>
+            <div class="g-grp"><h4>Projects, by share of the price</h4><div class="g-row"><span>Route planner redesign</span><b>40%</b></div><div class="g-row"><span>Carrier onboarding flow</span><b>27%</b></div><div class="g-row"><span>3 more</span><b>33%</b></div></div>
+            <div class="g-grp"><h4>Limits</h4><p class="h-stopl"><i aria-hidden="true"></i>No limit stopped you that week.</p></div></div></aside>
+        <p class="cap">Every tab's panel uses the same three parts: a group heading, rows with a name and a number, and a plain sentence. Shares in a group add up to 100%.</p></div>
+    </div>
+    </div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led"></i>Things that open, and things that need you</h3><span class="w-mh-note">Details open where you clicked; nothing else moves</span></header>
+    <div class="body grid g3">
+      <div class="mini-panel rel"><h4>Details, beside what you clicked</h4><div class="a-peek" style="right:56px"><i class="a-peek-arrow" style="left:auto;right:-7px;top:40px;transform:rotate(135deg)"></i><header><i class="a-st lit"></i><b>dataviz</b><button class="a-peek-x" aria-label="Close">×</button></header><small>From your Claude account · 1 use this week</small><p>Guidance for charts and dashboards.</p></div><i class="a-tile t2 lit on" style="position:absolute;right:20px;top:66px"></i></div>
+      <div><h4>A finding and its reason</h4><div class="a-insight" style="margin:0"><p>You've used 11 of 29. 18 never used.</p><small>Skills you never use still sit in the list every chat reads.</small></div></div>
+      <div><h4>A prepared change, ticked</h4><ul class="q-items" style="margin:0"><li class="q-item on"><label><input type="checkbox" checked><span><b>ux-reviewer</b> <small>.claude/agents/ux-reviewer.md</small><br><small>9 runs last week: about $40 at pay-per-use prices; on Sonnet, about $20.</small></span></label><pre class="q-diff"><ins>+ model: sonnet</ins></pre></li></ul></div>
+    </div>
+    <div class="body" style="padding-top:0"><h4>An answer card, with the question, the answer, why, and what's prepared</h4>
+      <section class="w-mod q-card" style="min-height:0;max-width:640px"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i><p class="q-q"><i class="w-led"></i>What can Claude reach outside my Mac?</p><p class="q-a">6 connectors can act outside your Mac. claude-in-chrome can act as you.</p><div class="q-chips"><span class="q-chip hot">claude-in-chrome <em>acts as you</em></span><span class="q-chip hot">Slack <em>can delete</em></span><span class="q-chip calm">GitHub <em>can delete</em></span></div><div class="q-act"><span class="q-lead">Claude Code could ask you before 4 connectors send or delete anything.</span><button class="w-btn main">Show me the change</button><button class="w-btn quiet">Not now</button></div></section><p class="cap">On Your week the card opens in the panel, where its frame and its question are left out.</p></div>
+    <div class="body" style="padding-top:0"><h4>The demo band</h4><div class="demo-band" style="border-radius:var(--r-md);border:1px solid var(--lit-line)"><i class="w-led"></i><b>Demo</b><span>One product manager's AI work at Quillmark, a made-up company. Every name, project and number here is invented, so it's safe to show.</span><a href="#" onclick="return false" aria-disabled="true" title="A sample: on the real band this link leaves the demo">Leave the demo</a></div></div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>Your AI's instructions: layers, pins, edits and hover labels</h3><span class="w-mh-note">Added Oct 14</span></header>
+    <div class="body grid g3">
+      <div class="s-g"><h4>The layers' key, under the picture</h4><div class="w-legend a-key" style="padding:10px 0 0;border-top:0;margin-top:0"><span><i class="s-sw mine"></i>Written by you</span><span><i class="s-sw claude"></i>Written by Claude</span><span><i class="s-sw other"></i>Came with the apps</span><span><i class="s-sw none"></i>Nothing there</span><span><em class="w-badge s-pin-key">1</em> A problem, numbered</span></div><p class="cap">The picture stacks the layers in the order Claude reads them, top first, and a thicker layer has more words. A numbered pin on a layer opens that problem in the panel. On Codex the key says "Written by Codex".</p></div>
+      <div><h4>An edit to your rules, before and after</h4><div class="s-was"><small>Now</small><p>Start new ideas <del>anywhere</del>.</p></div><div class="s-will"><small>After</small><p>Start new ideas <mark>in the project's folder</mark>.</p></div><p class="cap">Plain text, with the changed words marked in place.</p></div>
+      <div><h4>A hover label</h4><div class="tip" style="position:static;opacity:1;max-width:280px">The rule file for the Carrier onboarding flow project, about 260 words, written by you.</div><p class="cap">A light card with ink text and a thin edge, placed beside what it describes. Full sentences in sentence case.</p></div>
+    </div>
+    <div class="body" style="padding-top:0"><h4>A note on how the tab was counted</h4><p class="q-note" style="margin:0">Counted from your rule files, Claude's notes, and Claude Code's record of which files each chat loaded. The counts update every time you refresh.</p><p class="cap">It sits under the picture and the panel, just above the footer. Legends stay with the drawing they explain.</p></div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>The screen budget</h3><span class="w-mh-note">What one screen may show at once</span></header>
+    <div class="body grid g3">
+      <div class="job"><h4>The layout</h4><b>One screen, one job</b><p>One sentence on top, one picture, and a panel for what you pick. Everything else is one click deeper.</p></div>
+      <div class="job"><h4>Pictures</h4><b>One picture per tab</b><p>One chart or drawing on a screen. A second chart moves into the panel or one click deeper.</p></div>
+      <div class="job"><h4>Legends</h4><b>About eight entries at most</b><p>The legend sits under the picture it explains. Smaller groups share one entry, like "Everything else".</p></div>
+      <div class="job"><h4>Numbers</h4><b>One headline number at most</b><p>The first sentence holds a number only when the number is the answer. Other numbers sit in rows, the panel or a hover.</p></div>
+      <div class="job"><h4>Colors</h4><b>One job per color</b><p>Orange marks what's worth your attention now. Blue is where something came from. The project colors stay clear of both.</p></div>
+      <div class="job"><h4>Text</h4><b>11 pixels or more</b><p>Everything on screen, including the words and numbers inside a drawing, at every width.</p></div>
+    </div>
+    <div class="body" style="padding-top:0"><p class="cap">The check for a screen is the five-second read: someone who sees it for five seconds can say what it's for and the one thing it says. A screen over budget moves the extra part one click deeper.</p></div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>Rules every screen keeps</h3></header>
+    <div class="body"><ul class="rules">
+      <li><b>One job per color.</b> Orange marks what's worth your attention now. What ran in the week shown is the darkest grey. Blue says where something came from. Selection is an ink outline. Project colors stay clear of orange and blue.</li>
+      <li><b>Nothing moves when you click.</b> Tabs, switches and boxes keep their size; details open over the page next to what you clicked. The checks measure every frame before and after each click.</li>
+      <li><b>Every number says how it was made.</b> Point at it for what it counts, how sure it is and what it can't see.</li>
+      <li><b>Prices are pay-per-use estimates.</b> They always sit beside what you actually paid.</li>
+      <li><b>Nothing changes on its own.</b> A prepared change shows its exact lines, happens only when you press "Make this change", and has an Undo on the same card.</li>
+      <li><b>Plain words, in one voice.</b> A calm colleague: serious, casual, respectful and matter-of-fact (docs/voice.md). One name for each thing, explained the first time it appears.</li>
+      <li><b>Contrast, repetition, alignment, proximity.</b> What matters most stands out. The same part looks the same everywhere. Edges line up. Things that belong together sit together.</li>
+      <li><b>Text people can read.</b> 11 pixels or more on screen, including inside drawings, nothing cut off, and text at least 4.5 to 1 against its background.</li>
+    </ul></div>
+  </section>
+</main>
+<script>/* opened from the demo: the way back stays in the demo (QA run 4, finding 1); the sample footer matches the demo's, with one link */ if (/[?&]demo\b/.test(location.search)) { document.querySelectorAll("a[data-back]").forEach(function (a) { a.href = "index.html?demo"; }); document.querySelectorAll("a[data-keepdemo]").forEach(function (a) { a.href += "?demo"; }); document.querySelectorAll("[data-realonly]").forEach(function (e) { e.remove(); }); }</script>
+</body>
+</html>

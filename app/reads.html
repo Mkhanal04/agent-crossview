@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Crossview counts</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  /* this page only: a plain sheet. Panel round 1 asked for one place that says what the tool itself reads, keeps and sends. */
+  .rd{max-width:880px;margin:0 auto;padding:var(--sp-8) var(--sp-6) 64px}
+  .rd h1{margin:0;font-size:var(--t-2xl);letter-spacing:-.01em}
+  .rd .lead{margin:var(--sp-2) 0 var(--sp-6);color:var(--muted)}
+  .rd .top{display:flex;align-items:flex-end;gap:var(--sp-4)}
+  .rd .top a{margin-left:auto;color:var(--ink);font-weight:600;text-underline-offset:3px;white-space:nowrap}
+  .rd section.w-mod{margin-bottom:var(--sp-4)}
+  .rd .body{padding:var(--sp-4) 26px var(--sp-5)}
+  .rd ul{margin:0;padding-left:18px}
+  .rd li{margin:6px 0;font-size:var(--t-base)}
+  .rd li small{display:block;color:var(--muted);font-size:var(--t-sm)}
+  .rd code{font:var(--t-sm) var(--mono);background:var(--mod-3);border-radius:var(--r-xs);padding:1px 4px}
+</style>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%2315171B%27/%3E%3Crect x=%2710%27 y=%2710%27 width=%2712%27 height=%2712%27 rx=%273%27 fill=%27%23fff%27/%3E%3C/svg%3E">
+</head>
+<body class="lightpage">
+<main class="rd">
+  <div class="top"><div><h1>How Crossview counts</h1>
+    <p class="lead">Where Crossview's numbers come from, how it works out prices, and how they compare with the apps' own. It runs only on this Mac, and nothing it reads leaves the computer.</p></div>
+    <a data-back href="index.html">Back to Your week</a></div>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>What it reads</h3><span class="w-mh-note">Counts and names only</span></header>
+    <div class="body"><ul>
+      <li>The logs that Claude Code, Cowork and Codex keep on this Mac.<small>For each reply it reads the time, the model, how much was read and written, and any subagent, skill or connector it used. It also reads chat titles and the folder each chat ran in, so it can group chats by project. At the start of a chat, Claude Code records every action each connector offers, and Crossview reads that list too. It doesn't read Claude's replies, and the only use of your messages is the counts described below.</small></li>
+      <li>The Claude app's own record of how much of your 5-hour and weekly limits you've used.</li>
+      <li>Your setup, which means the names and short descriptions of your subagents and skills, and the model a subagent's file asks for if it names one. It also reads the "ask" and "allow" rules and the on and off switches in Claude Code's settings, the names of your connectors and plugins, and how long each rule file is and when it last changed.<small>A subagent is a separate AI that Claude Code hands part of a job to. A connector is a link to another app, like Google Drive or Figma. A rule file is a file of instructions Claude reads at the start of every chat. Crossview reads rule files to count their words and doesn't keep what they say.</small></li>
+      <li>For Your AI's instructions, it reads your rule files, your subagent and skill files, and Claude's notes about you. It counts their words, finds rules that repeat, checks that links and paths still lead somewhere, and sees how old each note is. From the logs, it reads which of those files loaded at the start of each chat. Files in your private folders are counted but never read.<small>Claude Code calls rule files CLAUDE.md, and Codex calls them AGENTS.md. Claude's notes are what Claude saves about you between chats, in its memory folders.</small></li>
+      <li>For Codex, it reads the limit numbers Codex records after each reply (how much of its 5-hour and weekly limits you used, and when each resets), Codex's settings file, the AGENTS.md rule files in your project folders, and whether Codex keeps a notes file. It doesn't read what's in that notes file.</li>
+      <li>The messages you typed in Claude Code, because you said yes to this on Oct 14. Crossview counts how often you correct Claude and on what topics. It keeps the counts and never the text, and it skips your private folders.</li>
+      <li>Your project folders, to spot paid services outside your plans.<small>It looks in settings files for the names of paid services' keys, such as "the Claude API key", and never reads the key itself. It also looks for code that calls those services.</small></li>
+      <li>Day-job and personal work.<small>Folders on your private list show only as "Day job" or "Personal", without titles.</small></li>
+    </ul></div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>What it keeps</h3><span class="w-mh-note">All of it in Crossview folder</span></header>
+    <div class="body"><ul>
+      <li>Counts, names and titles, in a folder called data inside Crossview folder, plus one file the page reads. For Your AI's instructions, it also keeps a sentence from each rule that repeats across your files, and the exact lines of any change it prepares.<small>Claude Code deletes a chat's log about 30 days after the chat was last used. Crossview keeps the counts it already made from that chat, so your history doesn't shrink. It never keeps the chat itself.</small></li>
+      <li>If you switch on the warning line in Claude Code, it keeps the time of each reading, how much of each limit you'd used and when each limit resets, in data/pace-log.jsonl.</li>
+      <li>Any chat you move to another project, and any monthly amounts you type in, in the same folder.</li>
+      <li>Anything you hid with Not now, in this browser only.</li>
+      <li>To remove everything, delete the data folder, and data.js and progress.js inside the app folder. The next refresh rebuilds them from the logs.</li>
+    </ul></div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>What it can change</h3><span class="w-mh-note">Only what you say yes to</span></header>
+    <div class="body"><ul>
+      <li>Which model a subagent uses. On Your week, "What used up my limit?" can add one line, <code>model: sonnet</code>, to the subagent files you tick. It only touches files in the <code>.claude/agents</code> folder in your home folder.</li>
+      <li>Which connector actions ask you first. "What can Claude reach outside my Mac?" can add rules to the "ask" list in <code>~/.claude/settings.json</code>, so Claude Code asks you before it runs those actions. Nothing else in that file changes.</li>
+      <li>Nothing happens until you press "Make this change", and that button only works when you open Crossview with its file. Before each change, it saves a copy of the file in the data folder and writes down what changed.<small>Undo, on the same card, takes out exactly what Crossview added and leaves anything you or Claude Code changed since. You can also edit the file yourself.</small></li>
+      <li>On Your AI's instructions, it can change two lines in your rule files about switching folders, and you see both lines word for word before you say yes. It can also move notes Claude hasn't changed in three months into an archive folder next to them, and take their lines out of that folder's index. Nothing is deleted, and Undo puts everything back.</li>
+      <li>"What have I set up that I never use?" changes nothing. Your Claude account's skills are switched off on claude.ai, so it gives you the list and tells you where to go.</li>
+    </ul></div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>What it sends</h3><span class="w-mh-note">Nothing</span></header>
+    <div class="body"><ul>
+      <li>Nothing leaves this Mac. The page loads no fonts, scripts or trackers from the internet.</li>
+      <li>When you open Crossview with its file, a small program starts on this Mac. It answers only this Mac, and it only accepts changes from its own page.</li>
+      <li>"Copy the request" for a bill only puts text on your clipboard. Nothing happens unless you paste it into Claude Code yourself, and Claude Code asks before each step.</li>
+      <li>The demo company is made up and holds nothing from your logs. Before it's shared, Crossview's checks scan every demo screen and file for names from your own data.</li>
+    </ul></div>
+  </section>
+
+  <section class="w-mod" id="match"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>Do Crossview's numbers match the apps' own?</h3><span class="w-mh-note">Only chats where both counts cover the same replies</span></header>
+    <div class="body" id="match-body"><p>Open Crossview from its folder to see this check on your own numbers.</p></div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>How can I check this myself?</h3></header>
+    <div class="body"><p>Open Claude Code, type <code>/usage</code> and press <b>w</b>. It shows your plan's current 5-hour and weekly bars, which come from Anthropic, and lists the skills, subagents, plugins and connectors used most in the last 7 days. It keeps no past weeks, so it can only check this one. Crossview's week starts on Monday, while Claude Code's 7 days include last weekend, so the two can differ a little. Codex shows its own limits in Codex itself.</p>
+    <p>Every reply in all three apps is priced the same way, at the per-use prices Anthropic and OpenAI publish (last checked Oct 10, 2026). The pay-per-use price is what the same work would cost if you paid for each use. You pay a flat subscription, so it isn't your bill.</p></div>
+  </section>
+</main>
+<script>document.write(/[?&]demo\b/.test(location.search) ? '<script src="demo-data.js"><\/script>' : '<script src="data.js"><\/script>');</script>
+<script>/* the number check, from the same data the app reads (it moved here from Mission control in release 2) */
+(function () {
+  var G = window.GB, c = G && G.checks, el = document.getElementById("match-body"); if (!c || !el) return;
+  var esc = function (t) { return String(t).replace(/[&<>"]/g, function (x) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[x]; }); };
+  var ten = function (v) { return "about $" + (Math.round(v / 10) * 10).toLocaleString(); };
+  var WHY = { "Claude Code": "Crossview's is lower because Claude Code also makes small background calls that never reach the logs, such as writing chat titles and summing up web pages.", "Cowork": "Crossview's is higher because Cowork's own figure prices the stored conversation at the cheaper short-term rate. Its logs show the longer-kept kind, which has a higher published price." };
+  var out = ["Claude Code", "Cowork"].map(function (k) { var x = c[k]; if (!x || !x.sessions) return ""; var d = x.theirs ? Math.round(100 * (x.ours - x.theirs) / x.theirs) : 0;
+    return "<p>On " + x.sessions + " of the " + x.recorded_sessions + " chats where " + esc(k) + " kept its own figure, Crossview's count is " + (d > 0 ? d + "% higher" : d < 0 ? (-d) + "% lower" : "the same") + " (" + ten(x.ours) + ", against " + esc(k) + "'s " + ten(x.theirs) + "). " + esc(WHY[k] || "") + "</p>"; }).join("");
+  el.innerHTML = (out || "<p>No chats kept a figure to compare yet.</p>") + "<p>Codex records how much text it read and wrote but no dollar figure, so it can't be checked this way.</p>";
+})();</script>
+<script>/* opened from the demo: the way back stays in the demo (QA run 4, finding 1) */ if (/[?&]demo\b/.test(location.search)) document.querySelectorAll("a[data-back]").forEach(function (a) { a.href = "index.html?demo"; });</script>
+</body>
+</html>

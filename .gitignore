@@ -1,0 +1,21 @@
+# Milan's private usage data and anything built from it
+data/
+app/data.js
+app/progress.js
+# the demo company is made up, so it is committed
+!demo/data/
+# local Claude notes and handoffs
+.claude/
+# system files
+.DS_Store
+__pycache__/
+# third-party screenshots for the private reference board
+docs/references/shots/
+docs/references/shots2/
+.playwright-mcp/
+video/node_modules/
+video/out/
+video/public
+video/_archive/*.mp4
+# the recording timeline goes with the private frames in data/video
+video/src/rec17.json

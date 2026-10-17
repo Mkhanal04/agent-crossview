@@ -1,0 +1,35 @@
+{
+ "manual": [
+  {
+   "service": "Claude API",
+   "month": "2026-10",
+   "usd": 18.4,
+   "entered": "2026-10-12T09:12"
+  }
+ ],
+ "plans": [
+  {
+   "name": "Claude Max",
+   "covers": [
+    "Claude Code",
+    "Cowork",
+    "Claude app"
+   ],
+   "monthly_usd": 100,
+   "since": null
+  },
+  {
+   "name": "ChatGPT Plus (for Codex)",
+   "covers": [
+    "Codex"
+   ],
+   "monthly_usd": 20,
+   "since": null
+  }
+ ],
+ "plans_note": "Made-up plans for the demo company.",
+ "plans_asked": true,
+ "sources": [],
+ "bills_folder": "data/bills",
+ "read": "2026-10-16T20:13"
+}

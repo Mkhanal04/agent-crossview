@@ -1,0 +1,393 @@
+{
+ "built": "2026-10-16T09:12",
+ "files": {
+  "count": 61,
+  "public": 61,
+  "by_kind": {
+   "your instructions (every chat)": 1,
+   "a folder's instructions": 5,
+   "a folder's instructions (AGENTS.md)": 1,
+   "reply style": 1,
+   "helper definition": 7,
+   "skill": 6,
+   "memory note": 52
+  },
+  "words": 9800
+ },
+ "loads": {
+  "chats": 34,
+  "since": "2026-08-15",
+  "latest": {
+   "route-planner": {
+    "when": "2026-10-15T10:12",
+    "project": "route-planner",
+    "ended_in": "route-planner",
+    "moved": false,
+    "memory_from": "route-planner",
+    "memory_project": "route-planner",
+    "files": [
+     {
+      "path": "~/.claude/CLAUDE.md",
+      "type": "User",
+      "words": 640
+     },
+     {
+      "path": "~/Projects/route-planner/CLAUDE.md",
+      "type": "Project",
+      "words": 420
+     },
+     {
+      "path": "~/.claude/projects/-Users-pm-Projects-route-planner/memory/MEMORY.md",
+      "type": "AutoMem",
+      "words": 160
+     }
+    ],
+    "listing": {
+     "skills": {
+      "n": 29,
+      "chars": 15600
+     },
+     "helpers": {
+      "n": 12,
+      "chars": 4200
+     },
+     "connectors": {
+      "n": 8,
+      "chars": 16800
+     },
+     "style": "Explanatory",
+     "style_words": 310
+    }
+   },
+   "triage-bot": {
+    "when": "2026-10-13T10:12",
+    "project": "triage-bot",
+    "ended_in": "triage-bot",
+    "moved": false,
+    "memory_from": "triage-bot",
+    "memory_project": "triage-bot",
+    "files": [
+     {
+      "path": "~/.claude/CLAUDE.md",
+      "type": "User",
+      "words": 640
+     },
+     {
+      "path": "~/Projects/triage-bot/CLAUDE.md",
+      "type": "Project",
+      "words": 520
+     },
+     {
+      "path": "~/.claude/projects/-Users-pm-Projects-triage-bot/memory/MEMORY.md",
+      "type": "AutoMem",
+      "words": 160
+     }
+    ],
+    "listing": {
+     "skills": {
+      "n": 29,
+      "chars": 15600
+     },
+     "helpers": {
+      "n": 12,
+      "chars": 4200
+     },
+     "connectors": {
+      "n": 8,
+      "chars": 16800
+     },
+     "style": "Explanatory",
+     "style_words": 310
+    }
+   },
+   "customer-interviews": {
+    "when": "2026-09-26T10:12",
+    "project": "customer-interviews",
+    "ended_in": "customer-interviews",
+    "moved": false,
+    "memory_from": "customer-interviews",
+    "memory_project": "customer-interviews",
+    "files": [
+     {
+      "path": "~/.claude/CLAUDE.md",
+      "type": "User",
+      "words": 640
+     },
+     {
+      "path": "~/Projects/customer-interviews/CLAUDE.md",
+      "type": "Project",
+      "words": 310
+     },
+     {
+      "path": "~/.claude/projects/-Users-pm-Projects-customer-interviews/memory/MEMORY.md",
+      "type": "AutoMem",
+      "words": 160
+     }
+    ],
+    "listing": {
+     "skills": {
+      "n": 29,
+      "chars": 15600
+     },
+     "helpers": {
+      "n": 12,
+      "chars": 4200
+     },
+     "connectors": {
+      "n": 8,
+      "chars": 16800
+     },
+     "style": "Explanatory",
+     "style_words": 310
+    }
+   },
+   "pricing-review": {
+    "when": "2026-10-10T10:12",
+    "project": "pricing-review",
+    "ended_in": "pricing-review",
+    "moved": false,
+    "memory_from": "pricing-review",
+    "memory_project": "pricing-review",
+    "files": [
+     {
+      "path": "~/.claude/CLAUDE.md",
+      "type": "User",
+      "words": 640
+     },
+     {
+      "path": "~/Projects/pricing-review/CLAUDE.md",
+      "type": "Project",
+      "words": 260
+     },
+     {
+      "path": "~/.claude/projects/-Users-pm-Projects-pricing-review/memory/MEMORY.md",
+      "type": "AutoMem",
+      "words": 160
+     }
+    ],
+    "listing": {
+     "skills": {
+      "n": 29,
+      "chars": 15600
+     },
+     "helpers": {
+      "n": 12,
+      "chars": 4200
+     },
+     "connectors": {
+      "n": 8,
+      "chars": 16800
+     },
+     "style": "Explanatory",
+     "style_words": 310
+    }
+   }
+  },
+  "moved_memory": {
+   "chats": 3,
+   "since": "2026-09-06",
+   "examples": [
+    {
+     "started": "Projects",
+     "ended": "route-planner",
+     "memory": "Projects",
+     "when": "2026-10-14T10:12"
+    }
+   ]
+  }
+ },
+ "repeats": [
+  {
+   "files": [
+    "~/.claude/agents/spec-writer.md",
+    "~/.claude/agents/ux-reviewer.md",
+    "~/.claude/agents/release-notes.md",
+    "~/Projects/route-planner/CLAUDE.md"
+   ],
+   "kinds": [
+    "helper definition"
+   ],
+   "sample": "Link the ticket number in every status update.",
+   "words": [
+    "ticket",
+    "status"
+   ]
+  },
+  {
+   "files": [
+    "~/.claude/CLAUDE.md",
+    "~/Projects/pricing-review/CLAUDE.md",
+    "~/.claude/skills/pricing-model/SKILL.md"
+   ],
+   "kinds": [
+    "skill"
+   ],
+   "sample": "Never share customer names outside the team workspace.",
+   "words": [
+    "customer",
+    "names"
+   ]
+  }
+ ],
+ "broken_links": [
+  {
+   "note": "carrier-tiers",
+   "folder": "route-planner",
+   "to": "old-rate-card",
+   "elsewhere": false
+  },
+  {
+   "note": "sprint-cadence",
+   "folder": "triage-bot",
+   "to": "team-calendar",
+   "elsewhere": true
+  },
+  {
+   "note": "interview-tags",
+   "folder": "customer-interviews",
+   "to": "codebook-v1",
+   "elsewhere": false
+  },
+  {
+   "note": "launch-checklist",
+   "folder": "Projects",
+   "to": "go-live-steps",
+   "elsewhere": false
+  }
+ ],
+ "missing_paths": [
+  {
+   "in": "~/Projects/triage-bot/CLAUDE.md",
+   "path": "~/Projects/triage-bot/runbooks/escalation-v1.md"
+  },
+  {
+   "in": "~/.claude/projects/-Users-pm-Projects/memory/launch-checklist.md",
+   "path": "~/Shared/Launch/2026-Q2/"
+  },
+  {
+   "in": "~/Projects/route-planner/CLAUDE.md",
+   "path": "~/Projects/route-planner/specs/old/"
+  }
+ ],
+ "missing_count": 3,
+ "shadowed": [
+  {
+   "file": "~/Projects/warehouse-cleanup/AGENTS.md",
+   "because": "~/Projects/CLAUDE.md"
+  }
+ ],
+ "memory": {
+  "notes": 52,
+  "folders": 5,
+  "kinds": {
+   "feedback": 27,
+   "project": 15,
+   "reference": 6,
+   "user": 4
+  },
+  "stale_90": 9,
+  "by_folder": [
+   {
+    "folder": "route-planner",
+    "id": "-Users-pm-Projects-route-planner",
+    "notes": 18,
+    "corrections": 11,
+    "oldest_days": 40,
+    "stale_90": 0,
+    "newest": "2026-10-15",
+    "stale_names": [],
+    "last_loaded": "2026-10-15T10:12"
+   },
+   {
+    "folder": "triage-bot",
+    "id": "-Users-pm-Projects-triage-bot",
+    "notes": 12,
+    "corrections": 7,
+    "oldest_days": 40,
+    "stale_90": 0,
+    "newest": "2026-10-14",
+    "stale_names": [],
+    "last_loaded": "2026-10-14T10:12"
+   },
+   {
+    "folder": "customer-interviews",
+    "id": "-Users-pm-Projects-customer-interviews",
+    "notes": 9,
+    "corrections": 3,
+    "oldest_days": 120,
+    "stale_90": 9,
+    "newest": "2026-07-08",
+    "stale_names": [
+     "customer-interviews-note-0",
+     "customer-interviews-note-1",
+     "customer-interviews-note-2",
+     "customer-interviews-note-3",
+     "customer-interviews-note-4",
+     "customer-interviews-note-5",
+     "customer-interviews-note-6",
+     "customer-interviews-note-7",
+     "customer-interviews-note-8"
+    ],
+    "last_loaded": null
+   },
+   {
+    "folder": "Projects",
+    "id": "-Users-pm-Projects",
+    "notes": 7,
+    "corrections": 2,
+    "oldest_days": 40,
+    "stale_90": 0,
+    "newest": "2026-10-07",
+    "stale_names": [],
+    "last_loaded": "2026-10-07T10:12"
+   },
+   {
+    "folder": "pricing-review",
+    "id": "-Users-pm-Projects-pricing-review",
+    "notes": 6,
+    "corrections": 4,
+    "oldest_days": 40,
+    "stale_90": 0,
+    "newest": "2026-10-10",
+    "stale_names": [],
+    "last_loaded": "2026-10-10T10:12"
+   }
+  ]
+ },
+ "reviewed": {
+  "read": "2026-10-16",
+  "by": "Claude, reading made-up files",
+  "items": [
+   {
+    "id": "notes-format",
+    "title": "Two ways of writing release notes are in use",
+    "line": "Your instructions ask for release notes in the changelog file; the release-notes subagent writes them as a separate page. Both are in use across 3 projects.",
+    "files": [
+     "~/.claude/CLAUDE.md",
+     "~/Projects/route-planner/CLAUDE.md"
+    ],
+    "fix": "Pick one place and say it once, in your instructions for every chat."
+   },
+   {
+    "id": "old-dashboard",
+    "title": "A retired dashboard is still named in 4 places",
+    "line": "Your instructions say the old metrics dashboard was retired in August, but 4 files still send Claude to it.",
+    "files": [
+     "~/.claude/CLAUDE.md"
+    ],
+    "fix": "Point those files at the new warehouse dashboard."
+   }
+  ],
+  "changes": {
+   "memory-switch": [
+    {
+     "file": "~/.claude/CLAUDE.md",
+     "label": "Your main rule file",
+     "old": "Start in ~/Projects and switch into the project you name.",
+     "new": "Open a project's chats in its own folder; notes only load from the folder a chat starts in.",
+     "plain": "After this, Claude suggests opening each project's chats in its own folder, so its notes load."
+    }
+   ]
+  }
+ }
+}

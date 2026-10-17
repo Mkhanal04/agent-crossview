@@ -1,0 +1,31 @@
+{
+ "read": "2026-10-16T20:13",
+ "shell_keys": [],
+ "services": [
+  {
+   "service": "Claude API",
+   "project": "triage-bot",
+   "signs": [
+    "its key is named in a settings file (ANTHROPIC_API_KEY)",
+    "uses its code library (@anthropic-ai/sdk)"
+   ],
+   "where_to_look": "the Claude Console, the site for Claude API bills, under Usage for the month"
+  },
+  {
+   "service": "OpenAI API",
+   "project": "warehouse-cleanup",
+   "signs": [
+    "its key is named in a settings file (OPENAI_API_KEY)"
+   ],
+   "where_to_look": "OpenAI platform, under Usage, then pick the month"
+  },
+  {
+   "service": "Google Maps Platform",
+   "project": "route-planner",
+   "signs": [
+    "named in an example settings file (GOOGLE_MAPS_API_KEY)"
+   ],
+   "where_to_look": "Google Cloud Billing: Reports"
+  }
+ ]
+}

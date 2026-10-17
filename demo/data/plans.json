@@ -1,0 +1,23 @@
+{
+ "note": "Made-up plans for the demo company.",
+ "plans": [
+  {
+   "name": "Claude Max",
+   "covers": [
+    "Claude Code",
+    "Cowork",
+    "Claude app"
+   ],
+   "monthly_usd": 100,
+   "since": null
+  },
+  {
+   "name": "ChatGPT Plus (for Codex)",
+   "covers": [
+    "Codex"
+   ],
+   "monthly_usd": 20,
+   "since": null
+  }
+ ]
+}

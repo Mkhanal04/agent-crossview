@@ -1,0 +1,551 @@
+{
+ "by_session": {
+  "fabab4d9-ed87-1eac-a8d6-2a63c301b8c3": {
+   "2026-10-13": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 6,
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 39,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 11
+   }
+  },
+  "local_da7e1f74-9a3e-ccd3-4c3d-0d47927bf96f": {
+   "2026-10-13": {
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 14,
+    "16090082-bf3b-0803-f060-56a7b9064367": 13
+   }
+  },
+  "adf608cc-f2e0-3bfd-1c8b-78bf3e38a666": {
+   "2026-10-12": {
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 42
+   }
+  },
+  "0fbda4bb-7f1f-f68b-2b39-898819b513c0": {
+   "2026-10-13": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 10,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 23
+   }
+  },
+  "6c79e2e2-c4fd-468c-6c53-248bf68851ea": {
+   "2026-10-09": {
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 26,
+    "16090082-bf3b-0803-f060-56a7b9064367": 12
+   }
+  },
+  "local_2f82afe8-b6ac-d37e-8d1c-8a29789681e1": {
+   "2026-10-09": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 32,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 21
+   }
+  },
+  "4cd7e20a-19a7-7a8c-de98-2dadae64ddaf": {
+   "2026-10-08": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 14,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 19
+   }
+  },
+  "8c933e51-0515-ee8d-66e0-407e27e6a032": {
+   "2026-10-06": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 5,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 17,
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 12
+   }
+  },
+  "36e16ca7-9eda-0b6b-aa2b-00758f55c928": {
+   "2026-10-05": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 12,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 12,
+    "16090082-bf3b-0803-f060-56a7b9064367": 8
+   }
+  },
+  "c6a3e1bf-5788-5ae8-30d2-6358962a0b5e": {
+   "2026-10-02": {
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 14,
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 8
+   }
+  },
+  "234404c7-e418-fd5c-d46c-9f5385c95531": {
+   "2026-09-29": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 21,
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 3
+   }
+  },
+  "local_0244e961-f510-8d44-89d1-013279e64264": {
+   "2026-09-30": {
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 29,
+    "16090082-bf3b-0803-f060-56a7b9064367": 8
+   }
+  },
+  "local_7f3de2db-7b1c-acc6-80ea-ded4a72d0d98": {
+   "2026-09-22": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 14,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 11
+   }
+  },
+  "d1b8b7ab-ab3b-d91b-0b63-b0273e341fd3": {
+   "2026-09-24": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 17,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 17
+   }
+  },
+  "35715400-fd54-31d2-3f1d-399769097e6e": {
+   "2026-09-23": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 2,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 17
+   }
+  },
+  "local_07b1f1ab-ca77-166b-faa1-07bf8da3c482": {
+   "2026-09-14": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 3,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 11
+   }
+  },
+  "local_faa939e3-a7d4-6626-8349-30356d6aef6f": {
+   "2026-09-14": {
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 4
+   }
+  },
+  "3a8f6809-f9b0-d539-b360-884d52d53d64": {
+   "2026-09-14": {
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 23,
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 4
+   }
+  },
+  "17f78552-7591-ac48-fdc7-1f0223e4856a": {
+   "2026-09-07": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 3,
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 9
+   }
+  },
+  "71109b80-e08b-ab7e-cd0f-fd73b411d658": {
+   "2026-09-10": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 31,
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 13,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 9
+   }
+  },
+  "0e31dc72-7346-b38f-0526-64c459048a06": {
+   "2026-09-11": {
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 18,
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 15,
+    "16090082-bf3b-0803-f060-56a7b9064367": 20
+   }
+  },
+  "local_65a3f81d-bbe4-b23f-4f4c-c92abe121913": {
+   "2026-09-05": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 20
+   }
+  },
+  "local_3992c035-11be-922b-46ea-9bc15425d49a": {
+   "2026-09-02": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 29,
+    "b34e86dc-56eb-8283-332e-32f3ee67f9c6": 11
+   }
+  },
+  "1e50ce80-2900-c66a-64ee-fd7c9203ab07": {
+   "2026-09-04": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 15,
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 15
+   }
+  },
+  "local_f4446f70-82ab-dc5a-00bd-59890ea1f8a1": {
+   "2026-10-13": {
+    "b7e32d8d-ff7e-61a9-26f3-e94cf28a40d5": 15,
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 18,
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 7
+   }
+  },
+  "local_a3511aee-0961-ba21-d477-f45d96a10cb7": {
+   "2026-10-10": {
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 13,
+    "b7e32d8d-ff7e-61a9-26f3-e94cf28a40d5": 3
+   }
+  },
+  "local_2a1dae5f-d2c9-2dde-7694-e043723c1022": {
+   "2026-10-05": {
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 12
+   }
+  },
+  "local_c15f79e6-4781-db95-fb43-66dac531e8c5": {
+   "2026-10-02": {
+    "b7e32d8d-ff7e-61a9-26f3-e94cf28a40d5": 7,
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 20
+   }
+  },
+  "local_dde96d6a-e147-d040-3b71-f0e928baa0c3": {
+   "2026-09-23": {
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 26,
+    "b7e32d8d-ff7e-61a9-26f3-e94cf28a40d5": 14
+   }
+  },
+  "401f3034-cfec-965a-3dbb-4b4d725b7498": {
+   "2026-10-08": {
+    "b7ed2115-0e81-8b4a-a45e-edb1f18c0374": 11
+   }
+  },
+  "dac3232e-77af-6f17-7251-4bb35eb984cb": {
+   "2026-10-05": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 2,
+    "b7ed2115-0e81-8b4a-a45e-edb1f18c0374": 11
+   }
+  },
+  "3244e051-57e2-931b-9f57-a1b2470b127b": {
+   "2026-09-28": {
+    "b7ed2115-0e81-8b4a-a45e-edb1f18c0374": 28
+   }
+  },
+  "e35331fc-da58-f5e8-75c9-baa770669d57": {
+   "2026-09-28": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 10
+   }
+  },
+  "df72fb8e-a969-9001-4535-9d79f7061877": {
+   "2026-09-23": {
+    "b7ed2115-0e81-8b4a-a45e-edb1f18c0374": 16
+   }
+  },
+  "b0d49447-c164-085a-61b6-88e6f032c1e1": {
+   "2026-09-17": {
+    "b7ed2115-0e81-8b4a-a45e-edb1f18c0374": 3,
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 9
+   }
+  },
+  "184ca126-4f81-7d2a-f389-8cc84eb6a252": {
+   "2026-09-09": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 8,
+    "b7ed2115-0e81-8b4a-a45e-edb1f18c0374": 6
+   }
+  },
+  "local_132a5c93-4bd1-5354-87ec-f8cb26782f08": {
+   "2026-10-15": {
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 17,
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 2
+   }
+  },
+  "25d52ceb-47be-29d1-955e-69601f651cee": {
+   "2026-10-05": {
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 11
+   }
+  },
+  "4d2d7836-01e6-2eaf-4bbb-651d72541224": {
+   "2026-09-29": {
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 7,
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 8
+   }
+  },
+  "local_6380ff93-1cd8-bbf6-f952-a66571dd8558": {
+   "2026-10-03": {
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 18
+   }
+  },
+  "2407640f-4510-a664-cbfa-de83dbe7c74f": {
+   "2026-09-14": {
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 18
+   }
+  },
+  "local_cfb28fcf-787d-2754-a3e4-f62276e61e65": {
+   "2026-09-14": {
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 3,
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 3
+   }
+  },
+  "0cfc456d-4843-8621-a2a5-9355413a3dc2": {
+   "2026-09-07": {
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 2,
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 17
+   }
+  },
+  "f6334ebb-4fa2-654e-c4e0-14927d8155a4": {
+   "2026-09-04": {
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 26
+   }
+  },
+  "local_455acb5d-196a-76fd-0c11-7929ead81663": {
+   "2026-08-19": {
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 30
+   }
+  },
+  "local_971bbe96-8a8f-fac9-8a83-e0ac85e32657": {
+   "2026-10-16": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 16
+   }
+  },
+  "local_c3f526a5-bca4-bb62-9e63-6db35a996032": {
+   "2026-10-09": {
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 11
+   }
+  },
+  "local_3b31c7d7-f6d4-0c44-6ca6-9186efbb8456": {
+   "2026-10-02": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 14
+   }
+  },
+  "local_43235526-89d5-485a-d016-f52e29d9df49": {
+   "2026-09-25": {
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 6
+   }
+  },
+  "local_7611f43d-3280-c0eb-2365-254577f56915": {
+   "2026-09-18": {
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 17
+   }
+  },
+  "local_64700d37-ddb0-8798-8576-113023468336": {
+   "2026-09-11": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 7
+   }
+  },
+  "local_1333452f-7fee-b7f8-6fa0-1de6079d0313": {
+   "2026-09-04": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 10,
+    "1045d997-ae39-7eb5-26b3-06e73be5a5d6": 6
+   }
+  },
+  "local_2fbcd98d-c1c5-83b5-d312-086c75d651c7": {
+   "2026-08-28": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 13
+   }
+  },
+  "local_dfc50780-4057-0e37-1596-772bfba0c051": {
+   "2026-08-21": {
+    "7ce592b7-fc34-a11b-0775-dca51822b09c": 11
+   }
+  },
+  "local_20c44ee3-18a5-252f-732a-781dc7855596": {
+   "2026-08-14": {
+    "16090082-bf3b-0803-f060-56a7b9064367": 17
+   }
+  },
+  "local_0296942b-2883-6bf8-1e58-c4ce027fb57d": {
+   "2026-09-17": {
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 24
+   }
+  },
+  "local_387d5938-5c9c-5d8a-df44-1457bcba959a": {
+   "2026-09-16": {
+    "b7e32d8d-ff7e-61a9-26f3-e94cf28a40d5": 33,
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 5
+   }
+  },
+  "local_11ac059d-e18f-6b0b-3a23-6f7397181893": {
+   "2026-09-10": {
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 6
+   }
+  },
+  "local_b06a9713-8cfa-f934-310d-ee64ab313778": {
+   "2026-09-11": {
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 20
+   }
+  },
+  "local_6523869b-bb89-b489-3318-91d5ead2cd5a": {
+   "2026-09-01": {
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 9
+   }
+  },
+  "local_82b9a21f-0dba-47af-aa93-1c7ebfa3ffab": {
+   "2026-09-01": {
+    "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": 22
+   }
+  },
+  "c3d171b8-fdc5-1729-320a-8d8542a79f5c": {
+   "2026-10-16": {
+    "b7e32d8d-ff7e-61a9-26f3-e94cf28a40d5": 25
+   }
+  },
+  "9ac3ed1d-6731-1b6e-235f-49764e1d8bb5": {
+   "2026-10-09": {
+    "b7ed2115-0e81-8b4a-a45e-edb1f18c0374": 8,
+    "claude-in-chrome": 11
+   }
+  },
+  "042d2f18-cd3a-30b4-b119-06d171d7a37a": {
+   "2026-10-01": {
+    "b7ed2115-0e81-8b4a-a45e-edb1f18c0374": 12,
+    "claude-in-chrome": 17
+   }
+  },
+  "bfd2ebdd-c3e0-ce47-af88-7f27c50f7649": {
+   "2026-09-23": {
+    "claude-in-chrome": 19
+   }
+  },
+  "edd77626-ceec-589d-8ea6-3d2cc6c939d4": {
+   "2026-10-16": {
+    "ccd_session": 6
+   }
+  },
+  "eb29b91a-97cc-c274-d596-e61fed1de992": {
+   "2026-10-02": {
+    "ccd_session": 30
+   }
+  },
+  "eed3c16a-289b-6596-a3f0-d97d312e4a10": {
+   "2026-08-17": {
+    "ccd_session": 17
+   }
+  },
+  "ea56207d-941f-5684-4f1c-33b279e07766": {
+   "2026-08-13": {
+    "ccd_session": 6
+   }
+  },
+  "local_145e132f-e997-092f-f4b8-232d0e308fc2": {
+   "2026-10-13": {
+    "claude-in-chrome": 3
+   }
+  },
+  "local_161ed76d-60a6-1229-ebc7-1d54debf0deb": {
+   "2026-10-08": {
+    "claude-in-chrome": 8
+   }
+  },
+  "8f48c8df-1b4c-8adf-d253-1e83e81f84af": {
+   "2026-09-22": {
+    "claude-in-chrome": 28
+   }
+  },
+  "ba56661a-f387-dd38-7a4a-3a78ced965c7": {
+   "2026-09-03": {
+    "claude-in-chrome": 7
+   }
+  },
+  "f216123b-7030-392d-232b-db7466e553f8": {
+   "2026-08-25": {
+    "claude-in-chrome": 2
+   }
+  },
+  "local_e0656282-bdfc-1c78-bce9-e485acb96932": {
+   "2026-08-17": {
+    "claude-in-chrome": 2
+   }
+  },
+  "a3c488e2-e1f0-ab4f-b74f-8b83b2436b0c": {
+   "2026-08-13": {
+    "claude-in-chrome": 3
+   }
+  }
+ },
+ "tools": {
+  "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": {
+   "read_file_content": 105,
+   "search_files": 88,
+   "trash_file": 18,
+   "update_file": 14,
+   "create_file": 8
+  },
+  "7ce592b7-fc34-a11b-0775-dca51822b09c": {
+   "get_message": 55,
+   "search_threads": 70,
+   "create_draft": 12,
+   "send_message": 13
+  },
+  "16090082-bf3b-0803-f060-56a7b9064367": {
+   "post_message": 35,
+   "search_messages": 120,
+   "read_channel": 110
+  },
+  "1045d997-ae39-7eb5-26b3-06e73be5a5d6": {
+   "search_issues": 107,
+   "get_issue": 116,
+   "update_issue": 27,
+   "create_issue": 16
+  },
+  "b34e86dc-56eb-8283-332e-32f3ee67f9c6": {
+   "get_design_context": 175,
+   "get_screenshot": 147,
+   "get_metadata": 27
+  },
+  "b7e32d8d-ff7e-61a9-26f3-e94cf28a40d5": {
+   "describe_table": 8,
+   "list_tables": 49,
+   "query": 40
+  },
+  "b7ed2115-0e81-8b4a-a45e-edb1f18c0374": {
+   "list_pull_requests": 40,
+   "get_file": 43,
+   "add_comment": 12
+  },
+  "claude-in-chrome": {
+   "read_page": 45,
+   "computer": 2,
+   "navigate": 42,
+   "form_input": 6,
+   "get_page_text": 5
+  },
+  "ccd_session": {
+   "list_sessions": 33,
+   "set_session_title": 26
+  }
+ },
+ "offered": {
+  "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3": [
+   "copy_file",
+   "create_file",
+   "read_file_content",
+   "search_files",
+   "share_file",
+   "trash_file",
+   "update_file"
+  ],
+  "7ce592b7-fc34-a11b-0775-dca51822b09c": [
+   "create_draft",
+   "delete_draft",
+   "forward",
+   "get_message",
+   "search_threads",
+   "send_message",
+   "trash_message"
+  ],
+  "16090082-bf3b-0803-f060-56a7b9064367": [
+   "add_reaction",
+   "delete_message",
+   "post_message",
+   "read_channel",
+   "search_messages"
+  ],
+  "1045d997-ae39-7eb5-26b3-06e73be5a5d6": [
+   "add_comment",
+   "create_issue",
+   "delete_issue",
+   "get_issue",
+   "search_issues",
+   "transition_issue",
+   "update_issue"
+  ],
+  "b34e86dc-56eb-8283-332e-32f3ee67f9c6": [
+   "add_comment",
+   "create_file",
+   "get_design_context",
+   "get_metadata",
+   "get_screenshot"
+  ],
+  "b7e32d8d-ff7e-61a9-26f3-e94cf28a40d5": [
+   "describe_table",
+   "execute_statement",
+   "list_tables",
+   "query"
+  ],
+  "b7ed2115-0e81-8b4a-a45e-edb1f18c0374": [
+   "add_comment",
+   "create_issue",
+   "delete_branch",
+   "get_file",
+   "list_pull_requests",
+   "merge_pull_request"
+  ],
+  "claude-in-chrome": [
+   "computer",
+   "file_upload",
+   "form_input",
+   "get_page_text",
+   "javascript_tool",
+   "navigate",
+   "read_page",
+   "tabs_close"
+  ],
+  "ccd_session": [
+   "archive_session",
+   "delete_session",
+   "list_sessions",
+   "set_session_title"
+  ]
+ }
+}

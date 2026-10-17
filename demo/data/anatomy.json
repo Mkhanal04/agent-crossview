@@ -1,0 +1,177 @@
+{
+ "Claude Code": {
+  "folder": {
+   "where": "a hidden folder in your home folder (.claude)",
+   "session_logs": 47,
+   "helper_logs": 56,
+   "project_folders": 9,
+   "mb": 840,
+   "first": "2026-08-10",
+   "last": "2026-10-16",
+   "parts": [
+    [
+     "Session logs",
+     "47 chats"
+    ],
+    [
+     "Your main rule file",
+     "one file, read in every chat"
+    ],
+    [
+     "Subagents you made",
+     "6 files"
+    ],
+    [
+     "Skills you made",
+     "5 folders"
+    ],
+    [
+     "Add-ons (plugins)",
+     "installed by your company's admin"
+    ],
+    [
+     "Automatic checks",
+     "1 script"
+    ],
+    [
+     "Its notes (memory)",
+     "41 notes in 6 project folders"
+    ]
+   ]
+  },
+  "settings": {
+   "items": [
+    [
+     "Reply style",
+     "default"
+    ],
+    [
+     "Rules for what it may do without asking",
+     "your company's managed rules, plus 3 of yours"
+    ],
+    [
+     "Model",
+     "Opus 5.5"
+    ],
+    [
+     "Extra add-on catalogs",
+     "1, from your company"
+    ]
+   ]
+  },
+  "checks": {
+   "items": [
+    {
+     "when": "when a chat starts",
+     "name": "load-team-context.sh",
+     "says": "Loading team context"
+    }
+   ]
+  },
+  "memory": {
+   "notes": 41,
+   "folders": 6,
+   "styles": [
+    "default"
+   ]
+  }
+ },
+ "Cowork": {
+  "folder": {
+   "where": "inside the Claude app's own folder (Application Support)",
+   "session_logs": 38,
+   "mb": 310,
+   "first": "2026-08-10",
+   "last": "2026-10-16",
+   "parts": [
+    [
+     "Task folders",
+     "38 kept on this Mac"
+    ],
+    [
+     "Task logs",
+     "one per task"
+    ],
+    [
+     "Usage record",
+     "your 5-hour and weekly limit readings"
+    ]
+   ]
+  },
+  "settings": {
+   "items": [
+    [
+     "Connectors set up in the Claude app",
+     "8"
+    ],
+    [
+     "App extensions",
+     "1"
+    ]
+   ]
+  },
+  "checks": {
+   "items": []
+  }
+ },
+ "Codex": {
+  "folder": {
+   "where": "a hidden folder in your home folder (.codex)",
+   "session_logs": 14,
+   "mb": 120,
+   "first": "2026-08-10",
+   "last": "2026-10-16",
+   "parts": [
+    [
+     "Session logs",
+     "14 chats"
+    ],
+    [
+     "Settings file",
+     "one, read at start"
+    ],
+    [
+     "Its own memory",
+     "a small database"
+    ]
+   ]
+  },
+  "settings": {
+   "items": [
+    [
+     "Model",
+     "gpt-6.1-sol"
+    ],
+    [
+     "Thinking effort",
+     "medium"
+    ],
+    [
+     "Approval rule",
+     "ask before changes"
+    ],
+    [
+     "Sandbox",
+     "this project's folder only"
+    ]
+   ]
+  },
+  "checks": {
+   "items": []
+  },
+  "instructions": {
+   "files": 1
+  },
+  "skills": [],
+  "plugins": [
+   "browser",
+   "documents",
+   "spreadsheets",
+   "code-review"
+  ],
+  "connectors": [
+   "node_repl"
+  ]
+ },
+ "read": "2026-10-16T20:13"
+}

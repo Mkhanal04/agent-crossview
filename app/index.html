@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Crossview</title>
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tab-work.css">
+<link rel="stylesheet" href="tab-shapes.css">
+<link rel="stylesheet" href="tab-week.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 rx=%278%27 fill=%27%2315171B%27/%3E%3Crect x=%2710%27 y=%2710%27 width=%2712%27 height=%2712%27 rx=%273%27 fill=%27%23fff%27/%3E%3C/svg%3E">
+</head>
+<body>
+<header class="bar" id="bar"></header>
+<main class="layout">
+  <section class="stage" id="stage" aria-label="Main view"></section>
+  <aside class="side" id="side" aria-label="Worth a look and details"></aside>
+</main>
+<footer class="foot" id="foot"></footer>
+<div class="tip" id="tip" role="tooltip"></div>
+<script>
+/* Which numbers to show. Your own (data.js and progress.js, made on this Mac and never committed), or the demo
+   company with ?demo (demo-data.js, all made up). If your own aren't here, as in a fresh copy of the project,
+   the demo loads instead. Nothing is fetched from anywhere else. */
+(function () {
+  var demo = /[?&]demo(=1)?(&|$)/.test(location.search);
+  document.write(demo ? '<script src="demo-data.js"><\/script>' : '<script src="data.js"><\/script><script src="progress.js"><\/script>');
+})();
+</script>
+<script>if (!window.GB) document.write('<script src="demo-data.js"><\/script>');</script>
+<script src="stage.js"></script>
+<script src="work.js"></script>
+<script src="answers.js"></script>
+<script src="history.js"></script>
+<script src="week.js"></script>
+<script src="anatomy.js"></script>
+<script src="shapes.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+{
+ "written_by": "Claude, for the demo company",
+ "notes": [
+  {
+   "id": "note-helper-models",
+   "title": "Most of your subagents run on the top model",
+   "because": [
+    {
+     "text": "{helper_top_share}% of the {helper_replies} steps your subagents took {period} ran on Opus, the most capable and most expensive model",
+     "kind": "measured",
+     "go": "screen:armory"
+    },
+    {
+     "text": "three of your six subagent files name no model, so they inherit the main chat's",
+     "kind": "measured",
+     "go": "screen:armory"
+    }
+   ],
+   "cant": "Whether a cheaper model would do the same work as well. Only running the same task on both can show that.",
+   "could": "Pick one routine subagent, such as the spec writer, and try it on a smaller model for the same task before keeping the change.",
+   "preview": {
+    "text": "Effect not measured yet.",
+    "kind": "unknown"
+   },
+   "target": "screen:armory"
+  },
+  {
+   "id": "note-long-sessions",
+   "title": "Long chats cost the most, not the answers",
+   "because": [
+    {
+     "text": "{carry_usd_share}% of the pay-per-use price {period} went to carrying the conversation (re-reading it {reread_usd_share}%, storing it to re-read {store_usd_share}%); writing answers was {answers_usd_share}%",
+     "kind": "estimate",
+     "go": "screen:mission"
+    }
+   ],
+   "cant": "Which parts of a long chat were actually needed.",
+   "could": "Start a fresh chat when you switch tasks; a short summary carries over what matters.",
+   "preview": {
+    "text": "Effect not measured yet.",
+    "kind": "unknown"
+   },
+   "target": "screen:mission"
+  },
+  {
+   "id": "note-unused-skills",
+   "title": "{skills_unused} of your {skills_total} skills have never been used",
+   "because": [
+    {
+     "text": "{skills_unused_account} of them came from your Claude account",
+     "kind": "measured",
+     "go": "screen:armory"
+    }
+   ],
+   "cant": "Whether a skill was followed by reading its file directly.",
+   "could": "Ask your admin which account add-ons your team needs; unused ones still sit in the list every chat reads.",
+   "preview": {
+    "text": "Effect not measured yet.",
+    "kind": "unknown"
+   },
+   "target": "screen:armory"
+  }
+ ],
+ "flags": []
+}
