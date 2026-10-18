@@ -32,7 +32,8 @@ pp = os.path.join(ROOT, "data", "private-patterns.json")
 PRIV = json.load(open(pp)) if os.path.exists(pp) else {}
 def label(folder):
     """The project a folder belongs to, as the app shows it; day-job and personal folders never show their names."""
-    rel = os.path.relpath(folder, CP)
+    try: rel = os.path.relpath(folder, CP)
+    except ValueError: return os.path.basename(folder.rstrip("/\\"))  # Windows: a folder on another drive
     for kind, pats in PRIV.items():
         for pat in (pats if isinstance(pats, list) else [pats]):
             try:

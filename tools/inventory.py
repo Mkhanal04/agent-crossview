@@ -4,8 +4,10 @@ from Claude Code logs. Reads names, descriptions and counters only. Usage: pytho
 import json, glob, os, re, sys, collections
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from roots import find, label, settings
-H = os.path.expanduser("~"); CP = H + "/Desktop/Claude_Projects"
-AS = H + "/Library/Application Support/Claude/local-agent-mode-sessions"
+from paths import HOME as H, claude_dir, claude_logs, cowork_dir, files
+CP = H + "/Desktop/Claude_Projects"
+AS = cowork_dir()
+CD = claude_dir()
 
 def front(path, field=None):
     name = desc = None
@@ -33,19 +35,19 @@ def add_agent(path, where, plugin=None):
     n, d = front(path); n = n or os.path.basename(path)[:-3]
     agents.append({"name": n, "where": where, "plugin": plugin, "path": path, "what": (d or "")[:220], "model": front(path, "model")})
 
-for p in glob.glob(H + "/.claude/skills/*/SKILL.md"): add_skill(p, "yours (every project)")
-for root in glob.glob(AS + "/skills-plugin/*/*"):
-    for p in glob.glob(root + "/skills/*/SKILL.md"): add_skill(p, "your Claude account (synced)", plugin_name(root) or "anthropic-skills")
-for root in glob.glob(AS + "/*/*/rpm/plugin_*"):
+for p in files(CD + "/skills/*/SKILL.md"): add_skill(p, "yours (every project)")
+for root in files(AS + "/skills-plugin/*/*"):
+    for p in files(root + "/skills/*/SKILL.md"): add_skill(p, "your Claude account (synced)", plugin_name(root) or "anthropic-skills")
+for root in files(AS + "/*/*/rpm/plugin_*"):
     pn = plugin_name(root)
-    for p in glob.glob(root + "/skills/*/SKILL.md"): add_skill(p, "account plugin", pn)
-    for p in glob.glob(root + "/agents/*.md"): add_agent(p, "account plugin", pn)
+    for p in files(root + "/skills/*/SKILL.md"): add_skill(p, "account plugin", pn)
+    for p in files(root + "/agents/*.md"): add_agent(p, "account plugin", pn)
 for p in find(".claude/skills/*/SKILL.md"):  # in the folders your chats ran in (tools/roots.py)
-    if p.startswith(H + "/.claude/"): continue
+    if p.startswith(CD + "/"): continue
     add_skill(p, "one project only: " + label(p).split("/.claude/")[0])
-for p in glob.glob(H + "/.claude/agents/*.md"): add_agent(p, "yours (every project)")
+for p in files(CD + "/agents/*.md"): add_agent(p, "yours (every project)")
 for p in find(".claude/agents/*.md"):
-    if p.startswith(H + "/.claude/"): continue
+    if p.startswith(CD + "/"): continue
     add_agent(p, "one project only: " + label(p).split("/.claude/")[0])
 BUILTIN_SKILLS = ["dataviz", "artifact-design", "artifact-diagramming", "artifact-capabilities", "update-config", "keybindings-help", "code-review", "simplify", "fewer-permission-prompts", "loop", "schedule", "claude-api", "workflow-authoring", "run", "plugin-authoring", "init", "security-review"]
 for n in BUILTIN_SKILLS:
@@ -56,8 +58,8 @@ for n, d in BUILTIN_AGENTS.items(): agents.append({"name": n, "where": "built in
 
 # instruction files
 instr = []
-for p in [H + "/.claude/CLAUDE.md"] + find("CLAUDE.md") + find("AGENTS.md"):
-    if not os.path.isfile(p) or p.startswith(H + "/.claude/") and p != H + "/.claude/CLAUDE.md": continue
+for p in [CD + "/CLAUDE.md"] + find("CLAUDE.md") + find("AGENTS.md"):
+    if not os.path.isfile(p) or p.startswith(CD + "/") and p != CD + "/CLAUDE.md": continue
     try: st = os.stat(p); instr.append({"path": p.replace(H, "~"), "words": len(open(p, errors="ignore").read().split()), "modified": __import__("datetime").date.fromtimestamp(st.st_mtime).isoformat()})
     except OSError: continue  # a folder this Mac doesn't let Glass Box read (for example Documents without permission)
 
@@ -68,7 +70,7 @@ mcp = collections.Counter(); mcp_tools = collections.defaultdict(set)
 # counted per chat, so chats whose logs Claude Code has since deleted (about 30 days after last use) still count:
 # data/use-by-session.json keeps every chat's counts, and chats no longer on disk are added back from it
 per = collections.defaultdict(lambda: {"skills": collections.defaultdict(lambda: [0, "", []]), "agents": collections.defaultdict(lambda: [0, "", []]), "mcp": collections.Counter(), "mcp_tools": collections.defaultdict(set)})
-for f in glob.glob(H + "/.claude/projects/*/*.jsonl") + glob.glob(H + "/.claude/projects/*/*/subagents/*.jsonl"):
+for f in claude_logs() + claude_logs(helpers=True):
     proj = os.path.basename(f.split("/projects/")[1].split("/")[0]).replace(re.sub(r"[/_. ]", "-", CP), "CP").replace("-", "/")[:40]
     sid = os.path.basename(f)[:-6] if "/subagents/" not in f else f.split("/subagents/")[0].rsplit("/", 1)[1]
     P = per[sid]

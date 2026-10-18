@@ -3,11 +3,11 @@
 Reads titles and counters only, never prompt or reply text. Usage: python3 sessions.py out.json"""
 import json, glob, os, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from paths import codex_logs, log_lines
-H = os.path.expanduser("~")
+from paths import codex_logs, log_lines, claude_logs, cowork_dir, codex_dir, files, slash
+
 rows = []
 # Claude Code
-for f in glob.glob(H + "/.claude/projects/*/*.jsonl"):
+for f in claude_logs():
     sid = os.path.basename(f)[:-6]; title = None; first = last = None; cwd = None; cost = None
     for line in open(f, errors="ignore"):
         try: d = json.loads(line)
@@ -20,16 +20,16 @@ for f in glob.glob(H + "/.claude/projects/*/*.jsonl"):
         if d.get("type") == "cost-state":
             c = d.get("totalCostUSD") or 0
             if cost is None or c >= cost: cost = c
-    subs = len(glob.glob(f[:-6] + "/subagents/*.jsonl"))
-    rows.append({"tool": "Claude Code", "id": sid, "start": first, "end": last, "title": title, "folder": cwd, "list_price_usd": cost, "helpers": subs})
+    subs = len(files(f[:-6] + "/subagents/*.jsonl"))
+    rows.append({"tool": "Claude Code", "id": sid, "start": first, "end": last, "title": title, "folder": slash(cwd), "list_price_usd": cost, "helpers": subs})
 # Cowork
-for f in glob.glob(H + "/Library/Application Support/Claude/local-agent-mode-sessions/**/local_*.json", recursive=True):
+for f in files(cowork_dir() + "/**/local_*.json"):
     try: d = json.load(open(f))
     except Exception: continue
-    rows.append({"tool": "Cowork", "id": d.get("sessionId"), "start": d.get("createdAt"), "end": d.get("lastActivityAt"), "title": d.get("title") or d.get("name"), "folder": d.get("cwd"), "model": d.get("model"), "list_price_usd": None, "helpers": None})
+    rows.append({"tool": "Cowork", "id": d.get("sessionId"), "start": d.get("createdAt"), "end": d.get("lastActivityAt"), "title": d.get("title") or d.get("name"), "folder": slash(d.get("cwd")), "model": d.get("model"), "list_price_usd": None, "helpers": None})
 # Codex
 names = {}
-idx = H + "/.codex/session_index.jsonl"
+idx = codex_dir() + "/session_index.jsonl"
 if os.path.exists(idx):
     for line in open(idx):
         try: d = json.loads(line); names[d["id"]] = d.get("thread_name")
@@ -44,7 +44,7 @@ for f in codex_logs():
         p = d.get("payload") if isinstance(d.get("payload"), dict) else {}
         if d.get("type") == "session_meta": sid = p.get("id"); cwd = cwd or p.get("cwd")
         if d.get("type") == "turn_context" and not cwd: cwd = p.get("cwd")
-    rows.append({"tool": "Codex", "id": sid, "start": first, "end": last, "title": names.get(sid), "folder": cwd, "list_price_usd": None, "helpers": None})
+    rows.append({"tool": "Codex", "id": sid, "start": first, "end": last, "title": names.get(sid), "folder": slash(cwd), "list_price_usd": None, "helpers": None})
 for r in rows:
     if isinstance(r["start"], (int, float)): r["start"] = __import__("datetime").datetime.utcfromtimestamp(r["start"] / (1000 if r["start"] > 1e12 else 1)).isoformat()
     if isinstance(r["end"], (int, float)): r["end"] = __import__("datetime").datetime.utcfromtimestamp(r["end"] / (1000 if r["end"] > 1e12 else 1)).isoformat()

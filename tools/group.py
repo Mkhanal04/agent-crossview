@@ -19,11 +19,12 @@ RULES = [(n, PRIVATE[k]) for n, k in (("Day job", "day_job"), ("Personal", "pers
 CODEX_RULES = [tuple(r) for r in WR.get("codex_folder_rules", [])]
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from roots import _top, H as HOME
+from paths import under, same
 def by_folder(f):
     """A chat's piece of work from the project folder it ran in, for anyone without their own rules."""
-    if not f or not f.startswith(HOME + "/") or "/Library/" in f: return None
+    if not f or not under(f, HOME) or "/Library/" in f or "/AppData/" in f: return None
     top = _top(f)
-    return None if top in (HOME, HOME + "/Desktop", HOME + "/Documents") else os.path.basename(top)
+    return None if any(same(top, x) for x in (HOME, HOME + "/Desktop", HOME + "/Documents")) else os.path.basename(top)
 
 def piece(r):
     o = overrides.get(r.get("id"))

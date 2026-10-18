@@ -3,6 +3,22 @@
 (function () {
   "use strict";
   const G = window.GB;
+  // On Windows (and Linux) the screens say "this computer" where they'd say "this Mac" (Oct 17): one pass over whatever
+  // is drawn, so each screen keeps its own words. On a Mac nothing here runs.
+  if (G && G.system && G.system !== "mac") {
+    const SWAP = [[/\bthis Mac's\b/g, "this computer's"], [/\bthis Mac\b/g, "this computer"], [/\bThis Mac\b/g, "This computer"], [/\byour Mac's\b/g, "your computer's"], [/\byour Mac\b/g, "your computer"], [/\bmy Mac\b/g, "my computer"],
+      [/\bthe Mac\b/g, "the computer"], [/\ba Mac\b/g, "a computer"], [/“Agent Crossview\.command”/g, "“Agent Crossview (Windows).cmd”"], [/\(Application Support\)/g, "(AppData)"]];
+    const fix = (t) => SWAP.reduce((x, [a, b]) => x.replace(a, b), t);
+    const walk = (root) => {
+      if (root.nodeType === 3) { if (/Mac|\.command|Application Support/.test(root.nodeValue)) root.nodeValue = fix(root.nodeValue); return; }
+      if (root.nodeType !== 1) return;
+      ["data-tip", "aria-label", "aria-description", "title"].forEach((k) => { const v = root.getAttribute(k); if (v && /Mac|\.command/.test(v)) root.setAttribute(k, fix(v)); });
+      root.childNodes.forEach(walk);
+    };
+    window.GBWords = () => walk(document.body);  // render() calls it once more after it sets the screen-reader notes
+    const start = () => { walk(document.body); new MutationObserver((ms) => ms.forEach((m) => m.addedNodes.forEach(walk))).observe(document.body, { childList: true, subtree: true }); };
+    document.readyState === "loading" ? document.addEventListener("DOMContentLoaded", start) : start();
+  }
   const $ = (s, el = document) => el.querySelector(s);
   const esc = (s) => String(s == null ? "" : s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const roundUsd = (v) => (v >= 1000 ? Math.round(v / 100) * 100 : Math.round(v / 10) * 10);
@@ -667,7 +683,7 @@
     $("#stage").innerHTML = S.screen === "shapes" && shp() ? shp().board() : S.screen === "note" && note() ? note().board() : S.screen === "machine" && workm() ? workm().board() : S.screen === "office" ? office() : S.screen === "armory" ? (anat() ? anat().board() : armory()) : S.screen === "progress" ? progress() : S.screen === "work" ? workView() : S.screen === "weeks" ? weeksView() : mission();
     drawer();
     $("#side").innerHTML = S.screen === "machine" || S.screen === "note" || S.screen === "armory" || S.screen === "shapes" ? "" : S.side === "detail" && S.selected ? detailView(S.selected) : S.side === "limits" ? limitsView() : S.screen === "progress" ? progressSide() : listView();
-    $("#foot").innerHTML = S.screen === "machine" || S.screen === "note" || S.screen === "armory" || S.screen === "shapes" || S.screen === "progress" ? (DEMO ? `This demo company was built ${esc(G.built)} from made-up files. Nothing here comes from anyone's real logs, and Crossview sends nothing anywhere. <a href="reads.html${DEMO ? "?demo" : ""}">How Crossview counts</a>` : `Built ${esc(G.built)} from the logs on this Mac. Crossview sends nothing anywhere. <a href="reads.html${DEMO ? "?demo" : ""}">How Crossview counts</a>${P && P.tasks.length ? ` · <button class="w-link foot-built" data-go="screen:progress">How Crossview is being built</button>` : ""}${LIVE ? "" : " This copy is read-only. Double-click the Agent Crossview file to refresh it."}`) : `<div class="legend"><span><span class="measured">12</span> counted</span><span><span class="estimate">about $40</span> estimate, rounded</span><span><span class="unknown">not recorded</span> unknown</span><span><i style="background:#38bdf8"></i>Made by you</span><span><i style="background:#34d399"></i>Came with Claude Code</span><span><i style="background:#a78bfa"></i>Only in one project</span><span><i style="background:#fbbf24"></i>The advisor</span><span>${coinSvg(3)} Pay-per-use price, estimated, with each extra coin roughly doubling it</span><span><i style="background:#f87171;border-radius:4px"></i>Worth a decision</span></div>
+    $("#foot").innerHTML = S.screen === "machine" || S.screen === "note" || S.screen === "armory" || S.screen === "shapes" || S.screen === "progress" ? (DEMO ? `This demo company was built ${esc(G.built)} from made-up files. Nothing here comes from anyone's real logs, and Crossview sends nothing anywhere. <a href="reads.html${DEMO ? "?demo" : ""}">How Crossview counts</a> · <button class="w-link foot-walk" data-walk="1">Show the first walk again</button>` : `Built ${esc(G.built)} from the logs on this Mac. Crossview sends nothing anywhere. <a href="reads.html${DEMO ? "?demo" : ""}">How Crossview counts</a> · <button class="w-link foot-walk" data-walk="1">Show the first walk again</button>${P && P.tasks.length ? ` · <button class="w-link foot-built" data-go="screen:progress">How Crossview is being built</button>` : ""}${LIVE ? "" : " This copy is read-only. Double-click the Agent Crossview file to refresh it."}`) : `<div class="legend"><span><span class="measured">12</span> counted</span><span><span class="estimate">about $40</span> estimate, rounded</span><span><span class="unknown">not recorded</span> unknown</span><span><i style="background:#38bdf8"></i>Made by you</span><span><i style="background:#34d399"></i>Came with Claude Code</span><span><i style="background:#a78bfa"></i>Only in one project</span><span><i style="background:#fbbf24"></i>The advisor</span><span>${coinSvg(3)} Pay-per-use price, estimated, with each extra coin roughly doubling it</span><span><i style="background:#f87171;border-radius:4px"></i>Worth a decision</span></div>
       Built ${esc(G.built)} from the logs on this Mac. ${LIVE ? '<button class="snooze" data-refresh="1">Refresh from the logs now</button> ' : "This copy is read-only. To refresh it or correct it, double-click the Agent Crossview file in its folder. "}Nothing leaves this Mac. ${esc(CANT)}`;
     if (S.screen === "armory") { const p2 = document.querySelector(".a-panel"); if (p2) p2.scrollTop = keepTop; S.aKey = S.atool + S.alayer; }
     reachable();
@@ -676,6 +692,7 @@
     // wires are drawn from where the boxes landed: now (reading the layout forces it), and again once fonts settle
     const wire = S.screen === "shapes" && shp() ? shp().after : S.screen === "note" && note() ? note().after : S.screen === "machine" && workm() ? workm().after : S.screen === "armory" && anat() ? anat().after : null;
     if (wire) { wire(); setTimeout(wire, 150); }
+    if (window.GBWords) window.GBWords();  // on Windows: the screen-reader notes set just above say "computer" too
     textScale(); setTimeout(textScale, 160); morePanel(); setTimeout(morePanel, 170); moreSheet(); setTimeout(moreSheet, 170);
     // every move between screens is one step in the browser's history, so Back returns to where you were (QA run 2)
     const want = addressOf();
@@ -704,7 +721,11 @@
   function moreSheet() {
     const p = document.querySelector(".q-sheet"), b = p && p.querySelector(".q-sheet-b"); if (!b) return;
     const set = () => p.classList.toggle("has-more", b.scrollHeight - b.clientHeight - b.scrollTop > 6);
-    set(); b.onscroll = set; b.addEventListener("toggle", () => requestAnimationFrame(set), true);
+    // a click inside the same sheet (a plan picked lower down) keeps its place instead of jumping to the top (QA, Oct 17)
+    const k = S.qopen || S.sopen || "sheet";
+    if (moreSheet.k === k) b.scrollTop = moreSheet.top || 0; else moreSheet.top = 0;
+    moreSheet.k = k;
+    set(); b.onscroll = () => { moreSheet.top = b.scrollTop; set(); }; b.addEventListener("toggle", () => requestAnimationFrame(set), true);
   }
   function textScale() { document.querySelectorAll("#stage svg[viewBox]").forEach((svg) => { const m = svg.getScreenCTM && svg.getScreenCTM(); if (m && m.a) svg.style.setProperty("--ik", (1 / m.a).toFixed(3)); }); }
   window.addEventListener("resize", () => requestAnimationFrame(textScale));

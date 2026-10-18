@@ -7,11 +7,11 @@ Writes data/corrections.json (private, never committed). It runs on a refresh on
 run needs --start, and after that the existing data/corrections.json is the sign that you opted in."""
 import collections, datetime, glob, json, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from paths import DATA
+from paths import DATA, HOME, claude_dir, claude_logs, files, slash
 if not os.path.exists(os.path.join(DATA, "corrections.json")) and "--start" not in sys.argv:
     print("Not switched on: nothing read. Run it once with --start to opt in."); sys.exit(0)
 
-H = os.path.expanduser("~"); CP = H + "/Desktop/Claude_Projects"
+H = HOME; CP = H + "/Desktop/Claude_Projects"
 try: PRIV = [re.compile(p) for p in json.load(open(os.path.join(DATA, "private-patterns.json"))).values()]
 except Exception: PRIV = []
 private = lambda s: any(r.search(s or "") for r in PRIV)
@@ -58,7 +58,7 @@ def week(ts):
     d = datetime.date.fromisoformat(ts[:10]); return (d - datetime.timedelta(days=d.weekday())).isoformat()
 
 chats = []
-for f in glob.glob(H + "/.claude/projects/*/*.jsonl"):
+for f in claude_logs():
     msgs, cwds, skip = [], [], False
     for line in open(f, errors="ignore"):
         if '"type":"user"' not in line: continue
@@ -116,9 +116,9 @@ def texts(paths):
         try: out.append(open(p, errors="ignore").read())
         except OSError: pass
     return out
-main_rule = texts([H + "/.claude/CLAUDE.md"])
-rule_files = texts([H + "/.claude/CLAUDE.md"] + glob.glob(CP + "/**/CLAUDE.md", recursive=True) + glob.glob(H + "/.claude/output-styles/*.md"))
-note_files = texts(glob.glob(H + "/.claude/projects/*/memory/*.md"))
+main_rule = texts([claude_dir() + "/CLAUDE.md"])
+rule_files = texts([claude_dir() + "/CLAUDE.md"] + files(CP + "/**/CLAUDE.md") + files(claude_dir() + "/output-styles/*.md"))
+note_files = texts(files(claude_dir() + "/projects/*/memory/*.md"))
 rule_text, note_text = "\n".join(rule_files), "\n".join(note_files)
 # mentions: how often the topic's words appear; files: in how many files (main rule file, all rule files, notes)
 written = {k: {"in_rules": len(r.findall(rule_text)), "in_notes": len(r.findall(note_text)),

@@ -3,12 +3,11 @@
 for all three (prices.py). Reads token counters, model names and helper-agent labels only, never prompt or reply text.
 Rows are summed by tool, session, agent, model and hour. Usage: python3 ledger.py  (writes data/ledger.json)"""
 import json, glob, os, collections, datetime
-from paths import codex_logs, log_lines
+from paths import codex_logs, log_lines, claude_logs, cowork_dir, files, session_of
 from prices import claude_cost, openai_cost, base_model, CHECKED, SOURCES, CLAUDE
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-H = os.path.expanduser("~")
-COWORK = H + "/Library/Application Support/Claude/local-agent-mode-sessions"
+COWORK = cowork_dir()
 
 rows = collections.defaultdict(lambda: {"replies": 0, "partial": 0, "fresh_in": 0, "cache_write": 0, "cache_read": 0, "out": 0, "usd": 0.0, "priced": True})
 agents = {}  # helper agent id -> who it was and what it was asked to do
@@ -58,18 +57,18 @@ def helper(path, tool, session):
 
 
 # Claude Code: main sessions, then their helper agents
-for f in glob.glob(H + "/.claude/projects/*/*.jsonl"):
+for f in claude_logs():
     read_claude_log(f, "Claude Code", os.path.basename(f)[:-6], "main")
-for f in glob.glob(H + "/.claude/projects/*/*/subagents/agent-*.jsonl"):
+for f in [f for f in claude_logs(helpers=True) if f.rsplit("/", 1)[1].startswith("agent-")]:
     sid = f.split("/subagents/")[0].rsplit("/", 1)[1]
     read_claude_log(f, "Claude Code", sid, helper(f, "Claude Code", sid))
 
 # Cowork: each task keeps a Claude Code style log inside its own folder
-for f in glob.glob(COWORK + "/**/local_*/.claude/projects/*/*.jsonl", recursive=True):
-    sid = "local_" + f.split("/local_")[1].split("/")[0]
+for f in files(COWORK + "/**/local_*/.claude/projects/*/*.jsonl"):
+    sid = session_of(f)
     read_claude_log(f, "Cowork", sid, "main")
-for f in glob.glob(COWORK + "/**/local_*/.claude/projects/*/*/subagents/agent-*.jsonl", recursive=True):
-    sid = "local_" + f.split("/local_")[1].split("/")[0]
+for f in files(COWORK + "/**/local_*/.claude/projects/*/*/subagents/agent-*.jsonl"):
+    sid = session_of(f)
     read_claude_log(f, "Cowork", sid, helper(f, "Cowork", sid))
 
 # Codex: one usage record per reply; the model comes from the turn's settings
@@ -105,7 +104,7 @@ for f in codex_logs():
 
 # What the tools recorded themselves, used to check our count and to estimate helper writing the logs dropped.
 recorded = {}  # session -> {model: {"read", "out", "usd"}}, plus a total
-for f in glob.glob(H + "/.claude/projects/*/*.jsonl"):
+for f in claude_logs():
     best = None
     for line in open(f, errors="ignore"):
         if '"cost-state"' not in line: continue
@@ -114,7 +113,7 @@ for f in glob.glob(H + "/.claude/projects/*/*.jsonl"):
         if d.get("type") == "cost-state" and (best is None or (d.get("totalCostUSD") or 0) >= (best.get("totalCostUSD") or 0)): best = d
     if best:
         recorded[os.path.basename(f)[:-6]] = ("Claude Code", {base_model(m): {"read": u.get("cacheReadInputTokens", 0), "out": u.get("outputTokens", 0), "usd": u.get("costUSD", 0)} for m, u in (best.get("modelUsage") or {}).items()})
-for f in glob.glob(COWORK + "/**/local_*/audit.jsonl", recursive=True):  # one result per turn; not running totals
+for f in files(COWORK + "/**/local_*/audit.jsonl"):  # one result per turn; not running totals
     mu = collections.defaultdict(lambda: {"read": 0, "out": 0, "usd": 0.0})
     for line in open(f, errors="ignore"):
         if '"result"' not in line: continue
@@ -123,7 +122,7 @@ for f in glob.glob(COWORK + "/**/local_*/audit.jsonl", recursive=True):  # one r
         if d.get("type") != "result": continue
         for m, u in (d.get("modelUsage") or {}).items():
             x = mu[base_model(m)]; x["read"] += u.get("cacheReadInputTokens", 0); x["out"] += u.get("outputTokens", 0); x["usd"] += u.get("costUSD", 0)
-    if mu: recorded["local_" + f.split("/local_")[1].split("/")[0]] = ("Cowork", dict(mu))
+    if mu: recorded[session_of(f)] = ("Cowork", dict(mu))
 
 ours = collections.defaultdict(lambda: {"read": 0, "out": 0, "partial": 0, "usd": 0.0})
 for k, v in rows.items():

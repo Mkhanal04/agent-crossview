@@ -6,7 +6,7 @@ Run after ledger.py, sessions.py, group.py and inventory.py. Usage: python3 tool
 import json, glob, os, re, sys, collections, datetime
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from prices import split_usd
-from paths import DATA, DEMO, codex_logs
+from paths import DATA, DEMO, codex_logs, log_lines, claude_logs, claude_json, claude_dir, claude_app_dir, files, stamp
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 H = os.path.expanduser("~")
 load = lambda n: json.load(open(os.path.join(DATA, n)))
@@ -53,7 +53,7 @@ else:
     tools_used = collections.defaultdict(collections.Counter)  # server -> tool -> n
     offered = collections.defaultdict(set)  # server -> every action it offers, from the tool lists Claude Code logs at the start of a chat
     TOOL = re.compile(r"mcp__([A-Za-z0-9_-]+?)__([A-Za-z0-9_-]+)")
-    for f in glob.glob(H + "/.claude/projects/*/*.jsonl") + glob.glob(H + "/.claude/projects/*/*/subagents/*.jsonl"):
+    for f in claude_logs() + claude_logs(helpers=True):
         sid = os.path.basename(f)[:-6] if "/subagents/" not in f else f.split("/subagents/")[0].rsplit("/", 1)[1]
         for line in open(f, errors="ignore"):
             if '"type":"attachment"' in line and "mcp__" in line:
@@ -126,12 +126,12 @@ def server_args(name):
             if k.lower() == name.lower() and isinstance(v, dict): found.append([str(a) for a in v.get("args") or []])
     if DEMO: return found
     try:
-        cj = json.load(open(H + "/.claude.json")); look(cj.get("mcpServers"))
+        cj = json.load(open(claude_json())); look(cj.get("mcpServers"))
         for proj in (cj.get("projects") or {}).values(): look(proj.get("mcpServers"))
     except Exception: pass
-    try: look(json.load(open(H + "/Library/Application Support/Claude/claude_desktop_config.json")).get("mcpServers"))
+    try: look(json.load(open(claude_app_dir() + "claude_desktop_config.json")).get("mcpServers"))
     except Exception: pass
-    for f in glob.glob(H + "/.claude/plugins/marketplaces/*/external_plugins/*/.mcp.json") + glob.glob(H + "/.claude/plugins/cache/*/*/*/.mcp.json"):
+    for f in files(claude_dir() + "/plugins/marketplaces/*/external_plugins/*/.mcp.json") + files(claude_dir() + "/plugins/cache/*/*/*/.mcp.json"):
         try: d = json.load(open(f)); look(d.get("mcpServers") or d)
         except Exception: pass
     return found
@@ -148,10 +148,10 @@ def online_setup(name):
             if any(ONLINE_KEY.search(e) for e in (v.get("env") or {})): return True
         return False
     try:
-        cj = json.load(open(H + "/.claude.json"))
+        cj = json.load(open(claude_json()))
         if look(cj.get("mcpServers")) or any(look(p.get("mcpServers")) for p in (cj.get("projects") or {}).values()): return True
     except Exception: pass
-    try: return look(json.load(open(H + "/Library/Application Support/Claude/claude_desktop_config.json")).get("mcpServers"))
+    try: return look(json.load(open(claude_app_dir() + "claude_desktop_config.json")).get("mcpServers"))
     except Exception: return False
 def reach_of(i, name):
     key = (i + " " + name).lower()
@@ -183,10 +183,10 @@ for c in inv["connectors"]:
 def add_setup(name, where):
     if any(p["name"].lower() == name.lower() or p["id"].lower() == name.lower() for p in ports.values()): return
     ports["setup:" + name] = {"id": "setup:" + name, "name": name, "group": "mac", "inferred": False, "actions": 0, "kinds": [], "did": [], "offered": 0, "from_list": False, "as_you": False, "outside": False, "set_up_only": True, "where": where}
-APP = os.path.join(DATA, "") if DEMO else H + "/Library/Application Support/Claude/"
+APP = os.path.join(DATA, "") if DEMO else claude_app_dir()
 try:
     if DEMO: raise FileNotFoundError  # the demo's setup is all in its own files
-    cj = json.load(open(H + "/.claude.json"))
+    cj = json.load(open(claude_json()))
     for n in (cj.get("mcpServers") or {}): add_setup(n, "Claude Code, every folder")
     for proj in (cj.get("projects") or {}).values():
         for n in (proj.get("mcpServers") or {}): add_setup(n, "Claude Code, one folder")
@@ -217,7 +217,7 @@ def weekly_forecast(S, ts):
     mid = (lo + hi) / 2
     last_t, last_sd = t(S[-1]), (S[-1].get("u") or {}).get("sd")
     reset = base + mid + ((last_t - base - mid) // WEEK_S) * WEEK_S  # the most recent reset before the last reading
-    loc = lambda x: datetime.datetime.fromtimestamp(x).strftime("%a %-I:%M %p").replace("AM", "am").replace("PM", "pm")  # shown at this week's dates, so daylight saving is right
+    loc = lambda x: stamp(datetime.datetime.fromtimestamp(x), "%a %-I:%M %p").replace("AM", "am").replace("PM", "pm")  # shown at this week's dates, so daylight saving is right
     out = {"weekly_reset": {"from": loc(reset - (mid - lo)), "to": loc(reset + (hi - mid)),
                             "drops": len(gaps), "last": datetime.datetime.fromtimestamp(reset).isoformat(timespec="minutes"), "next": datetime.datetime.fromtimestamp(reset + WEEK_S).isoformat(timespec="minutes")}}
     elapsed = last_t - reset
@@ -266,7 +266,7 @@ try:
     seen, rd = set(), []
     for f in codex_logs():
         if datetime.datetime.fromtimestamp(os.path.getmtime(f)) < cut: continue
-        for line in open(f, errors="ignore"):
+        for line in open(f, encoding="utf-8", errors="ignore"):  # plain logs only, as before (compressed ones: a follow-up)
             if '"rate_limits"' not in line: continue
             try: d = json.loads(line)
             except Exception: continue

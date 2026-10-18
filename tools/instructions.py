@@ -6,10 +6,10 @@ loaded" records in Claude Code's logs. Never reads your messages or Claude's rep
 Writes data/instructions.json (private, never committed)."""
 import collections, datetime, glob, json, math, os, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from paths import DATA
+from paths import DATA, HOME as H, WIN, claude_dir, claude_logs, files as fglob, folder_id, slash
 from roots import find
 
-H = os.path.expanduser("~"); CP = H + "/Desktop/Claude_Projects"
+CP = H + "/Desktop/Claude_Projects"; CD = claude_dir()
 PRIV = []
 try: PRIV = [re.compile(p) for p in json.load(open(os.path.join(DATA, "private-patterns.json"))).values()]
 except Exception: pass
@@ -43,13 +43,13 @@ def add(path, kind):
     except Exception: return
     files.append({"path": path, "kind": kind, "words": words(text), "modified": datetime.date.fromtimestamp(os.stat(path).st_mtime).isoformat(), "private": private(path), "text": text})
 
-add(H + "/.claude/CLAUDE.md", "your instructions (every chat)")
+add(CD + "/CLAUDE.md", "your instructions (every chat)")
 for p in find("CLAUDE.md") + find("CLAUDE.local.md"):  # in the folders your chats ran in (tools/roots.py)
-    if not p.startswith(H + "/.claude/"): add(p, "a folder's instructions")
+    if not p.startswith(CD + "/"): add(p, "a folder's instructions")
 for p in find("AGENTS.md"): add(p, "a folder's instructions (AGENTS.md)")
-for p in glob.glob(H + "/.claude/output-styles/*.md"): add(p, "reply style")
-for p in sorted(set(glob.glob(H + "/.claude/agents/*.md") + find(".claude/agents/*.md"))): add(p, "helper definition")
-for p in sorted(set(glob.glob(H + "/.claude/skills/*/SKILL.md") + find(".claude/skills/*/SKILL.md"))): add(p, "skill")
+for p in fglob(CD + "/output-styles/*.md"): add(p, "reply style")
+for p in sorted(set(fglob(CD + "/agents/*.md") + find(".claude/agents/*.md"))): add(p, "helper definition")
+for p in sorted(set(fglob(CD + "/skills/*/SKILL.md") + find(".claude/skills/*/SKILL.md"))): add(p, "skill")
 # memory folders are named after the folder a chat started in, with every / and _ turned into -
 _DIRS = None
 def mem_dir(folder):
@@ -57,7 +57,7 @@ def mem_dir(folder):
     global _DIRS
     if _DIRS is None: _DIRS = [CP] + glob.glob(CP + "/*") + glob.glob(CP + "/*/*") + glob.glob(CP + "/*/*/*") + glob.glob(CP + "/*/*/*/*") + glob.glob(CP + "/*/*/*/*/*") + [H + "/Desktop"]
     for d in _DIRS:
-        if re.sub(r"[/_. ]", "-", d) == folder: return d
+        if (folder_id(d) if WIN else re.sub(r"[/_. ]", "-", d)) == folder: return d
     return None
 def mem_label(folder):
     """Each memory folder by its own name, so two folders inside one project stay apart."""
@@ -70,7 +70,7 @@ def mem_project(folder):
     d = mem_dir(folder)
     return project_of(d) if d else None
 mem = []
-for p in glob.glob(H + "/.claude/projects/*/memory/*.md"):
+for p in fglob(CD + "/projects/*/memory/*.md"):
     if os.path.basename(p) == "MEMORY.md": continue
     add(p, "memory note")
     f = files[-1] if files and files[-1]["path"] == p else None
@@ -94,16 +94,17 @@ def project_of(folder):
     return short(folder)
 
 loads = []
+unq = lambda s: slash(json.loads('"' + s + '"')) if "\\" in s else s
 mem_seen = {}  # each memory folder: the last time any chat read its notes (every load record, not only the first)
-for f in glob.glob(H + "/.claude/projects/*/*.jsonl"):
+for f in claude_logs():
     first = None; cwd = None; cwds = []; listing = {}; ts = None
     for line in open(f, errors="ignore"):
         if '"cwd"' in line and cwd is None:
             m = re.search(r'"cwd":"([^"]+)"', line)
-            if m: cwd = m.group(1)
+            if m: cwd = unq(m.group(1))
         if '"cwd"' in line:
             m = re.search(r'"cwd":"([^"]+)"', line)
-            if m and (not cwds or cwds[-1] != m.group(1)): cwds.append(m.group(1))
+            if m and (not cwds or cwds[-1] != unq(m.group(1))): cwds.append(unq(m.group(1)))
         if '"attachment"' not in line: continue
         try: d = json.loads(line)
         except Exception: continue
@@ -112,7 +113,8 @@ for f in glob.glob(H + "/.claude/projects/*/*.jsonl"):
         t = a.get("type")
         if t == "instructions":
             for x in a.get("files") or []:
-                if x.get("type") == "AutoMem" and "/projects/" in (x.get("path") or ""):
+                x["path"] = slash(x.get("path") or "")
+                if x.get("type") == "AutoMem" and "/projects/" in x["path"]:
                     k = x["path"].split("/projects/")[1].split("/memory/")[0]; ts_ = (d.get("timestamp") or "")[:16]
                     if ts_ > mem_seen.get(k, ""): mem_seen[k] = ts_
         if t == "instructions" and first is None:
@@ -259,7 +261,7 @@ out = {"built": datetime.datetime.now().isoformat(timespec="minutes"),
        "loads": {"chats": len(loads), "latest": latest, "since": loads[0]["when"][:10] if loads else None,
                  "moved_memory": {"chats": len(mixed), "since": mixed[0]["when"][:10] if mixed else None,
                         # notes those chats wrote, found by the chat named in each note's header, and where they landed
-                        "notes_saved_to_start": sum(1 for l in mixed for p_ in glob.glob(H + f"/.claude/projects/{l['mem_id']}/memory/*.md") if re.search(r"originSessionId:\s*" + re.escape(l["id"]), open(p_, errors="ignore").read(1500))), "examples": [{"started": l["project"], "ended": l["ended_in"], "memory": l["memory_from"], "when": l["when"]} for l in mixed[-4:]]}},
+                        "notes_saved_to_start": sum(1 for l in mixed for p_ in fglob(CD + f"/projects/{l['mem_id']}/memory/*.md") if re.search(r"originSessionId:\s*" + re.escape(l["id"]), open(p_, errors="ignore").read(1500))), "examples": [{"started": l["project"], "ended": l["ended_in"], "memory": l["memory_from"], "when": l["when"]} for l in mixed[-4:]]}},
        "repeats": repeats[:12], "broken_links": broken, "missing_paths": missing[:40], "missing_count": len(missing), "shadowed": shadowed,
        "memory": memory, "reviewed": reviewed}
 json.dump(out, open(os.path.join(DATA, "instructions.json"), "w"), indent=1)

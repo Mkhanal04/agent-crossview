@@ -46,7 +46,7 @@ window.GBWeek = function (X) {
   function strip(per) {
     // the dials and the stops follow Your week's app switch (release 1, Oct 16): Codex reads from its own records
     const cx = S.qapp === "Codex" && M.codex_plan && M.codex_plan.latest, who0 = cx ? "Codex" : "Claude";
-    const P = cx ? M.codex_plan : M.plan; let fh = null, sd = null, sub = "no reading on this Mac";
+    const P = cx ? M.codex_plan : M.plan; let fh = null, sd = null, sub = G.system && G.system !== "mac" ? "no reading here" : "no reading on this Mac";
     if (P && per === thisWeek && P.latest) { fh = P.latest.fh; sd = P.latest.sd; sub = "as of " + ampm(new Date(P.latest.at).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })); }
     else if (!cx && P && P.week_peaks[per]) { fh = P.week_peaks[per].fh; sd = P.week_peaks[per].sd; sub = "highest that week"; }
     else if (cx) { const R = (M.codex_plan.readings || []).filter((r) => r[0].slice(0, 10) >= per && r[0].slice(0, 10) <= plus(per, 6)); if (R.length) { sd = Math.max(...R.map((r) => r[1] || 0)); fh = Math.max(...R.map((r) => r[2] || 0)); sub = "highest that week"; } }
@@ -162,7 +162,10 @@ window.GBWeek = function (X) {
     const nd = daysIn(per), soFar = nd < 7, plansNow = PER_DAY * nd, end = plus(per, nd - 1);
     const billed = B.sources.map((s) => ({ v: s.vendor, usd: Object.entries(s.by_day || {}).filter(([d]) => d >= per && d <= end).reduce((a, [, u]) => a + u, 0) })).filter((s) => s.usd > 0);
     const P = M.periods[per] || {}, works = Object.entries(P).filter(([, t]) => t.usd > 0).sort((a, b) => b[1].usd - a[1].usd), use = works.reduce((a, [, t]) => a + t.usd, 0) || 1;
-    const planLine = B.plans.map((p) => `${esc(p.name)} $${p.monthly_usd} a month`).join(", ");
+    // a plan your company pays for, or paying per use, has no monthly price: the receipt says who pays instead (Oct 17)
+    const own = B.plans.filter((p) => p.monthly_usd != null && (p.pay || "self") === "self"), others = B.plans.filter((p) => !own.includes(p));
+    const planLine = own.map((p) => `${esc(p.name)} $${p.monthly_usd} a month`).join(", ");
+    const otherLine = others.map((p) => `${esc(p.name)} is ${(p.pay || "company") === "api" ? "paid per use, with an API key" : "paid by your company"}`).join(". ");
     const oc = otherCosts(per, P, billed); ocHtml = oc.html;
     const extra = billed.reduce((a, s) => a + s.usd, 0) + oc.entered, allIn = plansNow + extra;
     const fresh = !S.wPrinted; S.wPrinted = true;
@@ -170,10 +173,10 @@ window.GBWeek = function (X) {
     const howCounted = `Each reply ${words(per)} is priced at its model's published per-use rate, checked ${G.prices_checked}. Small background calls that the records don't keep are left out, so the total may run a little low.`;
     const body = `<div class="w-printer"><div class="w-slot" aria-hidden="true"></div><div class="w-receipt${fresh ? " print" : ""}">
         <div class="w-r-head"><span>Receipt</span><span>${esc(span(per))}</span></div>
-        <p class="w-r-line"><b>Your plans, about $${Math.round(plansNow)} ${esc(period)}</b><small>A daily share of ${planLine}${soFar ? `, for ${plural(nd, "day")}` : ""}</small></p>
+        ${own.length || !others.length ? `<p class="w-r-line"><b>Your plans, about $${Math.round(plansNow)} ${esc(period)}</b><small>A daily share of ${planLine}${soFar ? `, for ${plural(nd, "day")}` : ""}</small></p>` : ""}${others.length ? `<p class="w-r-line"><b>${own.length ? "Your other plans" : "Your plans"}</b><small>${otherLine}.</small></p>` : ""}
         <div class="w-r-line w-r-peruse"><small>Pay-per-use price ${esc(period)}</small><b class="w-r-big">${money(use)} <em>an estimate</em></b>
           <small class="w-r-note">What the same work would cost without a plan, at published per-use rates checked ${esc(G.prices_checked)}. It may run a little low. ${DEMO ? `<span class="w-link" tabindex="0" ${tip(howCounted)}>How this is counted</span>` : `<button class="w-link" data-go="screen:mission" ${tip(howCounted)}>How this is counted</button>`}</small></div>
-        <p class="w-r-line w-r-allin"><b>About $${Math.round(allIn)} in all ${esc(period)}</b><small>Plans $${Math.round(plansNow)}${extra > 0 ? ` + other costs about $${extra.toFixed(2)}` : ""}${oc.unknown ? ` · ${plural(oc.unknown, "paid service")} not entered yet` : ""}</small></p>
+        ${!own.length && others.length && !extra ? "" : `<p class="w-r-line w-r-allin"><b>About $${Math.round(allIn)} in all ${esc(period)}</b><small>Plans $${Math.round(plansNow)}${extra > 0 ? ` + other costs about $${extra.toFixed(2)}` : ""}${oc.unknown ? ` · ${plural(oc.unknown, "paid service")} not entered yet` : ""}</small></p>`}
         <div class="w-r-split"><span>Your use, by project</span><em>shares of the pay-per-use price</em></div>
         ${flow(per, works, use)}
         <button class="w-btn w-r-dl" data-w="week:csv" ${tip(`Downloads ${words(per)}'s numbers as a spreadsheet file, with a note on what each column means. The file is made on this Mac and isn't sent anywhere.`)}>Download ${words(per)} as a spreadsheet</button>

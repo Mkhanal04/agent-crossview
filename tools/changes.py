@@ -22,18 +22,23 @@ press "Make this change" or "Undo" on Your week, and only for the two kinds of c
 Every change keeps a copy of the file as it was, in data/changes/, and a line in data/changes.json saying what
 changed. Undo puts back exactly what this changed (the model line, or the rules it added) and leaves anything
 else you or Claude Code changed since alone.
-GLASSBOX_HOME and GLASSBOX_CHANGES point both somewhere else, for testing on copies."""
+GLASSBOX_HOME and GLASSBOX_CHANGES point both somewhere else, for testing on copies.
+
+On Windows (Oct 17) files are written back with the line endings they had (Windows files often end lines with
+CRLF), always as UTF-8, and a setting your company manages (paths.managed_settings) is never changed from here."""
 import datetime, json, os, re, shutil, sys, tempfile
-from paths import DATA
+from paths import DATA, slash, managed_settings
 
 HOME = os.path.abspath(os.path.expanduser(os.environ.get("GLASSBOX_HOME") or "~"))
 BOX = os.path.abspath(os.environ.get("GLASSBOX_CHANGES") or DATA)
 LOG = os.path.join(BOX, "changes.json")
 MODELS = {"sonnet", "haiku", "opus", "inherit"}
 RULE = re.compile(r"^mcp__[A-Za-z0-9_-]+(__[A-Za-z0-9_.-]+)?$")
+# a memory folder's name in Claude Code's projects folder: -Users-ann-site on a Mac, C--Users-ann-site on Windows
+FOLDER_ID = r"^(-|[A-Za-z]--)[A-Za-z0-9_.-]+$"
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 # the status line command is made here, never taken from the page
-STATUS = {"type": "command", "command": f'"{sys.executable}" "{os.path.join(ROOT, "tools", "statusline.py")}"'}
+STATUS = {"type": "command", "command": f'"{slash(sys.executable)}" "{slash(os.path.join(ROOT, "tools", "statusline.py"))}"'}
 
 
 class Refused(Exception):
@@ -58,9 +63,14 @@ def _save_log(o):
 
 
 def _write(path, text):
-    # write next to the file, then swap it in, so a half-written file is never left behind
+    # write next to the file, then swap it in, so a half-written file is never left behind; a file whose lines end
+    # in CRLF (usual on Windows) keeps them, and every file is written as UTF-8
+    try:
+        with open(path, "rb") as f: crlf = b"\r\n" in f.read(65536)
+    except OSError: crlf = False
+    if crlf: text = text.replace("\r\n", "\n").replace("\n", "\r\n")
     d = os.path.dirname(path); fd, tmp = tempfile.mkstemp(dir=d, prefix=".glassbox-")
-    with os.fdopen(fd, "w") as f: f.write(text)
+    with os.fdopen(fd, "w", encoding="utf-8", newline="") as f: f.write(text)
     try: shutil.copymode(path, tmp)
     except Exception: pass
     os.replace(tmp, path)
@@ -95,9 +105,23 @@ def _set_model(text, model):
     return text[:a] + head + text[b:], before, after
 
 
+def _locked(what):
+    """Why a change would touch a setting your company manages, or None. The page turns the button off for the same reasons."""
+    m, _ = managed_settings()
+    if what == "ask-first" and m.get("allowManagedPermissionRulesOnly"): return "your company's rules decide what Claude Code may do, so rules you add aren't used"
+    if what == "status-line" and (m.get("statusLine") or m.get("disableAllHooks")): return "your company sets the line at the bottom of Claude Code"
+    if isinstance(what, tuple) and what[0] == "helper-model" and m.get("availableModels") and what[1] != "inherit" and not any(what[1] in str(x).lower() for x in m["availableModels"]): return "your company limits which models Claude Code can use"
+    return None
+
+
+def _guard(what):
+    why = _locked(what)
+    if why: raise Refused(why + ". Ask your admin if it should change")
+
+
 def _settings():
     full = os.path.join(HOME, ".claude", "settings.json")
-    raw = open(full).read() if os.path.exists(full) else "{}"
+    raw = open(full, encoding="utf-8").read().lstrip("\ufeff") if os.path.exists(full) else "{}"
     try: s = json.loads(raw or "{}")
     except Exception: raise Refused("Claude Code's settings file doesn't read as valid JSON right now, so Crossview won't touch it")
     if not isinstance(s, dict): raise Refused("Claude Code's settings file isn't laid out as expected")
@@ -129,12 +153,13 @@ def make(req):
     if kind == "helper-model":
         model = req.get("model")
         if model not in MODELS: raise Refused("pick sonnet, haiku, opus or inherit")
+        _guard(("helper-model", model))
         files = req.get("files") or []
         if not files or len(files) > 12: raise Refused("pick one to twelve helpers")
         plans = []
         for p in files:
             full = _real(p)
-            if "/.claude/agents/" not in full or not full.endswith(".md"): raise Refused("only helper files in a .claude/agents folder")
+            if "/.claude/agents/" not in slash(full) or not full.endswith(".md"): raise Refused("only helper files in a .claude/agents folder")
             if not os.path.isfile(full): raise Refused(f"{p} isn't there any more")
             text = open(full).read(); new, before, after = _set_model(text, model)
             plans.append((p, full, new, before, after))
@@ -143,6 +168,7 @@ def make(req):
             items.append({"file": p, "before": before, "after": after, "copy": _keep_copy(cid, full)})
             _write(full, new)
     elif kind == "status-line":
+        _guard("status-line")
         full, raw, s = _settings()
         cur = s.get("statusLine")
         if cur == STATUS: raise Refused("nothing to change: it's already on")
@@ -167,7 +193,7 @@ def make(req):
             _write(full, new)
     elif kind == "archive-notes":
         folders = req.get("folders") or []
-        if not folders or len(folders) > 20 or not all(isinstance(f, str) and re.match(r"^-[A-Za-z0-9_.-]+$", f) for f in folders): raise Refused("pick the memory folders to tidy")
+        if not folders or len(folders) > 20 or not all(isinstance(f, str) and re.match(FOLDER_ID, f) for f in folders): raise Refused("pick the memory folders to tidy")
         stamp = datetime.date.today().isoformat()
         for fid in folders:
             mdir = _real(f"~/.claude/projects/{fid}/memory")
@@ -201,7 +227,7 @@ def make(req):
         for l in links:
             fid, note, to = (l or {}).get("folder"), (l or {}).get("note"), (l or {}).get("to")
             ok = lambda v: isinstance(v, str) and re.match(r"^[A-Za-z0-9_.-]+$", v)
-            if not (isinstance(fid, str) and re.match(r"^-[A-Za-z0-9_.-]+$", fid) and ok(note) and ok(to)): raise Refused("a link to tidy isn't named the expected way")
+            if not (isinstance(fid, str) and re.match(FOLDER_ID, fid) and ok(note) and ok(to)): raise Refused("a link to tidy isn't named the expected way")
             mdir = _real(f"~/.claude/projects/{fid}/memory")
             if os.path.exists(os.path.join(mdir, to + ".md")): continue  # it leads somewhere now: leave it
             byfile.setdefault(os.path.join(mdir, note + ".md"), (f"~/.claude/projects/{fid}/memory/{note}.md", set()))[1].add(to)
@@ -215,8 +241,9 @@ def make(req):
     elif kind == "ask-first":
         rules = req.get("rules") or []
         if not rules or len(rules) > 200 or not all(isinstance(r, str) and RULE.match(r) for r in rules): raise Refused("only rules for connectors (mcp__...)")
+        _guard("ask-first")
         full = os.path.join(HOME, ".claude", "settings.json")
-        raw = open(full).read() if os.path.exists(full) else "{}"
+        raw = open(full, encoding="utf-8").read().lstrip("\ufeff") if os.path.exists(full) else "{}"
         try: s = json.loads(raw or "{}")
         except Exception: raise Refused("Claude Code's settings file doesn't read as valid JSON right now, so Crossview won't touch it")
         if not isinstance(s, dict): raise Refused("Claude Code's settings file isn't laid out as expected")
@@ -283,13 +310,13 @@ def undo(cid):
             if open(full).read() != it["after"]: left.append(it["file"]); continue
             _write(full, open(os.path.join(BOX, it["copy"])).read())
         elif c["kind"] == "status-line":
-            try: s = json.loads(open(full).read())
+            try: s = json.loads(open(full, encoding="utf-8").read().lstrip("\ufeff"))
             except Exception: left.append(it["file"]); continue
             if s.get("statusLine") != it["value"]: left.append(it["file"]); continue
             del s["statusLine"]
-            _save_settings(full, open(full).read(), s)
+            _save_settings(full, open(full, encoding="utf-8").read(), s)
         elif c["kind"] == "ask-first":
-            raw = open(full).read()
+            raw = open(full, encoding="utf-8").read().lstrip("\ufeff")
             try: s = json.loads(raw)
             except Exception: left.append(it["file"]); continue
             ask = (s.get("permissions") or {}).get("ask") or []

@@ -4,13 +4,12 @@
 import json, glob, os, collections, datetime, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from prices import split_usd
-from paths import DATA, DEMO, codex_logs, log_lines
+from paths import DATA, DEMO, codex_logs, log_lines, claude_logs, cowork_dir, files, session_of
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 # --fast: after a correction, reuse what was read from the logs last time and redo only what depends on the grouping
 PREV_PATH = os.path.join(DATA, "dashboard.json")
 FAST = DEMO or ("--fast" in sys.argv and os.path.exists(PREV_PATH))  # the demo never reads this Mac's logs
 PREV = json.load(open(PREV_PATH)) if FAST and os.path.exists(PREV_PATH) else {}
-H = os.path.expanduser("~")
 rows = json.load(open(os.path.join(DATA, "sessions-grouped.json")))
 inv = json.load(open(os.path.join(DATA, "inventory.json")))
 # Log times are UTC; days and weeks are this Mac's own (Monday to Sunday, local time), as the app shows them.
@@ -29,7 +28,7 @@ for x in L["rows"]:
     ld = local_day(x["hour"]); a = ranges.setdefault(x["tool"], [ld, ld]); a[0] = min(a[0], ld); a[1] = max(a[1], ld)
 # limit hits from Claude Code logs
 limit_hits = PREV.get("limit_hits", [])
-for f in ([] if FAST else glob.glob(H + "/.claude/projects/*/*.jsonl")):
+for f in ([] if FAST else claude_logs()):
     for line in open(f, errors="ignore"):
         if "rate_limit" not in line: continue
         try: d = json.loads(line)
@@ -41,7 +40,7 @@ for f in ([] if FAST else glob.glob(H + "/.claude/projects/*/*.jsonl")):
 # agent and skill runs this week (from Oct 5)
 _t = datetime.date.today(); WEEK = (_t - datetime.timedelta(days=_t.weekday())).isoformat()
 agent_week = collections.Counter(PREV.get("agent_week", {})); skill_week = collections.Counter(PREV.get("skill_week", {}))
-for f in ([] if FAST else glob.glob(H + "/.claude/projects/*/*.jsonl") + glob.glob(H + "/.claude/projects/*/*/subagents/*.jsonl")):
+for f in ([] if FAST else claude_logs() + claude_logs(helpers=True)):
     for line in open(f, errors="ignore"):
         if '"tool_use"' not in line: continue
         try: d = json.loads(line)
@@ -55,15 +54,15 @@ for f in ([] if FAST else glob.glob(H + "/.claude/projects/*/*.jsonl") + glob.gl
                 if c.get("name") in ("Agent", "Task"): agent_week[inp.get("subagent_type") or "general-purpose"] += 1
                 if c.get("name") == "Skill": skill_week[(inp.get("skill") or "?").split(":")[-1]] += 1
 # Limit events from all three tools: hits (stopped) and warnings (near the limit), one per limit window.
-COWORK = H + "/Library/Application Support/Claude/local-agent-mode-sessions"
+COWORK = cowork_dir()
 events = {tuple(k): v for k, v in PREV.get("limit_raw", [])}
 def ev(key, **kw):
     e = events.get(key)
     if e is None or kw.get("util", 0) > e.get("util", 0) or (kw["status"] == "hit" and e["status"] != "hit"): events[key] = {**(e or {}), **kw, "ts": min(kw["ts"], (e or kw)["ts"])}
 for h in ([] if FAST else limit_hits):
     ev(("Claude", "hit", h.get("resets") or h["ts"], h["kind"]), tool="Claude Code", plan="Claude", status="hit", kind=h["kind"], ts=h["ts"], session=h.get("session"))
-for f in ([] if FAST else glob.glob(COWORK + "/**/local_*/audit.jsonl", recursive=True)):
-    sid = "local_" + f.split("/local_")[1].split("/")[0]
+for f in ([] if FAST else files(COWORK + "/**/local_*/audit.jsonl")):
+    sid = session_of(f)
     for line in open(f, errors="ignore"):
         if "rate_limit_event" not in line: continue
         try: d = json.loads(line)

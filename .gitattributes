@@ -1,0 +1,10 @@
+# Windows reads its double-click file only with Windows line endings
+*.cmd text eol=crlf
+# the scripts and pages keep plain line endings everywhere
+*.py text eol=lf
+*.js text eol=lf
+*.json text eol=lf
+*.html text eol=lf
+*.css text eol=lf
+*.md text eol=lf
+*.command text eol=lf

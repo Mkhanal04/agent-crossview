@@ -49,6 +49,14 @@ function check(where) {
 // the top bar (release 2 QA: "This week" and the date chip were cut at 1280, and at 1440 with scrollbars): every tab, week
 // choice and the date chip shows whole, inside the window, at 11 pixels or more
 function bar(where) {
+  // the checks open the app as a file, where the Refresh button isn't drawn; the app you double-click has it, and it takes
+  // room from the week switch (cut at 1280 to 1419 until Oct 17). So the bar is checked with the button in place, as served.
+  let added = null;
+  if (!$("#bar .bar-refresh") && $("#bar .more-menu") && $("#bar .bar-slot")) {
+    const t = document.createElement("template");
+    t.innerHTML = '<button class="w-btn quiet bar-refresh" data-refresh="1" aria-label="Refresh from the logs"><span aria-hidden="true">↻</span><span class="bar-refresh-t"> Refresh</span></button>';
+    added = t.content.firstChild; $("#bar").insertBefore(added, $("#bar .more-menu"));
+  }
   document.querySelectorAll("#bar .tabs button, #bar .w-seg button, #bar .w-asof, #bar .w-asof span, #bar .brand, #bar .more-menu summary, #bar .bar-refresh").forEach((el) => {
     const r = el.getBoundingClientRect(); if (!r.width) return;
     const name = `${el.className ? String(el.className).split(" ")[0] : el.tagName.toLowerCase()} "${el.textContent.trim().slice(0, 24)}"`;
@@ -60,6 +68,7 @@ function bar(where) {
     }
     if (parseFloat(getComputedStyle(el).fontSize) < 10.5) out.push(`OVERFLOW ${where}: the top bar's ${name} is under 11px`);
   });
+  if (added) added.remove();
   out.push(`FIT the top bar, ${where}`);
 }
 (async () => {

@@ -4,7 +4,7 @@ Run after sessions.py, group.py, inventory.py and dashboard_data.py. Usage: pyth
 import json, glob, os, collections, datetime, re, sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from prices import split_usd, CLAUDE as PRICE_TABLE
-from paths import DATA, OUT, DEMO
+from paths import DATA, OUT, DEMO, SYSTEM, claude_logs, stamp
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 H = os.path.expanduser("~")
 load = lambda n: json.load(open(os.path.join(DATA, n)))
@@ -26,7 +26,7 @@ if DEMO or ("--fast" in __import__("sys").argv and os.path.exists(CACHE)):  # th
     calls = json.load(open(CACHE)) if os.path.exists(CACHE) else {}
 else:
     calls = {}
-    for f in glob.glob(H + "/.claude/projects/*/*.jsonl"):
+    for f in claude_logs():
         sid = os.path.basename(f)[:-6]; c_ag = collections.Counter(); c_sk = collections.Counter()
         for line in open(f, errors="ignore"):
             if '"tool_use"' not in line: continue
@@ -271,7 +271,7 @@ def fill(o, V):
     if isinstance(o, dict): return {k: fill(v, V) for k, v in o.items()}
     return o
 raw_notes = notes
-notes = fill(raw_notes, vals_for(LG["rows"], f"in all the kept logs (since {datetime.date.fromisoformat(first_day).strftime('%b %-d')})"))
+notes = fill(raw_notes, vals_for(LG["rows"], f"in all the kept logs (since {stamp(datetime.date.fromisoformat(first_day), '%b %-d')})"))
 notes_by_week = {}
 for w_ in (WEEK, (datetime.date.fromisoformat(WEEK) - datetime.timedelta(days=7)).isoformat()):
     rs_ = [x for x in LG["rows"] if w_ <= local_day(x["hour"]) <= (datetime.date.fromisoformat(w_) + datetime.timedelta(days=6)).isoformat()]
@@ -356,7 +356,7 @@ for _p in (lambda P: P.values() if isinstance(P, dict) else P)(machine.get("port
     if _p.get("name") in SHOWN: _p["name"] = SHOWN[_p["name"]]
 for _c in connectors:
     if isinstance(_c, dict) and _c.get("name") in SHOWN: _c["name"] = SHOWN[_c["name"]]
-out = {"machine": machine, "money": money, "anatomy": anatomy, "other_costs": other_costs, "built": datetime.datetime.now().strftime("%b %-d, %-I:%M %p").replace("AM", "am").replace("PM", "pm"), "week_start": WEEK, "today": today.isoformat(), "agents": agents, "skills": skills, "work": work,
+out = {"system": SYSTEM, "machine": machine, "money": money, "anatomy": anatomy, "other_costs": other_costs, "built": stamp(datetime.datetime.now(), "%b %-d, %-I:%M %p").replace("AM", "am").replace("PM", "pm"), "week_start": WEEK, "today": today.isoformat(), "agents": agents, "skills": skills, "work": work,
        "corrections": load("corrections.json") if os.path.exists(os.path.join(DATA, "corrections.json")) else None,
        "weekly": D["weekly"], "weekly_share": weekly_share, "model_cost": D["model_cost"], "token_kinds": D["token_kinds"], "limit_hits": D["limit_hits"],
        "sessions": D["sessions"], "tools": D["tools"], "connectors": D["connectors"], "instruction_files": D["instruction_files"],

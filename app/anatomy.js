@@ -44,11 +44,15 @@ window.GBAnatomy = function (X) {
       F.last && F.last >= p ? "lit" : F.session_logs ? "dim" : "none",
       [it("Where it is", F.where || "Not found", "lit")].concat((F.parts || []).map(([n, s]) => it(n, s, "lit")), F.first ? [it("Oldest log kept", day(F.first), "lit"), it("Newest log", day(F.last), F.last >= p ? "lit" : "dim")] : []),
       5, tool === "Cowork" && G.cowork_end && G.cowork_end < G.week_start ? `The Claude app stopped saving Cowork's logs on this Mac after ${day(G.cowork_end)}, so Crossview can't see newer Cowork tasks.` : "Crossview reads these logs on this Mac and sends nothing anywhere.");
+    const co = tool === "Claude Code" && A.managed && (A.managed.items || []).length ? A.managed : null;
     const st = (A.settings || {}).items || [];
     const off = tool === "Claude Code" ? Object.keys(G.plugin_state || {}) : [];
     add("settings", "Settings and permissions", tool === "Codex" ? "its model and when it asks you" : "what it may do without asking", st.length ? "lit" : "none",
-      st.map(([n, v]) => it(n, n === "Model" ? model(v) : VAL[v] || v, "lit")).concat(off.map((n) => it(`Add-on "${n}"`, "You switched it off on Oct 10", "dim"))), 4,
-      tool === "Claude Code" ? "These are kept in Claude Code's own settings file on this Mac. Crossview only reads them." : tool === "Codex" ? "These are kept in Codex's own settings file on this Mac. Crossview only reads them." : "These are set inside the Claude app.");
+      st.map(([n, v]) => it(n, n === "Model" ? model(v) : (tool === "Codex" || v !== "default" ? VAL[v] || v : v), "lit")).concat(off.map((n) => it(`Add-on "${n}"`, "You switched it off", "dim"))), 4,
+      tool === "Claude Code" ? `These are kept in Claude Code's own settings file on this Mac. Crossview only reads them.${co ? " Your company's settings, on the layer above, win over these." : ""}` : tool === "Codex" ? "These are kept in Codex's own settings file on this Mac. Crossview only reads them." : "These are set inside the Claude app.");
+    // settings your company set (Oct 17): their own layer, read-only, only when there are any
+    if (co) add("company", "Set by your company", `${plural(co.items.length, "setting")}, read-only`, "lit", co.items.map(([n, v]) => it(n, v, "lit")), 4,
+      "Someone who manages Claude Code at your company set these, and they win over your own settings. Crossview only reads them. To change one, ask your admin.");
     const hk = (A.checks || {}).items || [];
     add("checks", "Automatic checks", hk.length ? `${plural(hk.length, "check")}, ${hk[0].when}` : "none set up", hk.length ? "lit" : "none",
       hk.map((h) => it(h.name, `Runs ${h.when}${h.says ? ` and says "${h.says}"` : ""}`, "lit")), Math.max(1, hk.length),
@@ -81,7 +85,7 @@ window.GBAnatomy = function (X) {
     const other = (type) => { const e = elsewhere(type); return e.length && !wk.helpers[type] ? `${e.map(([t, n]) => `${plural(n, "run")} ${words()} from ${t}`).join(", ")}, ` : ""; };
     // the logs name a subagent only by its name: when a project has one with the same name as yours, its runs count once, under yours
     const hNow = (a) => (a.same_name && a.origin !== "Made by you" ? 0 : wk.helpers[a.name]);
-    if (tool === "Claude Code") hl = G.agents.map((a) => it(a.name, `${a.origin} · ${hNow(a) ? `${plural(hNow(a), "run")} ${words()}, ` : other(a.name)}${a.runs ? `${plural(a.runs, "run")} since ${since(tool)}, last on ${day(a.last)}` : `no runs since the logs start on ${since(tool)}`}`, hNow(a) ? "lit" : a.runs ? "dim" : "none", { key: a.same_name ? `${a.name} (${a.origin})` : a.name, plain: a.same_name ? `${a.plain || ""} Another subagent is also named ${a.name}. The logs record only the name, so both show the same runs.`.trim() : a.plain, file: a.file, runsNow: hNow(a) || 0, uses: a.runs || 0, unit: "run", origin: a.origin, last: a.last }));
+    if (tool === "Claude Code") hl = G.agents.map((a) => it(a.name, `${a.origin} · ${hNow(a) ? `${plural(hNow(a), "run")} ${words()}, ` : other(a.name)}${a.runs ? `${plural(a.runs, "run")} since ${since(tool)}, last on ${day(a.last)}` : (since(tool) ? `no runs since the logs start on ${since(tool)}` : "no runs in the logs on this Mac")}`, hNow(a) ? "lit" : a.runs ? "dim" : "none", { key: a.same_name ? `${a.name} (${a.origin})` : a.name, plain: a.same_name ? `${a.plain || ""} Another subagent is also named ${a.name}. The logs record only the name, so both show the same runs.`.trim() : a.plain, file: a.file, runsNow: hNow(a) || 0, uses: a.runs || 0, unit: "run", origin: a.origin, last: a.last }));
     else hl = Object.entries(ever.helpers).map(([type, n]) => it(type, `Came with ${tool} · ${wk.helpers[type] ? `${plural(wk.helpers[type], "run")} ${words()}, ` : ""}${plural(n, "run")} since ${since(tool)}`, wk.helpers[type] ? "lit" : "dim", { key: type, runsNow: wk.helpers[type] || 0, uses: n, unit: "run", origin: "Came with the app" }));
     hl.sort((a, b) => b.runsNow - a.runsNow || (a.state === "dim" ? 0 : 1) - (b.state === "dim" ? 0 : 1));
     const yours = tool === "Claude Code" ? G.agents.filter((a) => a.origin !== "Came with Claude Code").length : 0, never = hl.filter((h) => h.state === "none").length;
@@ -94,7 +98,7 @@ window.GBAnatomy = function (X) {
     let sk = [];
     // a skill is lit for the week shown if Claude Code called it in a chat that started that week
     const skw = (G.skill_weeks || {})[p] || (p === G.week_start ? Object.fromEntries(G.skills.filter((k) => k.week).map((k) => [k.name, k.week])) : {});
-    if (tool === "Claude Code") sk = G.skills.map((k) => it(k.name, `${k.origin}${skw[k.name] ? ` · ${plural(skw[k.name], "use")} ${words()}` : ""}${k.uses ? ` · ${plural(k.uses, "use")} since ${since(tool)}, last on ${day(k.last)}` : ` · not used since the logs start on ${since(tool)}`}`, skw[k.name] ? "lit" : k.uses ? "dim" : "none", { plain: k.plain, uses: k.uses || 0, runsNow: skw[k.name] || 0, unit: "use", origin: k.origin, last: k.last }));
+    if (tool === "Claude Code") sk = G.skills.map((k) => it(k.name, `${k.origin}${skw[k.name] ? ` · ${plural(skw[k.name], "use")} ${words()}` : ""}${k.uses ? ` · ${plural(k.uses, "use")} since ${since(tool)}, last on ${day(k.last)}` : (since(tool) ? ` · not used since the logs start on ${since(tool)}` : " · not used in the logs on this Mac")}`, skw[k.name] ? "lit" : k.uses ? "dim" : "none", { plain: k.plain, uses: k.uses || 0, runsNow: skw[k.name] || 0, unit: "use", origin: k.origin, last: k.last }));
     else if (tool === "Cowork") sk = G.skills.filter((k) => k.origin === "From your Claude account").map((k) => it(k.name, "From your Claude account · Crossview can't count its use in Cowork", "dim", { plain: k.plain }));
     else sk = ((A.skills || []).map((n) => it(n, "Skill", "dim"))).concat((A.plugins || []).map((n) => it(n, `${(A.bundled || []).includes(n) ? "Came with Codex" : "Add-on"}${window.GBStage.actsAsYou(n) ? " · can act as you" : ""}`, "dim", window.GBStage.actsAsYou(n) ? { risky: true, as_you: true, reach: "can act as you" } : {})));
     const skNever = sk.filter((s) => s.state === "none").length;
@@ -140,7 +144,8 @@ window.GBAnatomy = function (X) {
 
 
   // ---------- the exploded drawing ----------
-  const CX = 500, PW = 160, PH = 70, GAP = 78, TOP = 82;
+  const CX = 500, PW = 160, PH = 70, TOP = 82;
+  let GAP = 78;  // a tenth layer (settings your company set) packs the plates a little closer, so the drawing keeps its size
   const P = (y, i, j) => [CX + (i - j) * PW, y - PH + (i + j) * PH];
   const pts = (a) => a.map(([x, y]) => `${x.toFixed(1)},${y.toFixed(1)}`).join(" ");
   function slab(y, t, cls) {
@@ -160,7 +165,7 @@ window.GBAnatomy = function (X) {
     if (L.id === "ai") return block(y, 0.38, 0.38, 0.24, 0.24, 8, L.state === "lit" ? "core" : "core dim");
     if (L.id === "instructions") { for (let k = 0; k < 3; k++) g += block(y, 0.3 - k * 0.04, 0.3 + k * 0.04, 0.42, 0.32, 2 + k * 3, ls); return g; }  // a stack of pages
     if (L.id === "folder") { [[0.6, 0.16], [0.6, 0.36], [0.16, 0.6], [0.38, 0.62], [0.62, 0.64]].forEach(([i, j], k) => (g += block(y, i, j, 0.12, 0.17, k < 2 ? 14 : 5, ls))); return g; }  // files and folders
-    if (L.id === "settings") { for (let k = 0; k < 4; k++) { g += block(y, 0.18 + k * 0.17, 0.56, 0.06, 0.32, 2, ls); g += block(y, 0.165 + k * 0.17, 0.6 + (k % 2) * 0.16, 0.09, 0.07, 7, ls); } return g; }  // switches
+    if (L.id === "settings" || L.id === "company") { for (let k = 0; k < 4; k++) { g += block(y, 0.18 + k * 0.17, 0.56, 0.06, 0.32, 2, ls); g += block(y, 0.165 + k * 0.17, 0.6 + (k % 2) * 0.16, 0.09, 0.07, 7, ls); } return g; }  // switches
     if (L.id === "checks") { const n = Math.max(1, Math.min(3, L.items.length)); for (let k = 0; k < n; k++) g += block(y, 0.64 - k * 0.2, 0.64, 0.15, 0.15, 10, L.items.length ? ls : "none"); return g; }
     if (L.id === "connectors") { [[0.86, 0.14], [0.86, 0.42], [0.86, 0.7], [0.14, 0.86], [0.42, 0.86], [0.7, 0.86]].slice(0, Math.max(1, Math.min(6, L.items.length))).forEach(([i, j], k) => (g += block(y, i - 0.05, j - 0.05, 0.1, 0.1, 11, L.items.length ? st(k) : "none"))); return g; }  // ports on the edge
     const spec = { helpers: [3, 0.6, 9], skills: [5, 0.55, 3], projects: [2, 0.66, 7] }[L.id] || [2, 0.6, 8];
@@ -169,6 +174,7 @@ window.GBAnatomy = function (X) {
     return g;
   }
   function drawing(L, sel) {
+    GAP = L.length > 9 ? Math.round((78 * 8) / (L.length - 1)) : 78;
     const n = L.length, ys = L.map((_, k) => TOP + (n - 1 - k) * GAP);
     let g = `<line x1="${CX}" y1="${ys[n - 1] - PH - 14}" x2="${CX}" y2="${ys[0] + PH + 24}" class="a-axis"/>`;
     L.forEach((l, k) => {
@@ -300,10 +306,12 @@ window.GBAnatomy = function (X) {
   }
 
   function board() {
-    if (!S.atool || !TOOLS.includes(S.atool)) S.atool = "Claude Code";
+    // someone who only uses Codex opens on Codex, the same as on Your week (QA of the walk, Oct 17)
+    const R0 = G.ranges || {}, codexOnly = R0.Codex && !R0["Claude Code"] && !R0.Cowork;
+    if (!S.atool || !TOOLS.includes(S.atool)) S.atool = codexOnly && TOOLS.includes("Codex") ? "Codex" : "Claude Code";
     if (!S.afilter) S.afilter = "all";
     const L = layers(S.atool);
-    if (!S.alayer || !L.find((l) => l.id === S.alayer)) S.alayer = "helpers";
+    if (!S.alayer || !L.find((l) => l.id === S.alayer)) S.alayer = S.atool === "Codex" && codexOnly ? "skills" : "helpers";  // Crossview can't read Codex's subagents yet, so a Codex-only user starts on its skills
     const ws = Object.entries(L.works || {}).filter(([, u]) => u > 0).sort((a, b) => b[1] - a[1]), use = ws.reduce((a, [, u]) => a + u, 0) || 1;
     // one sentence on top, like every other tab (QA run 3)
     const cnt = (id) => ((L.find((l) => l.id === id) || {}).items || []).length, parts = [];

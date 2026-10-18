@@ -1,7 +1,10 @@
 #!/usr/bin/env python3
-"""Refresh everything from the logs on this Mac, in order. Usage: python3 tools/refresh.py
+"""Refresh everything from the logs on this computer, in order. Usage: python3 tools/refresh.py
 Each step reads counters only; nothing leaves the computer."""
 import subprocess, sys, os, time
+if os.name == "nt" and not sys.flags.utf8_mode:  # Windows: read and write every file as UTF-8, as on a Mac
+    os.environ["PYTHONUTF8"] = "1"
+    sys.exit(subprocess.call([sys.executable] + sys.argv))
 T = os.path.dirname(os.path.abspath(__file__))
 STEPS = [
     ("Reading and pricing every reply", ["ledger.py"]),
@@ -11,7 +14,7 @@ STEPS = [
     ("Weeks, models and usage limits", ["dashboard_data.py"]),
     ("Which agents and connectors each piece of work used", ["machine_data.py"]),
     ("What you paid: plans and any API bills you added", ["bills.py"]),
-    ("The anatomy of each tool on this Mac", ["anatomy_data.py"]),
+    ("How each app is set up on this computer", ["anatomy_data.py"]),
     ("Signs of paid services outside your plans", ["other_costs.py"]),
     ("Your AI's instructions: rule files and notes", ["instructions.py"]),
     ("What you keep correcting: counts only, and only if you said yes", ["corrections.py"]),
@@ -30,3 +33,14 @@ for label, cmd in STEPS:
     if r.returncode:
         print(r.stdout[-2000:], r.stderr[-2000:]); sys.exit(f"Stopped at: {label}")
 print(f"Done in {time.time() - t0:.0f} seconds.")
+# say plainly which apps' records were found, and where it looked for the ones it couldn't find
+sys.path.insert(0, T)
+from paths import where_looked, HOME
+short = lambda p: p.replace(HOME, "~", 1)
+for app, w in where_looked().items():
+    if app == "Company settings":
+        if w["found"]: print(f"- Settings your company manages for Claude Code: found in {short(w['found'])}.")
+        continue
+    if w["found"]: print(f"- {app}: records found in {short(w['found'])}.")
+    else: print(f"- {app}: no records found. Looked in {' and '.join(short(p) for p in w['looked'])}.")
+    if w.get("compressed_unread"): print(f"  {w['compressed_unread']} older Codex chats are compressed and couldn't be read. The README says how to read them.")

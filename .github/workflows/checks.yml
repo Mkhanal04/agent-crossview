@@ -1,0 +1,31 @@
+# Crossview's checks on GitHub's free Windows test machine (Oct 17): the refresh, "Make this change" and Undo, the local
+# server and the browser checks, run against made-up personal and business computers (tools/checks/home_check.py).
+# Nobody's real records are used. It runs on the public repo for every update; on the private one only when started by hand.
+name: Checks on Windows
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    if: github.repository == 'Mkhanal04/agent-crossview' || github.event_name == 'workflow_dispatch'
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # the oldest Python the double-click file accepts, and the newest (which reads compressed Codex chats itself)
+        python: ["3.9", "3.14"]
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Made-up personal and business computers, end to end, with the browser checks
+        run: python tools/checks/home_check.py --browser

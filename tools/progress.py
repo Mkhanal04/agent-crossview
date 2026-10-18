@@ -3,6 +3,8 @@
 What this build has used comes from data/sessions-grouped.json (the piece of work "Agent Glass Box").
 Usage: python3 progress.py"""
 import json, os, re, datetime
+import sys; sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from paths import stamp
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 TP = os.path.join(ROOT, "TASKS.md")  # the build's own task list; a shared copy may not have one
 text = open(TP).read() if os.path.exists(TP) else ""
@@ -40,7 +42,7 @@ if os.path.exists(p):
              "usd": round(sum(usd), 2) if usd else None, "usd_sessions": len(usd), "priced": any("usd_est" in r for r in rows),
              "first": min((str(r["start"])[:10] for r in rows), default=None)}
 
-out = {"read": datetime.datetime.now().strftime("%a %b %-d, %-I:%M %p"), "tasks": tasks, "waiting": lists.get("Waiting on Milan", []),
+out = {"read": stamp(datetime.datetime.now(), "%a %b %-d, %-I:%M %p"), "tasks": tasks, "waiting": lists.get("Waiting on Milan", []),
        "after": lists.get("After the test", []), "build": build}
 open(os.path.join(ROOT, "app", "progress.js"), "w").write("window.GB_PROGRESS = " + json.dumps(out) + ";\n")
 print("app/progress.js:", len(tasks), "tasks,", sum(1 for t in tasks if t.get("status") == "done"), "done")

@@ -844,6 +844,9 @@ body.lightpage .nav button[aria-pressed=true]{color:var(--ink);border-bottom-col
 .q-radio.on{border-color:var(--ink)}
 .q-radio input[type=radio]{accent-color:var(--ink);flex:none;margin:0}
 .q-radio small{color:var(--muted);font-size:var(--t-sm)}
+.q-sub{margin:10px 0 2px;font-size:var(--t-base);font-weight:600;color:var(--ink)}
+.q-who{display:grid;gap:4px;margin:0 0 0 28px}
+.q-radio.sub{padding:5px 10px;background:transparent;font-size:var(--t-sm)}
 .q-amt{display:inline-flex;align-items:center;gap:4px;margin-left:8px;color:var(--ink-2);font-size:var(--t-sm)}
 .q-amt input{width:84px;font:var(--t-sm) var(--mono);padding:3px 6px;border:1px solid var(--rim-2);border-radius:var(--r-sm)}
 .q-change{align-self:flex-start;font-size:var(--t-sm);color:var(--muted);margin-top:-4px}
@@ -1066,3 +1069,26 @@ body.lightpage .bar .bar-slot{min-height:34px;align-items:center}
 /* the week in detail: the subagents count always sits on its own line under the title, so a longer count in one week
    doesn't push the board down 28px (release 3 checks) */
 .w-agents>.w-mh{flex-wrap:wrap}.w-agents>.w-mh>.w-mh-note{flex-basis:100%;margin-left:0}
+/* the first-minute walk (task 11, Oct 17): the screen dims, the part a step talks about stays lit, and one card says it */
+.wk{position:fixed;inset:0;z-index:900}
+.wk.dim{background:rgba(21,23,27,.58)}
+.wk-veil{position:fixed;background:rgba(21,23,27,.58)}
+.wk-hole{position:fixed;border-radius:14px;outline:2px solid #fff;outline-offset:-1px;pointer-events:none}
+.wk-card{position:fixed;z-index:901;background:var(--mod);color:var(--ink);border-radius:var(--r-lg);padding:22px 24px 18px;box-shadow:var(--sh-float);font:400 var(--t-base)/1.5 var(--sans)}
+.wk-n{margin:0 0 8px;font-size:var(--t-sm);color:var(--muted)}
+.wk-lead{margin:0;font-size:var(--t-xl);font-weight:600;line-height:1.3;letter-spacing:-.2px}
+.wk-rows{list-style:none;margin:14px 0 4px;padding:0}
+.wk-rows li{display:flex;gap:12px;padding:7px 0;border-top:1px solid var(--rim)}
+.wk-dim{margin-left:auto;color:var(--muted);text-align:right}
+.wk-nums{display:flex;gap:10px;margin:14px 0 4px}
+.wk-nums>div{flex:1;background:var(--mod-3);border-radius:var(--r-md);padding:10px 12px}
+.wk-nums span{display:block;font-size:var(--t-sm);color:var(--muted);line-height:1.35}
+.wk-nums b{display:block;font-size:var(--t-lg);margin-top:4px;white-space:nowrap}
+.wk-sup{margin:10px 0 0;color:var(--muted)}
+.wk-foot{display:flex;align-items:center;gap:14px;margin-top:18px}
+.wk-skip{background:none;border:0;padding:4px 0;font:inherit;font-size:var(--t-md);color:var(--muted);cursor:pointer;text-decoration:underline;text-decoration-color:var(--amt-2);text-underline-offset:3px}
+.wk-dots{margin-left:auto;display:flex;gap:5px}
+.wk-dots i{width:7px;height:7px;border-radius:4px;background:var(--ghost)}
+.wk-dots i.on{background:var(--ink)}
+.wk-go{padding:9px 14px;font-size:var(--t-base)}
+@media (max-width:520px){.wk-nums{flex-direction:column}}

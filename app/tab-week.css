@@ -160,3 +160,6 @@ body.lightpage .bar .w-asof{width:162px;min-width:0}
 .h-svg .h-week:focus{outline:none}
 .h-page .g-panel .h-open{margin:0 0 16px}
 .h-page .g-panel .h-open+.g-grp{margin-top:0}
+/* the top bar below 1440 wide: a little less space around the tabs and the week switch, so the switch's first button
+   is never cut by its own slot (it read "his week" from about 1281 to 1419; found Oct 17, older than that batch) */
+@media (max-width:1439px){.bar-refresh-t{display:none}.bar-refresh{padding:5px 9px}.tabs button{padding:6px 8px}body.lightpage .bar{gap:8px}.bar-slot{gap:8px}.bar-slot .w-seg button{padding-left:9px;padding-right:9px}.bar-slot .w-asof{padding-left:8px;padding-right:8px}}

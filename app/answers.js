@@ -34,36 +34,90 @@ window.GBAnswers = function (X) {
   const madeAct = (c, what) => `<span class="q-lead q-done"><b>Changed ${esc(when(c.when))}.</b> ${what}</span><button class="w-btn quiet" data-w="q:sheet:undo:${esc(c.id)}">Undo</button>`;
 
   // ---------- 1. Am I on the right plan? ----------
-  // the plans people pay for, as listed on Oct 13 2026: Claude's from Anthropic's plan pages; ChatGPT's from published guides (OpenAI's page couldn't be read)
+  // ---------- who pays (Oct 17): yourself, your company, or per use with an API key ----------
+  // plans saved before Oct 17 have a price and no "pay", so they read as paid by you, exactly as before
+  const payOf = (p) => p.pay || (p.monthly_usd == null ? "company" : "self");
+  const priced = (p) => payOf(p) === "self";
+  const workPlan = (p) => !!p && (payOf(p) === "company" || /\b(Team|Enterprise|Business|through work)\b/.test(p.name));
+  const claudePlan = () => (B.plans || []).find((p) => !(p.covers || []).includes("Codex"));
+  // what a plan costs, said plainly: a company's or an API key's has no monthly price to show
+  // a change that would touch a setting your company manages stays off (tools/changes.py refuses it too)
+  function lockOf(kind, req) {
+    const L = (((G.anatomy || {})["Claude Code"] || {}).managed || {}).locks || {}, ask = " Ask your admin if it should change.";
+    if (kind === "ask-first" && L.ask_rules) return "Your company decides what Claude Code may do, so rules added here wouldn't be used." + ask;
+    if (kind === "status-line" && L.status_line) return "Your company sets the line at the bottom of Claude Code." + ask;
+    if (kind === "helper-model" && L.models && !L.models.some((m) => String(m).toLowerCase().includes(((req || {}).model || "sonnet")))) return "Your company limits which models Claude Code can use." + ask;
+    return "";
+  }
+  const costWords = (p) => (payOf(p) === "company" ? "paid by your company" : payOf(p) === "api" ? "paid per use, with an API key" : `$${p.monthly_usd} a month, flat`);
+  // the plans people have, checked Oct 17 2026 on claude.com/pricing and learn.chatgpt.com's pricing page: [key, name,
+  // monthly price, kind]. A work plan (Team, Enterprise, Business) has no price here, since seat prices vary: your company
+  // pays for it, or you type what you pay. "api" is paying per use with an API key, with no monthly plan.
   const CATALOG = {
-    claude: [["none", "No Claude plan", 0], ["pro", "Claude Pro", 20], ["max5", "Claude Max 5x", 100], ["max20", "Claude Max 20x", 200], ["other", "Another Claude plan", null]],
-    chatgpt: [["none", "No ChatGPT plan", 0], ["plus", "ChatGPT Plus", 20], ["pro100", "ChatGPT Pro", 100], ["pro200", "ChatGPT Pro, top tier", 200], ["other", "Another ChatGPT plan", null]],
+    claude: [["none", "No Claude plan", 0, "none"], ["pro", "Claude Pro", 20, "personal"], ["max5", "Claude Max 5x", 100, "personal"], ["max20", "Claude Max 20x", 200, "personal"],
+      ["team_std", "Claude Team, Standard seat", null, "work"], ["team_prem", "Claude Team, Premium seat", null, "work"], ["ent", "Claude Enterprise", null, "work"], ["work", "Not sure which plan", null, "work"],
+      ["api", "I pay per use with an API key", null, "api"], ["other", "Another Claude plan", null, "other"]],
+    chatgpt: [["none", "No ChatGPT plan", 0, "none"], ["plus", "ChatGPT Plus", 20, "personal"], ["pro100", "ChatGPT Pro", 100, "personal"], ["pro200", "ChatGPT Pro", 200, "personal"], ["pro500", "ChatGPT Pro", 500, "personal"],
+      ["business", "ChatGPT Business", null, "work"], ["ent", "ChatGPT Enterprise", null, "work"], ["work", "Not sure which plan", null, "work"],
+      ["api", "I pay per use with an API key", null, "api"], ["other", "Another ChatGPT plan", null, "other"]],
   };
   const vendorOf = (p) => ((p.covers || []).includes("Codex") ? "chatgpt" : "claude");
   function planPicks() {
     if (S.qplans) return S.qplans;
-    const pick = { claude: "none", chatgpt: "none", claudeUsd: "", chatgptUsd: "" };
+    const pick = { claude: "none", chatgpt: "none", claudeUsd: "", chatgptUsd: "", claudeWho: "company", chatgptWho: "company" };
     (B.plans || []).forEach((p) => {
-      const v = vendorOf(p), hit = CATALOG[v].find((c) => c[2] === p.monthly_usd && c[0] !== "none");
-      pick[v] = hit ? hit[0] : "other"; if (!hit) pick[v + "Usd"] = p.monthly_usd;
+      const v = vendorOf(p), hit = CATALOG[v].find((c) => (p.plan ? c[0] === p.plan : c[2] === p.monthly_usd && c[0] !== "none"));
+      pick[v] = hit ? hit[0] : "other"; if (p.monthly_usd != null && (!hit || hit[2] == null)) pick[v + "Usd"] = p.monthly_usd;
+      if (hit && hit[3] === "work") pick[v + "Who"] = payOf(p) === "company" ? "company" : "self";
     });
     return (S.qplans = pick);
   }
   function plansSheet() {
     const pk = planPicks();
-    const group = (v, title) => `<div class="q-grp"><h4>${title}</h4><div class="q-radios">${CATALOG[v].map(([k, name, usd]) => `<label class="q-radio${pk[v] === k ? " on" : ""}"><input type="radio" name="plan-${v}" data-w="q:plan:${v}:${k}" ${pk[v] === k ? "checked" : ""}><span>${esc(name)}${usd != null && usd > 0 ? ` <small>$${usd} a month</small>` : ""}${k === "other" ? ` <span class="q-amt">$<input type="number" min="0" max="5000" step="1" inputmode="decimal" data-plan-usd="${v}" value="${esc(pk[v + "Usd"])}" aria-label="Monthly price"> a month</span>` : ""}</span></label>`).join("")}</div></div>`;
-    return { title: "Which plans do you pay for?", kind: "plans", body: `<p>Crossview compares what you pay for each plan with the work you did on it. Pick your Claude plan and your ChatGPT plan. Codex comes with ChatGPT. If your bill shows a different price, pick "Another" and type it in.</p>
+    const amt = (v) => `<span class="q-amt">$<input type="number" min="0" max="5000" step="1" inputmode="decimal" data-plan-usd="${v}" value="${esc(pk[v + "Usd"])}" aria-label="Monthly price"> a month</span>`;
+    // a work plan asks one more thing: who pays for it
+    const who = (v) => `<span class="q-who" role="radiogroup" aria-label="Who pays for it">${[["company", "My company pays for it"], ["self", "I pay for it"]].map(([w, l]) => `<label class="q-radio sub${pk[v + "Who"] === w ? " on" : ""}"><input type="radio" name="who-${v}" data-w="q:who:${v}:${w}" ${pk[v + "Who"] === w ? "checked" : ""}><span>${l}${w === "self" ? amt(v) : ""}</span></label>`).join("")}</span>`;
+    const radio = (v, [k, name, usd, kind]) => `<label class="q-radio${pk[v] === k ? " on" : ""}"><input type="radio" name="plan-${v}" data-w="q:plan:${v}:${k}" ${pk[v] === k ? "checked" : ""}><span>${esc(name)}${usd != null && usd > 0 ? ` <small>$${usd} a month</small>` : ""}${k === "other" ? ` ${amt(v)}` : ""}</span></label>${kind === "work" && pk[v] === k ? who(v) : ""}`;
+    const part = (v, kinds, h) => { const xs = CATALOG[v].filter((c) => kinds.includes(c[3])); return `${h ? `<p class="q-sub">${h}</p>` : ""}${xs.map((c) => radio(v, c)).join("")}`; };
+    const group = (v, title) => `<div class="q-grp"><h4>${title}</h4><div class="q-radios">${part(v, ["none", "personal"], "On your own")}${part(v, ["work"], "Through work")}${part(v, ["api", "other"], "Something else")}</div></div>`;
+    return { title: "Which plans do you have?", kind: "plans", body: `<p>Crossview compares what each plan costs with the work you did on it. Pick your Claude plan and your ChatGPT plan, which includes Codex.</p>
       ${group("claude", "Your Claude plan, for Claude Code, Cowork and the Claude app")}${group("chatgpt", "Your ChatGPT plan, which includes Codex")}
-      <p class="q-small">Claude's prices come from Anthropic's plan pages, checked Oct 13 2026. ChatGPT's come from published guides because OpenAI's own page couldn't be read, so check them against your bill. Your answer is saved only on this Mac, and you can change it here at any time.</p>`,
+      <p class="q-small">Prices come from Anthropic's and OpenAI's pricing pages, checked Oct 17 2026. If your bill shows a different price, pick "Another" and type it in. Your answer is saved only on this Mac, and you can change it here at any time.</p>`,
       req: { kind: "plans" }, ask: null };
   }
   function askPlans() {
     return card("plan", "Am I on the right plan?", true, `<p class="q-a">Crossview first needs to know which plans you pay for.</p><p class="q-why">It compares what you pay with the work you did on them. It takes two clicks, and your answer stays on this Mac.</p>`,
       `<span class="q-lead">${LIVE ? "" : DEMO ? "" : "To save your plans, start Crossview by double-clicking “Agent Crossview.command” in its folder."}</span><button class="w-btn main" data-w="q:sheet:plans">Choose my plans</button>`);
   }
+  // the business version (Oct 17): a plan your company pays for, or paying per use, has no monthly price to compare, so
+  // the card gives the work's pay-per-use price, never suggests a bigger plan, and says a change is the admin's to make
+  function planWork(per) {
+    const nd = daysIn(per), use = useOf(per), hits = hitsIn(per), ch = hits.filter((h) => h.tool !== "Codex"), cx = hits.length - ch.length;
+    const appUse = (apps) => apps.reduce((x, a) => x + ((((M.apps || {})[per] || {})[a] || {}).usd || 0), 0);
+    // with the app switch, Codex has its own plan panel, so Claude's card speaks only of Claude's plan
+    const ps = (B.plans || []).filter((p) => !hasCodex() || !(p.covers || []).includes("Codex")), co = ps.filter((p) => payOf(p) === "company"), api = ps.filter((p) => payOf(p) === "api"), own = ps.filter(priced);
+    const would = per === thisWeek ? "would cost" : "would have cost";
+    let a;
+    if (use < 1) a = `No work was recorded ${wk(per)}${soFar(per)}.`;
+    else a = [co.length ? `Your company pays for ${list(co.map((p) => planName(p)))}, so there's no price for you to compare.` : "",
+      api.length ? `You pay per use with an API key, so your bill for ${list(api.map((p) => list(p.covers || []).replace("Claude app", "the Claude app")))} ${wk(per)} should be close to the price below.` : "",
+      ...own.map((p) => { const paid = (p.monthly_usd * 12 / 365) * nd; return appUse(p.covers || []) >= paid ? `${planName(p)} covered its cost ${wk(per)}.` : `${planName(p)} cost more than the work it covered ${wk(per)}.`; })].filter(Boolean).join(" ");
+    const fig = `<div class="q-fig"><div class="q-big" ${tip(`The pay-per-use price is what the same work would cost at published per-use prices. Each reply ${wk(per)} is priced at its model's published rate, checked ${G.prices_checked}. It's an estimate and may run a little low.`)}>${money(use)}<small>${api.length && !co.length ? "Your work at pay-per-use prices, close to your bill" : "Pay-per-use price of your work"}</small></div></div>`;
+    let line = "";
+    if (ch.length) { const kinds = [...new Set(ch.map(limitName))], days = [...new Set(ch.map((h) => weekday(h.ts)))]; line = `The ${list(kinds)} limit stopped you <b>${nWord(ch.length)}</b> on ${list(days)}.`; }
+    if (cx) line += ` Codex's limit stopped you ${nWord(cx)}.`;
+    const option = co.length ? `<p class="q-why" ${tip("Your company picks the plan and the seats on it, so it decides how much room your limits have.")}>Your company picks the plan. If you keep running out, ask your admin.</p>` : "";
+    const change = DEMO ? "" : `<button class="w-link q-change" data-w="q:sheet:plans">Change my plans</button>`;
+    const act = `<span class="q-lead">${line}</span>${ch.length ? `<button class="w-btn" data-w="q:sheet:stops">Show me ${ch.length === 1 ? "the stop" : ch.length === 2 ? "both stops" : "the stops"}</button>` : ""}`;
+    return card("plan", "Am I on the right plan?", false, `<p class="q-a">${a}</p>${fig}${change}${option}`, act);
+  }
   function plan(per) {
     if (!DEMO && B.plans_asked === false) return askPlans();
-    const nd = daysIn(per), paid = PER_DAY * nd, use = useOf(per), hits = hitsIn(per), ch = hits.filter((h) => h.tool !== "Codex"), cx = hits.length - ch.length;
+    const mine = (B.plans || []).filter((p) => !hasCodex() || !(p.covers || []).includes("Codex"));
+    if (mine.some((p) => !priced(p))) return planWork(per);
+    // a plan with no price elsewhere (Codex through work, say): compare only the plans you pay for with the work they cover
+    const mixed = (B.plans || []).some((p) => !priced(p)), ownApps = mixed ? [...new Set(B.plans.filter(priced).flatMap((p) => p.covers || []))] : null;
+    const nd = daysIn(per), paid = PER_DAY * nd, use = mixed ? ownApps.reduce((x, a) => x + ((((M.apps || {})[per] || {})[a] || {}).usd || 0), 0) : useOf(per), hits = hitsIn(per), ch = hits.filter((h) => h.tool !== "Codex"), cx = hits.length - ch.length;
     const ratio = paid ? use / paid : 0, claude = (B.plans || []).find((p) => /claude/i.test(p.name));
     // each plan on its own, this week and the four full weeks before, so the answer rests on more than a few days
     const prior = [1, 2, 3, 4].map((i) => plus(per, -7 * i)).filter((w) => M.periods[w]);
@@ -98,7 +152,8 @@ window.GBAnswers = function (X) {
     const trend = plans.length && prior.length >= 2 ? `<ul class="q-plans" ${tip(`Each plan's cost for these days, next to the pay-per-use price of the work done in the apps it covers. The ${prior.length} weeks before run from ${day(prior[prior.length - 1])} to ${day(plus(prior[0], 6))}. Chats in the Claude app and ChatGPT aren't recorded on this Mac, so a plan may be worth more than it shows here.`)}>${plans.map((x) => `<li><b>${esc(planName(B.plans.find((p) => p.name === x.name) || x))}</b><span>${usd(x.now)} of work for ${usd(x.paid)}${soFar(per)}</span><span class="dim">The ${prior.length} weeks before, ${usd(x.before)} of work for ${usd(x.paidBefore)}</span></li>`).join("")}</ul>${DEMO ? "" : `<button class="w-link q-change" data-w="q:sheet:plans">Change my plans</button>`}` : "";
     // the plan that would give more room, from Anthropic's own page; only worth saying when a limit stopped you
     let option = "";
-    if (ch.length && claude) {
+    if (ch.length && claude && workPlan(claude)) option = `<p class="q-why">Your company's plan sets these limits. If they keep stopping you, ask your admin.</p>`;
+    else if (ch.length && claude) {
       option = claude.monthly_usd >= 200 ? "You're already on the largest Max plan. The next step up is a Team plan or an API plan."
         : claude.monthly_usd >= 100 ? "Max 20x costs $100 more a month and gives you four times as much room in each 5-hour window. Anthropic doesn't say how much bigger the weekly limit gets."
         : "Max 5x costs $100 a month and gives you five times as much room as Pro in each 5-hour window.";
@@ -206,9 +261,10 @@ window.GBAnswers = function (X) {
     else act = `<span class="q-lead">You can run ${names.length ? list(names) : "the subagents you pick"} on Sonnet, a smaller model, by adding one line to ${names.length === 1 ? "its file" : "each file"}. You can undo it at any time.</span><button class="w-btn main" data-w="q:sheet:limit">Show me the change</button>${later("limit")}`;
     if (done && cands.length) act = madeAct(done, esc(done.summary)) + `<button class="w-btn" data-w="q:sheet:limit">Show me the list</button>`;
     // the warning in Claude Code, as a switch: on only after a yes, off with Undo
-    const pd = active("pace")[0], other = (G.rules || {}).status_line && !pd;
-    const sw = `<button class="q-switch${pd ? " on" : ""}" data-w="${pd ? `q:sheet:undo:${esc(pd.id)}` : "q:sheet:pace"}" ${other ? "disabled" : ""} ${tip(pd ? "Claude Code shows your limits after each reply and warns you when you're on pace to run out. Click to switch it off." : other ? "You already have your own line at the bottom of Claude Code, so Crossview won't replace it." : "Shows your limits at the bottom of Claude Code. It turns orange when you're on pace to run out before the limit resets. Clicking shows you the change first.")}><i aria-hidden="true"></i>${pd ? "Claude Code now warns you before you run out" : "Warn me in Claude Code before I run out"}</button>`;
-    return card("limit", "What used up my limit?", (!!n && !!cands.length && !snoozed("q:limit") && !done) || soon, `<p class="q-a">${a}</p>${ahead}${bar}<p class="q-why" ${tip(MODEL_SRC)}>${why}</p>${sw}`, act);
+    const pd = active("pace")[0], other = (G.rules || {}).status_line && !pd, cpl = claudePlan(), noLine = !pd && cpl && (workPlan(cpl) || payOf(cpl) === "api"), coLine = !pd && lockOf("status-line");
+    const sw = `<button class="q-switch${pd ? " on" : ""}" data-w="${pd ? `q:sheet:undo:${esc(pd.id)}` : "q:sheet:pace"}" ${other || noLine || coLine ? "disabled" : ""} ${tip(pd ? "Claude Code shows your limits after each reply and warns you when you're on pace to run out. Click to switch it off." : coLine ? "Your company sets the line at the bottom of Claude Code. Ask your admin if it should change." : noLine ? "Claude Code shares your limits with this line only on Pro and Max plans, so on your plan it would stay empty." : other ? "You already have your own line at the bottom of Claude Code, so Crossview won't replace it." : "Shows your limits at the bottom of Claude Code. It turns orange when you're on pace to run out before the limit resets. Clicking shows you the change first.")}><i aria-hidden="true"></i>${pd ? "Claude Code now warns you before you run out" : "Warn me in Claude Code before I run out"}</button>`;
+    const swWhy = coLine ? "Your company sets what Claude Code shows below each reply, so Crossview can't add its warning. Ask your admin if it should change." : noLine ? "Claude Code shares your limits with this warning only on Pro and Max plans, so it can't warn you on your plan." : "";
+    return card("limit", "What used up my limit?", (!!n && !!cands.length && !snoozed("q:limit") && !done) || soon, `<p class="q-a">${a}</p>${ahead}${bar}<p class="q-why" ${tip(MODEL_SRC)}>${why}</p>${sw}${swWhy ? `<p class="q-why">${swWhy}</p>` : ""}`, act);
   }
   function limitSheet(per) {
     const f = limitFacts(per), { cands, work } = f;
@@ -383,19 +439,21 @@ window.GBAnswers = function (X) {
         ask: `Please undo this change Crossview made, and change nothing else: ${c.items.map((it) => it.added ? `in ${it.file}, take ${it.added.join(", ")} out of the "ask" list under "permissions"` : it.set ? `in ${it.file}, remove the "statusLine" setting` : it.before ? `in ${it.file}, change "${it.after}" back to "${it.before}"` : `in ${it.file}, remove the line "${it.after}" from the header block`).join("; ")}. Show me each change before you save it.` };
     }
     if (!s) return "";
+    const locked = s.kind && !s.undo ? lockOf(s.kind, s.req) : "";
+    if (locked) { s = Object.assign({}, s, { req: null, ask: null, cant: locked }); }
     const off = DEMO ? "This is the demo company, so changes are turned off." : LIVE ? "" : `To ${S.qopen.startsWith("undo:") ? "undo" : "make"} it, start Crossview by double-clicking “Agent Crossview.command” in its folder (Agent-Glass-Box).${s.ask ? " You can also copy the request for Claude Code." : ""}`;
     const copied = S.qcopied === S.qopen;
     // one row on every sheet: Make this change, Copy it for Claude Code, Close; what a sheet can't do is said in a line,
     // not by a different row (QA run 4, finding 9)
     // a sheet that only explains (the stops) has no change to make or copy, so it keeps just its own buttons (QA run 5, finding 1)
     const explains = !s.kind && !s.ask && !s.undo && s.kind !== "plans";
-    const why = s.kind === "plans" || s.undo || explains ? "" : [!s.kind ? (s.cant || "Crossview can't make this change itself, so copy the request instead.") : "", !s.ask ? "Crossview makes this change itself, so there's nothing to copy for Claude Code." : ""].filter(Boolean).join(" ");
+    const why = s.kind === "plans" || s.undo || explains ? "" : locked ? locked : [!s.kind ? (s.cant || "Crossview can't make this change itself, so copy the request instead.") : "", !s.ask ? "Crossview makes this change itself, so there's nothing to copy for Claude Code." : ""].filter(Boolean).join(" ");
     const btns = s.kind === "plans" ? `<button class="w-btn main" data-w="q:saveplans" ${LIVE ? "" : "disabled"}>Save my plans</button><button class="w-btn quiet" data-w="q:close">Close</button>` : (s.undo ? (LIVE ? `<button class="w-btn main" data-w="q:undo:${esc(s.undo)}">Undo it</button>` : "") : explains ? "" : `<button class="w-btn main" data-w="q:make" ${!s.kind || !LIVE || !s.req ? "disabled" : ""}>Make this change</button>`)
       + (s.kind === "plans" || explains ? "" : `<button class="w-btn" data-w="q:copy" data-prompt="${esc(s.ask || "")}" ${s.ask ? tip("Copies a request to paste into Claude Code. Claude then makes the same change and asks before saving. Nothing happens until you paste it.") : "disabled"}>${copied ? "Copied. Paste it into Claude Code" : "Copy it for Claude Code"}</button>`)
       + (s.foot || "") + (s.kind === "plans" ? "" : `<button class="w-btn quiet" data-w="q:close">Close</button>`);
     return `<div class="q-veil" data-w="q:close"></div><div class="q-sheet" role="dialog" aria-modal="true" aria-labelledby="q-sheet-h">
       <header><h3 id="q-sheet-h">${esc(s.title)}</h3><button class="q-x" data-w="q:close" aria-label="Close">×</button></header>
-      <div class="q-sheet-b">${s.body}${why ? `<p class="q-off">${esc(why)}</p>` : ""}${off && (s.kind || s.undo) && !(s.kind === "plans" && DEMO) ? `<p class="q-off">${esc(off)}</p>` : ""}${S.qerr ? `<p class="q-err" role="alert">${esc(S.qerr)}</p>` : ""}</div>
+      <div class="q-sheet-b">${locked ? `<p class="q-off">${esc(locked)}</p>` : ""}${s.body}${why && !locked ? `<p class="q-off">${esc(why)}</p>` : ""}${off && (s.kind || s.undo) && !(s.kind === "plans" && DEMO) ? `<p class="q-off">${esc(off)}</p>` : ""}${S.qerr ? `<p class="q-err" role="alert">${esc(S.qerr)}</p>` : ""}</div>
       <div class="g-more q-more" aria-hidden="true">More below ↓</div><footer>${btns}</footer></div>`;
   }
   function current(per) {
@@ -505,16 +563,28 @@ window.GBAnswers = function (X) {
     return "";
   }
 
+  // no readings: on a company plan, or paying per use, say why instead of an empty chart (Oct 17). Claude Code shares its
+  // limit readings only on Pro and Max (Anthropic's status line docs, checked Oct 17 2026), so a work seat usually has none.
+  const noClaudeReadings = () => { const cp = claudePlan(); return !!cp && (workPlan(cp) || payOf(cp) === "api") && !((M.plan || {}).readings || []).length; };
+  const ax = (x0, y0, t) => `<text x="${x0}" y="${y0}" text-anchor="middle" class="q-p-ax">${esc(t)}</text>`;
+  function noReadings(per) {
+    const cp = claudePlan(), mid = 502;  // the middle of the chart, x(3.5)
+    if (cp && payOf(cp) === "api") return ax(mid, 130, "Paying per use with an API key has no weekly limit to show");
+    if (cp && workPlan(cp)) return ax(mid, 118, "Company plans usually don't save your weekly limit on this computer.") + ax(mid, 142, "In Claude Code, type /usage to see how much you've used.");
+    return ax(mid, 130, `No readings of Claude's weekly limit ${wk(per)}`);
+  }
   // Claude's weekly limit through the week, from the Claude app's readings on this Mac, with every limit stop marked
   function pace(per, noCodex) {
     const P = M.plan || {}, t0 = new Date(per + "T00:00").getTime(), D = 86400000, off = (d) => (new Date(d).getTime() - t0) / D;
     const R = (P.readings || []).filter(([t, sd]) => sd != null && off(t) >= 0 && off(t) < 7).map(([t, sd]) => [off(t), sd, t]);
     const reset = P.weekly_reset && P.weekly_reset.last && off(P.weekly_reset.last) >= 0 && off(P.weekly_reset.last) < 7 ? off(P.weekly_reset.last) : null;
     const isNow = per === thisWeek, last = R[R.length - 1], END = 7, x = (d) => 96 + d * 116, y = (v) => 222 - v * 1.84;
-    let g = `<line x1="${x(0)}" y1="${y(100)}" x2="${x(END)}" y2="${y(100)}" class="q-p-ceil"/><text x="0" y="${y(100) + 4}" class="q-p-ax">all used</text><line x1="${x(0)}" y1="${y(50)}" x2="${x(END)}" y2="${y(50)}" class="q-p-grid"/><text x="0" y="${y(50) + 4}" class="q-p-ax">half</text><line x1="${x(0)}" y1="${y(0)}" x2="${x(END)}" y2="${y(0)}" class="q-p-base"/><text x="0" y="${y(0) + 4}" class="q-p-ax">none</text>`;
+    // a company plan or paying per use with no readings at all: no empty grid, only the days and the sentence saying why (Oct 17)
+    const bare = !R.length && noClaudeReadings();
+    let g = bare ? `<line x1="${x(0)}" y1="${y(0)}" x2="${x(END)}" y2="${y(0)}" class="q-p-base"/>` : `<line x1="${x(0)}" y1="${y(100)}" x2="${x(END)}" y2="${y(100)}" class="q-p-ceil"/><text x="0" y="${y(100) + 4}" class="q-p-ax">all used</text><line x1="${x(0)}" y1="${y(50)}" x2="${x(END)}" y2="${y(50)}" class="q-p-grid"/><text x="0" y="${y(50) + 4}" class="q-p-ax">half</text><line x1="${x(0)}" y1="${y(0)}" x2="${x(END)}" y2="${y(0)}" class="q-p-base"/><text x="0" y="${y(0) + 4}" class="q-p-ax">none</text>`;
     // what hasn't happened yet starts now, not at the last reading (release 1 QA, finding 5)
     const nowD = last ? Math.min(END, Math.max(last[0], (Date.now() - t0) / D)) : null;
-    if (isNow && last) g += `<rect x="${x(nowD)}" y="${y(100) - 12}" width="${Math.max(0, x(END) - x(nowD))}" height="${y(0) - y(100) + 12}" class="q-p-ahead"/><text x="${x(nowD) + 10}" y="${y(100) + 16}" class="q-p-ax">hasn't happened yet</text>`;
+    if (isNow && last) g += `<rect x="${x(nowD)}" y="${y(100) - 12}" width="${Math.max(0, x(END) - x(nowD))}" height="${y(0) - y(100) + 12}" class="q-p-ahead"/>${x(END) - x(nowD) > 150 ? `<text x="${x(nowD) + 10}" y="${y(100) + 16}" class="q-p-ax">hasn't happened yet</text>` : ""}`;
     ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach((d, i) => { const dd = plus(per, i), fut = isNow && dd > G.today; g += `<text x="${x(i + 0.5)}" y="${y(0) + 22}" text-anchor="middle" class="q-p-day${fut ? " fut" : ""}${dd === G.today ? " today" : ""}">${d}</text>`; });
     if (R.length) {
       const pts = (reset != null && reset < R[0][0] ? [[reset, 0]] : []).concat(R.map(([d, v]) => [d, v]));
@@ -522,12 +592,16 @@ window.GBAnswers = function (X) {
       g += `<circle cx="${x(last[0])}" cy="${y(last[1])}" r="5" class="q-p-dot"/>`;
       const wp = P.weekly_pace || {};
       if (isNow) {
-        g += `<line x1="${x(last[0])}" y1="${y(100) - 18}" x2="${x(last[0])}" y2="${y(0)}" class="q-p-now"/><text x="${x(last[0])}" y="${y(100) - 22}" text-anchor="middle" class="q-p-lab strong">the Claude app's last reading, ${esc(ampm(new Date(last[2]).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }).replace(",", "")))}</text>`;
+        g += `<line x1="${x(last[0])}" y1="${y(100) - 18}" x2="${x(last[0])}" y2="${y(0)}" class="q-p-now"/>${((t, cx0) => { const half = t.length * 3.6, end = cx0 + half > 936, start = cx0 - half < 96; return `<text x="${end ? 936 : start ? 96 : cx0}" y="${y(100) - 22}" text-anchor="${end ? "end" : start ? "start" : "middle"}" class="q-p-lab strong">${esc(t)}</text>`; })(`the Claude app's last reading, ${ampm(new Date(last[2]).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }).replace(",", ""))}`, x(last[0]))}`;
         g += `<text x="${x(last[0]) + 10}" y="${y(last[1]) + 20}" class="q-p-lab strong">${last[1]}% used</text>`;
         if (wp.runs_out) { const ro = Math.min(END, off(wp.runs_out)); g += `<path d="M${x(last[0])} ${y(last[1])} L${x(ro)} ${y(100)}" class="q-p-proj hot"/><text x="${x(ro) - 8}" y="${y(100) + 18}" text-anchor="end" class="q-p-lab hot">at this pace it runs out ${esc(shortWhen(wp.runs_out))}</text>`; }
         else if (wp.at_reset != null) { const e = P.weekly_reset && P.weekly_reset.next ? Math.min(END + 0.3, off(P.weekly_reset.next)) : END; g += `<path d="M${x(last[0])} ${y(last[1])} L${x(Math.min(END, e))} ${y(wp.at_reset * Math.min(END, e) / e + last[1] * (1 - Math.min(END, e) / e))}" class="q-p-proj"/><text x="${x(END) - 4}" y="${y(Math.max(wp.at_reset, last[1])) - 12}" text-anchor="end" class="q-p-lab">${wp.at_reset >= 45 && wp.at_reset <= 55 ? "about half" : `about ${wp.at_reset}%`} when it resets</text>`; }
-      } else g += `<text x="${x(last[0]) + 10}" y="${y(last[1]) + 20}" class="q-p-lab strong">${last[1]}% at the last reading, ${esc(new Date(last[2]).toLocaleDateString("en-US", { weekday: "long" }))}</text>`;
-    } else g += `<text x="${x(3.5)}" y="${y(50)}" text-anchor="middle" class="q-p-ax">No readings of Claude's weekly limit ${wk(per)}</text>`;
+      } else {
+        // late in the week the label would run off the chart: it goes on the left of the dot instead (found on made-up records, Oct 17)
+        const t = `${last[1]}% at the last reading, ${new Date(last[2]).toLocaleDateString("en-US", { weekday: "long" })}`, left = x(last[0]) + 10 + t.length * 7.4 > 940;
+        g += `<text x="${x(last[0]) + (left ? -10 : 10)}" y="${y(last[1]) + 20}"${left ? ' text-anchor="end"' : ""} class="q-p-lab strong">${esc(t)}</text>`;
+      }
+    } else g += noReadings(per);
     // Claude's chart marks only Claude's own limits; Codex's stops get their own line under it (camera fix batch, Oct 15)
     const hs = hitsIn(per).filter((h) => h.tool !== "Codex");
     hs.forEach((h) => { const d = off(at(h.ts)); g += `<line x1="${x(d)}" y1="${y(0) - 7}" x2="${x(d)}" y2="${y(0) + 7}" class="q-p-stop"/>`; });
@@ -551,14 +625,20 @@ window.GBAnswers = function (X) {
     const nd = daysIn(per), paid = !app ? PER_DAY * nd : (ps.reduce((a, p) => a + (p.monthly_usd || 0), 0) * 12 / 365) * nd, use = !app ? useOf(per) : app === "Codex" ? cxUse : Math.max(0, useOf(per) - cxUse), mx = Math.max(paid, use, 1), so = per === thisWeek ? "so far this week" : "last week";
     const nm = planName;
     if (!ps.length) return `<p class="q-p-none">Crossview doesn't know which plan covers ${esc(app)} yet.</p>`;
-    return `<div class="q-plans">${ps.map((p) => `<span class="q-plan"><b>${esc(nm(p))}</b> $${p.monthly_usd} a month, flat<small>covers ${esc(list((p.covers || []).map((c) => (c === "Claude app" ? "the Claude app" : c))))}</small></span>`).join("")}</div>
+    const chips = `<div class="q-plans">${ps.map((p) => `<span class="q-plan"><b>${esc(nm(p))}</b> ${costWords(p)}<small>covers ${esc(list((p.covers || []).map((c) => (c === "Claude app" ? "the Claude app" : c))))}</small></span>`).join("")}</div>`;
+    // a plan with no monthly price here (your company's, or per use): the work's pay-per-use price on its own
+    if (ps.some((p) => !priced(p))) { const api = ps.every((p) => payOf(p) === "api");
+      return `${chips}<div class="q-cmp"><span ${tip(api ? "Pay-per-use prices are what the same work would cost if you paid for each use. With an API key, that's close to your bill." : "Pay-per-use prices are what the same work would cost if you paid for each use. Your company pays for the plan, so this isn't a bill.")}>${api ? "Your work at pay-per-use prices" : "If you paid per use"}</span><span class="q-barw"><b>${app === "Codex" ? dollars(use) : money(use)}${per === thisWeek ? " so far" : ""}</b></span></div>`; }
+    return `${chips}
       <div class="q-cmp"><span ${tip(per === thisWeek ? "A daily share of what you pay each month, for the days of this week so far. Your plans are flat fees, so this is how much of them this week used up." : "A daily share of what you pay each month, for the seven days of last week. Your plans are flat fees, so this is how much of them last week used up.")}>${ps.length === 1 ? (per === thisWeek ? "What your plan costs" : "What your plan cost") : "What your plans cost"} ${so}</span><span class="q-barw"><i class="q-bar paid" style="width:${Math.max(1, (paid / mx) * 70)}%"></i><b>about $${Math.round(paid)}</b></span>
         <span ${tip("Pay-per-use prices are what the same work would cost if you paid for each use instead of a flat plan. It isn't a bill.")}>If you paid per use instead</span><span class="q-barw"><i class="q-bar use" style="width:${Math.max(1, (use / mx) * 70)}%"></i><b>${app === "Codex" ? dollars(use) : money(use)}${per === thisWeek ? " so far" : ""}</b></span></div>`;
   }
 
   // ---------- Codex, one app at a time (release 1, Oct 16): its own limit chart, from the readings in its logs ----------
   const hasCodex = () => Object.values(M.apps || {}).some((a) => a && a.Codex) || !!((M.codex_plan || {}).readings || []).length;
-  const appOf = () => (S.qapp === "Codex" && hasCodex() ? "Codex" : "Claude");
+  // someone who only uses Codex opens on Codex, not on Claude's empty view (follow-up from the stranger test, built with the walk)
+  const codexOnly = () => !((G.ranges || {})["Claude Code"] || (G.ranges || {}).Cowork || ((M.plan || {}).readings || []).length);
+  const appOf = () => ((S.qapp === "Codex" || (!S.qapp && codexOnly())) && hasCodex() ? "Codex" : "Claude");
   const cxHits = (per) => hitsIn(per).filter((h) => h.tool === "Codex");
   const cxChats = (per) => (((M.apps || {})[per] || {}).Codex || {}).sessions || 0;
   function codexPace(per) {
@@ -569,13 +649,13 @@ window.GBAnswers = function (X) {
     let g = `<line x1="${x(0)}" y1="${y(100)}" x2="${x(END)}" y2="${y(100)}" class="q-p-ceil"/><text x="0" y="${y(100) + 4}" class="q-p-ax">all used</text><line x1="${x(0)}" y1="${y(50)}" x2="${x(END)}" y2="${y(50)}" class="q-p-grid"/><text x="0" y="${y(50) + 4}" class="q-p-ax">half</text><line x1="${x(0)}" y1="${y(0)}" x2="${x(END)}" y2="${y(0)}" class="q-p-base"/><text x="0" y="${y(0) + 4}" class="q-p-ax">none</text>`;
     // what hasn't happened yet starts now, not at the last reading (release 1 QA, finding 5)
     const nowD = last ? Math.min(END, Math.max(last[0], (Date.now() - t0) / D)) : null;
-    if (isNow && last) g += `<rect x="${x(nowD)}" y="${y(100) - 12}" width="${Math.max(0, x(END) - x(nowD))}" height="${y(0) - y(100) + 12}" class="q-p-ahead"/><text x="${x(nowD) + 10}" y="${y(100) + 16}" class="q-p-ax">hasn't happened yet</text>`;
+    if (isNow && last) g += `<rect x="${x(nowD)}" y="${y(100) - 12}" width="${Math.max(0, x(END) - x(nowD))}" height="${y(0) - y(100) + 12}" class="q-p-ahead"/>${x(END) - x(nowD) > 150 ? `<text x="${x(nowD) + 10}" y="${y(100) + 16}" class="q-p-ax">hasn't happened yet</text>` : ""}`;
     ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].forEach((d, i) => { const dd = plus(per, i), fut = isNow && dd > G.today; g += `<text x="${x(i + 0.5)}" y="${y(0) + 22}" text-anchor="middle" class="q-p-day${fut ? " fut" : ""}${dd === G.today ? " today" : ""}">${d}</text>`; });
     if (R.length) {
       // a new path where Codex's week started over, so the line drops instead of sliding down
       g += `<path d="${R.map(([d, v], k) => `${k && starts.some((s0) => R[k - 1][0] < s0 && s0 <= d) ? "M" : k ? "L" : "M"}${x(d).toFixed(1)} ${y(v).toFixed(1)}`).join(" ")}" class="q-p-line"/>`;
       g += `<circle cx="${x(last[0])}" cy="${y(last[1])}" r="5" class="q-p-dot"/>`;
-      if (isNow) g += `<line x1="${x(last[0])}" y1="${y(100) - 18}" x2="${x(last[0])}" y2="${y(0)}" class="q-p-now"/><text x="${x(last[0])}" y="${y(100) - 22}" text-anchor="middle" class="q-p-lab strong">Codex's last reading, ${esc(ampm(new Date(last[2]).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }).replace(",", "")))}</text>`;
+      if (isNow) g += `<line x1="${x(last[0])}" y1="${y(100) - 18}" x2="${x(last[0])}" y2="${y(0)}" class="q-p-now"/>${((t, cx0) => { const half = t.length * 3.6, end = cx0 + half > 936, start = cx0 - half < 96; return `<text x="${end ? 936 : start ? 96 : cx0}" y="${y(100) - 22}" text-anchor="${end ? "end" : start ? "start" : "middle"}" class="q-p-lab strong">${esc(t)}</text>`; })(`Codex's last reading, ${ampm(new Date(last[2]).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }).replace(",", ""))}`, x(last[0]))}`;
       g += `<text x="${x(last[0]) + 10}" y="${y(last[1]) - 10}" class="q-p-lab strong">${Math.round(last[1])}% used</text>`;
     } else g += `<text x="${x(3.5)}" y="${y(50)}" text-anchor="middle" class="q-p-ax">No readings of Codex's weekly limit ${wk(per)}</text>`;
     starts.forEach((d, k) => (g += `<line x1="${x(d)}" y1="${y(100)}" x2="${x(d)}" y2="${y(0)}" class="q-p-start"/><text x="${x(d) + 6}" y="${y(100) + (isNow && last && Math.abs(d - last[0]) < 0.6 ? 52 : 34)}" class="q-p-ax">${k === 0 && (!R.length || R[0][0] >= d - 0.01) ? "its week started" : "its week started over"}</text>`));
@@ -609,9 +689,13 @@ window.GBAnswers = function (X) {
   function codexPlanPanel(per) {
     const ps = B.plans.filter((p) => (p.covers || []).includes("Codex")), cxUse = (((M.apps || {})[per] || {}).Codex || {}).usd || 0;
     if (!ps.length) return `<p class="q-a">Crossview doesn't know which plan covers Codex yet.</p>`;
+    if (payOf(ps[0]) === "company") return `<p class="q-a">Your company pays for ${esc(planName(ps[0]))}, so there's no price for you to compare. Codex's work ${per === thisWeek ? "this week would cost" : "last week would have cost"} ${dollars(cxUse)} at pay-per-use prices.</p>
+      <p class="q-why">Your company's plan sets Codex's limits. If they keep stopping you, ask your admin.</p>`;
+    if (payOf(ps[0]) === "api") return `<p class="q-a">You pay per use for Codex with an API key, so your bill for ${wk(per)} should be close to ${dollars(cxUse)}.</p>
+      <p class="q-why">That's Codex's work priced at published per-use rates. Your bill from OpenAI is the exact figure.</p>`;
     const paid = (ps.reduce((a, p) => a + (p.monthly_usd || 0), 0) * 12 / 365) * daysIn(per), covered = cxUse >= paid;
     return `<p class="q-a">${covered ? `Yes. Codex's work ${per === thisWeek ? "this week would cost" : "last week would have cost"} ${dollars(cxUse)} at pay-per-use prices. Your ${esc(planName(ps[0]))} plan's share of those days is ${dollars(paid)}.` : `Your ${esc(planName(ps[0]))} plan's share of ${wk(per)} is ${dollars(paid)}${soFar(per)}. Codex's work would have cost ${dollars(cxUse)} at pay-per-use prices.`}</p>
-      <p class="q-why">${esc(planName(ps[0]))} is $${ps[0].monthly_usd} a month, flat. Pay-per-use prices are what the same work would cost if you paid for each use instead; they aren't a bill. ${covered ? "" : "A plan still makes sense if you value never paying per use, or if Codex helps you elsewhere."}</p>`;
+      <p class="q-why">${esc(planName(ps[0]))} is $${ps[0].monthly_usd} a month, flat.${workPlan(ps[0]) ? " Your company's plan sets Codex's limits, so a change is your admin's to make." : ""} Pay-per-use prices are what the same work would cost if you paid for each use instead; they aren't a bill. ${covered ? "" : "A plan still makes sense if you value never paying per use, or if Codex helps you elsewhere."}</p>`;
   }
   function codexLimitPanel(per) {
     const L = (M.codex_plan || {}).latest || {};
@@ -632,7 +716,8 @@ window.GBAnswers = function (X) {
     const stopLine = !hs.length ? `No limit stopped you ${wk(per)}${soFar(per)}.` : tools.length === 1 ? `${tools[0]}'s limit stopped you ${nWord(hs.length)} ${wk(per)}${hs.length === 1 ? `, on ${weekday(hs[0].ts)} ${partOfDay(hs[0].ts)}` : ""}.` : `Limits stopped you ${nWord(hs.length)} ${wk(per)}.`;
     // the first sentence answers one question, "am I okay?", in plain words; the stop is on the chart and the thing to
     // act on is the orange row right below (screen-words, copy deck Oct 15)
-    const covered = /^Yes\b/.test(ans("plan")), lead = esc(!B.plans.length ? "Crossview doesn't know which plans you pay for yet." : covered ? (per === thisWeek ? "Your plans are covering the cost of this week's work." : "Your plans covered the cost of last week's work.") : (per === thisWeek ? "Your plans cost more than this week's work would have." : "Your plans cost more than last week's work would have."));
+    const unpriced = (B.plans || []).filter((p) => !priced(p) && (!hasCodex() || !(p.covers || []).includes("Codex"))), coPays = unpriced.some((p) => payOf(p) === "company");
+    const covered = /^Yes\b/.test(ans("plan")), lead = esc(!B.plans.length ? "Crossview doesn't know which plans you pay for yet." : unpriced.length ? (coPays ? (per === thisWeek ? "Your company pays for your plan, so this week costs you nothing extra." : "Your company paid for your plan, so last week cost you nothing extra.") : (per === thisWeek ? "You pay per use, so this week's bill grows with the work." : "You paid per use, so last week's bill grew with the work.")) : covered ? (per === thisWeek ? "Your plans are covering the cost of this week's work." : "Your plans covered the cost of last week's work.") : (per === thisWeek ? "Your plans cost more than this week's work would have." : "Your plans cost more than last week's work would have."));
     void planLine; void stopLine;
     const sw = !hasCodex() ? "" : `<div class="w-seg q-app" role="group" aria-label="Which app">${["Claude", "Codex"].map((a) => `<button data-w="q:app:${a}" aria-pressed="${appOf() === a}" ${tip(a === "Claude" ? "Claude Code, Cowork and the Claude app share one plan and one set of limits." : `Codex has its own plan and its own limits.${appOf() !== "Codex" && cxHits(per).length ? " The orange dot means a Codex limit stopped you " + wk(per) + "." : ""}`)}>${a}${a === "Codex" && appOf() !== "Codex" && cxHits(per).length ? '<i class="q-app-dot" aria-label="a Codex limit stopped you"></i>' : ""}</button>`).join("")}</div>`;
     const headRight = sw + `<button class="w-btn q-detail-btn" data-w="q:detail" ${tip("Opens the week in detail, with your limits, the subagents each app used and what you paid.")}>Show me the week in detail →</button>`;
@@ -655,7 +740,7 @@ window.GBAnswers = function (X) {
       return `${empty()}${St.page({ lead, title: `Your week ${per === thisWeek ? "so far" : ""}`.trim(), headRight, hint: false, canvas: ccanvas, key: ckey, strip: cstrip, cls: "q-page q-new q-cx", panel: { k: ck, n: cids.length, act: "q:plate:", unit: "Item", title: ctitle, line: cc ? esc(cc.line) : "", body: cbody } })}${sheet(per)}`;
     }
     const canvas = `<div class="q-wk">
-      <div class="q-pace-b${S.qsel === "limit" ? " sel" : ""}" data-w="q:plate:limit" role="button" tabindex="0" aria-pressed="${S.qsel === "limit"}" aria-label="Claude's weekly limit: open What used up my limit?"><span class="q-h">${per === thisWeek ? "How much of Claude's weekly limit you've used" : "How much of Claude's weekly limit you used"} <small>${hasCodex() ? "Claude Code, Cowork and the Claude app share this limit. " : ""}${per === thisWeek ? "It resets Monday morning." : `It reset on Monday, ${esc(day(per))}.`}</small></span>${pace(per, hasCodex())}</div>
+      <div class="q-pace-b${S.qsel === "limit" ? " sel" : ""}" data-w="q:plate:limit" role="button" tabindex="0" aria-pressed="${S.qsel === "limit"}" aria-label="Claude's weekly limit: open What used up my limit?"><span class="q-h">${per === thisWeek ? "How much of Claude's weekly limit you've used" : "How much of Claude's weekly limit you used"} <small>${hasCodex() ? "Claude Code, Cowork and the Claude app share this limit. " : ""}${noClaudeReadings() ? "" : per === thisWeek ? "It resets Monday morning." : `It reset on Monday, ${esc(day(per))}.`}</small></span>${pace(per, hasCodex())}</div>
       <div class="q-ch"><p class="q-h">What changed${hasCodex() ? " in Claude" : ""} ${wk(per)} <small ${tip("Crossview compares the week with the four weeks before it, by fixed rules: a connector used far more than usual or for the first time, a skill you made, a subagent far above usual, or a different project taking 40% or more of the week. The ones that can send, delete or act as you come first.")} tabindex="0" class="q-hint">compared with the four weeks before</small></p>
         ${shown.length ? shown.map((c) => row(c.id, c.title, c.line, miniOf(c), c.hot, c.kind)).join("") : `<p class="q-quiet">Nothing else changed ${wk(per)}, compared with the four weeks before.</p>`}
         ${rest.length ? row("more", `${plural(rest.length, "more change")}`, rest.map((c) => c.title).join(". ") + ".", "") : ""}</div>
@@ -664,7 +749,7 @@ window.GBAnswers = function (X) {
     const k = ids.indexOf(S.qsel), c = ch.find((x) => x.id === S.qsel);
     const titles = { limit: per === thisWeek ? "How much of Claude's weekly limit you've used" : "How much of Claude's weekly limit you used", plan: "Am I on the right plan?", reach: "What can Claude reach outside my Mac?", carry: "What have I set up that I never use?", more: `${plural(rest.length, "more change")} ${wk(per)}` };
     const body = c ? changePanel(c, per) : S.qsel === "more" ? `<ul class="q-list">${rest.map((x) => `<li><b>${esc(x.title)}</b><br><small>${esc(x.line)}</small></li>`).join("")}</ul>` : `<div class="q-page-pick">${html[S.qsel]}</div>`;
-    const key = `<span class="q-cue" aria-hidden="true">More below ↓</span><span><i class="q-k ink"></i>From your logs and the Claude app's readings</span><span><i class="q-k blue"></i>What you pay</span><span><i class="y-jack hot" aria-hidden="true"></i>Something you can act on</span>`;
+    const key = `<span class="q-cue" aria-hidden="true">More below ↓</span><span><i class="q-k ink"></i>${noClaudeReadings() ? "From your logs" : "From your logs and the Claude app's readings"}</span><span><i class="q-k blue"></i>What you pay</span><span><i class="y-jack hot" aria-hidden="true"></i>Something you can act on</span>`;
     const strip = `<span ${tip("A subagent is a separate AI with its own instructions, which Claude Code can hand part of a job to.")}>${esc(agentsLine(per))}</span>`;
     return `${empty()}${St.page({ lead, title: `Your week ${per === thisWeek ? "so far" : ""}`.trim(), headRight, hint: false, canvas, key, strip, cls: "q-page q-new", panel: { k, n: ids.length, act: "q:plate:", unit: "Item", title: c ? c.title : titles[S.qsel], line: c ? esc(c.why || c.line) : "", body } })}${sheet(per)}`;
   }
@@ -688,22 +773,28 @@ window.GBAnswers = function (X) {
     // (the browser steps back too, so its own Back doesn't land on the same All weeks view twice)
     if (v === "q:front") { S.nview = null; if (S.hback && location.hash === "#detail") { S.allw = true; S.hback = false; S.fromHistory = true; history.back(); return "top"; } S.hback = false; if (location.hash === "#detail") history.replaceState(null, "", "#week"); return "top"; }
     if (v.startsWith("q:sheet:")) { S.qopen = v.slice(8); S.qerr = null; S.qcopied = null; S.qfocus = true; return "stay"; }
-    if (v === "q:close") { const k = S.qopen; S.qopen = null; S.qerr = null; S.qback = k; return "stay"; }
+    if (v === "q:close") { const k = S.qopen; S.qopen = null; S.qerr = null; S.qback = k; if (k === "plans") S.qplans = null; return "stay"; }
     if (v.startsWith("q:pick:")) {
       const [, , q, ...rest] = v.split(":"), name = rest.join(":");
       S.qpick = S.qpick || {}; if (!S.qpick[q]) (q === "limit" ? limitSheet : reachSheet)(per);
       const set = S.qpick[q]; set.has(name) ? set.delete(name) : set.add(name);
       return "stay";
     }
-    if (v.startsWith("q:plan:")) { const [, , vend, key] = v.split(":"); const pk = planPicks(); pk.claudeUsd = (document.querySelector('[data-plan-usd="claude"]') || {}).value || pk.claudeUsd; pk.chatgptUsd = (document.querySelector('[data-plan-usd="chatgpt"]') || {}).value || pk.chatgptUsd; pk[vend] = key; return "stay"; }
+    if (v.startsWith("q:plan:") || v.startsWith("q:who:")) {
+      const [, what, vend, key] = v.split(":"); const pk = planPicks(); pk.claudeUsd = (document.querySelector('[data-plan-usd="claude"]') || {}).value || pk.claudeUsd; pk.chatgptUsd = (document.querySelector('[data-plan-usd="chatgpt"]') || {}).value || pk.chatgptUsd;
+      if (what === "who") pk[vend + "Who"] = key; else pk[vend] = key;
+      return "stay";
+    }
     if (v === "q:saveplans") {
       const pk = planPicks(), plans = [];
       for (const vend of ["claude", "chatgpt"]) {
         const c = CATALOG[vend].find((x) => x[0] === pk[vend]);
         if (!c || c[0] === "none") continue;
-        const usdIn = c[0] === "other" ? Number((document.querySelector(`[data-plan-usd="${vend}"]`) || {}).value) : c[2];
-        if (c[0] === "other" && !(usdIn >= 0)) { S.qerr = "Type the monthly price for your other plan."; window.dispatchEvent(new Event("gb:render")); return false; }
-        plans.push({ vendor: vend, name: c[0] === "other" ? (vend === "claude" ? "Claude (other plan)" : "ChatGPT (other plan)") : c[1], monthly_usd: usdIn });
+        const kind = c[3], pay = kind === "api" ? "api" : kind === "work" && pk[vend + "Who"] === "company" ? "company" : "self";
+        const usdIn = pay !== "self" ? null : c[2] != null ? c[2] : Number((document.querySelector(`[data-plan-usd="${vend}"]`) || {}).value);
+        if (pay === "self" && !(usdIn >= 0)) { S.qerr = kind === "work" ? "Type what you pay each month for your plan, or pick “My company pays for it”." : "Type the monthly price for your other plan."; window.dispatchEvent(new Event("gb:render")); return false; }
+        const name = c[0] === "other" ? (vend === "claude" ? "Claude (other plan)" : "ChatGPT (other plan)") : c[0] === "work" ? (vend === "claude" ? "Claude, through work" : "ChatGPT, through work") : kind === "api" ? (vend === "claude" ? "Claude, paid per use" : "Codex, paid per use") : c[1];
+        plans.push(Object.assign({ vendor: vend, name, monthly_usd: usdIn }, pay !== "self" || c[3] !== "personal" ? { pay, plan: c[0] } : {}));
       }
       if (!LIVE) return false;
       el.disabled = true; el.textContent = "Saving…";

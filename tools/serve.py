@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
-"""Serves Crossview on this Mac only (127.0.0.1) and saves your corrections.
+"""Serves Crossview on this computer only (127.0.0.1) and saves your corrections.
 POST /api/move {"session": id, "work": name or null} moves a session to another piece of work (null undoes it),
 then regroups and rebuilds in about a second. The Progress page re-reads TASKS.md on every load.
 POST /api/change and /api/undo make or undo one of the prepared changes on Your week, only when you press the
 button (tools/changes.py says exactly which files and lines it may touch).
 Usage: python3 tools/serve.py [--open]"""
 import re, http.server, json, os, subprocess, sys, datetime, webbrowser, threading
+if os.name == "nt" and not sys.flags.utf8_mode:  # Windows: read and write every file as UTF-8, as on a Mac
+    os.environ["PYTHONUTF8"] = "1"
+    sys.exit(subprocess.call([sys.executable] + sys.argv))
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import changes
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
@@ -96,10 +99,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             out = []
             for p in got:
                 name, usd, vendor = (p or {}).get("name"), (p or {}).get("monthly_usd"), (p or {}).get("vendor")
+                pay, key = (p or {}).get("pay", "self"), (p or {}).get("plan")  # who pays (Oct 17): you, your company, or per use with an API key
                 if vendor not in ("claude", "chatgpt"): return self.reply(400, {"error": "unknown kind of plan"})
+                if pay not in ("self", "company", "api") or (key is not None and not (isinstance(key, str) and re.match(r"^[a-z0-9_]{1,12}$", key))): return self.reply(400, {"error": "unknown kind of plan"})
                 if not isinstance(name, str) or not name.strip() or len(name) > 40: return self.reply(400, {"error": "name the plan in 40 characters or fewer"})
-                if not isinstance(usd, (int, float)) or usd < 0 or usd > 5000: return self.reply(400, {"error": "enter a monthly price between $0 and $5,000"})
-                out.append({"name": name.strip(), "covers": CLAUDE_APPS if vendor == "claude" else GPT_APPS, "monthly_usd": round(float(usd), 2), "since": None})
+                if pay != "self": usd = None
+                elif not isinstance(usd, (int, float)) or usd < 0 or usd > 5000: return self.reply(400, {"error": "enter a monthly price between $0 and $5,000"})
+                row = {"name": name.strip(), "covers": CLAUDE_APPS if vendor == "claude" else GPT_APPS, "monthly_usd": None if usd is None else round(float(usd), 2), "since": None}
+                if "pay" in (p or {}): row.update({"pay": pay, "plan": key})
+                out.append(row)
             json.dump({"note": "Your plans, from the question on Your week (" + datetime.date.today().isoformat() + "). Change them there.", "plans": out},
                       open(os.path.join(ROOT, "data", "plans.json"), "w"), indent=1)
             r = run("tools/bills.py")
@@ -116,7 +124,7 @@ if __name__ == "__main__":
     try: srv = http.server.ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
     except OSError:  # already running from an earlier double-click: just open it
         print(f"Crossview is already running at {url}"); webbrowser.open(url); sys.exit(0)
-    print(f"Crossview is open at {url}  (this Mac only). Close this window to stop it.")
+    print(f"Crossview is open at {url}  (this computer only). Close this window to stop it.")
     if "--open" in sys.argv: threading.Timer(0.5, lambda: webbrowser.open(url)).start()
     try: srv.serve_forever()
     except KeyboardInterrupt: pass
