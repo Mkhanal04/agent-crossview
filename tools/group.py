@@ -22,7 +22,7 @@ from roots import _top, H as HOME
 from paths import under, same
 def by_folder(f):
     """A chat's piece of work from the project folder it ran in, for anyone without their own rules."""
-    if not f or not under(f, HOME) or "/Library/" in f or "/AppData/" in f: return None
+    if not f or not under(f, HOME) or "/Library/" in f or under(f, HOME + "/AppData"): return None
     top = _top(f)
     return None if any(same(top, x) for x in (HOME, HOME + "/Desktop", HOME + "/Documents")) else os.path.basename(top)
 

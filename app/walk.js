@@ -164,7 +164,8 @@
     if (still) {}
     else if (el && side) el.scrollIntoView({ block: "center" });
     else if (el) { el.scrollIntoView({ block: "start" }); const bar = ($("#bar") || {}).offsetHeight || 0; window.scrollBy(0, -(bar + 24)); }
-    requestAnimationFrame(() => {
+    // placed now and again on the next frame: some browsers (headless Chrome on Windows) don't draw a frame until later
+    const put = () => {
       if (!card) return;
       const r = el && el.getBoundingClientRect(), W = Math.min(400, innerWidth - 32);
       box.classList.toggle("dim", !r);
@@ -184,7 +185,8 @@
       else if (r.bottom + 16 + h < innerHeight) { left = Math.min(Math.max(16, r.left), innerWidth - W - 16); top = r.bottom + 16; }
       else { left = Math.min(Math.max(16, r.left), innerWidth - W - 16); top = Math.max(16, r.top - h - 16); }
       card.style.left = left + "px"; card.style.top = Math.max(16, top) + "px";
-    });
+    };
+    put(); requestAnimationFrame(put);
   }
   function close(remembered, putBack) {
     if (box) box.remove(); if (card) card.remove(); box = card = hole = null; at = 0;

@@ -63,9 +63,9 @@ const ok = (cond, good, bad) => out.push(cond ? `AGREE ${good}` : `FAIL ${bad}`)
 
   // 6. "can act outside your Mac": the same number on Your week and in Your setup
   click($('[data-go="screen:note"]')); await wait(150); click($('[data-w="q:plate:reach"]')); await wait(200);
-  const wkOut = (($("#stage").innerText.match(/(\d+) connectors? can act outside your Mac/) || [])[1]);
+  const wkOut = (($("#stage").innerText.match(/(\d+) connectors? can act outside your (?:Mac|computer)/) || [])[1]);
   click($('[data-go="screen:armory"]')); await wait(200); click($('[data-a="layer:connectors"]')); await wait(200);
-  const setupOut = (($("#stage").innerText.match(/connected, (\d+) can act outside your Mac/) || [])[1]);
+  const setupOut = (($("#stage").innerText.match(/connected, (\d+) can act outside your (?:Mac|computer)/) || [])[1]);
   ok(wkOut === setupOut, `"can act outside your Mac": ${wkOut || "none"} on both screens`, `"can act outside your Mac": Your week says ${wkOut || "none"}, Your setup says ${setupOut || "none"}`);
   // 7. orange in Your setup's connector grid follows the one rule: sends, deletes or acts as you outside the Mac
   const byName = {};

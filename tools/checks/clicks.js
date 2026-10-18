@@ -92,7 +92,7 @@ const level = (pk, el) => { if (!pk || !el) return false; const a = pk.querySele
   ok("arrow down steps", $(".a-panel h3").textContent === "Connectors to other apps");
   for (const t of ["Cowork", "Codex", "Claude Code"]) { click($(`[data-a="tool:${t}"]`)); await wait(60); ok("tool " + t, $(".a-stage .w-mh h3").textContent.includes(t)); }
   const plate = document.querySelector('.a-plate[data-a="layer:folder"]'); plate.focus(); key("Enter", plate); await wait(60);
-  ok("Enter on a layer", $(".a-panel h3").textContent === "Its folder on your Mac");
+  ok("Enter on a layer", /^Its folder on your (Mac|computer)$/.test($(".a-panel h3").textContent));
   click($('[data-a="layer:projects"]')); await wait(60);
   const pr = $(".a-row button[data-nwork]"); const pw = pr && pr.dataset.nwork; click(pr); await wait(120);
   ok("project opens Your work or its full page", (location.hash === "#work" && !!document.querySelector(".y-page")) || location.hash.startsWith("#work") || (location.hash === "#all-projects" && !!document.querySelector(".y-allpage")), pw + " " + location.hash);

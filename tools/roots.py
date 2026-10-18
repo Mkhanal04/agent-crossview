@@ -5,8 +5,11 @@ folder alone, never everything under it."""
 import glob, json, os
 from paths import DATA, HOME as H, WIN, same, under, files, claude_dir
 
-# /AppData/ is Windows' counterpart of the Mac's /Library/: app files, never projects
-SKIP = ("/node_modules/", "/_Archive/", "/.git/", "/Library/", "/AppData/")
+SKIP = ("/node_modules/", "/_Archive/", "/.git/", "/Library/")
+# your own AppData folder is Windows' counterpart of the Mac's Library: app files, never projects. Only yours: a home
+# folder can itself sit inside another AppData folder (GitHub's Windows test machine keeps its made-up one there)
+APPDATA = H + "/AppData"
+skip = lambda p: any(s in p + "/" for s in SKIP) or under(p, APPDATA)
 SHALLOW = {H, H + "/Desktop", H + "/Documents", H + "/Downloads", "/"}
 
 
@@ -33,7 +36,7 @@ def project_roots():
     except Exception: rows = []
     for r in rows:
         f = r.get("folder")
-        if not f or not isinstance(f, str) or not os.path.isdir(f) or any(s in f + "/" for s in SKIP): continue
+        if not f or not isinstance(f, str) or not os.path.isdir(f) or skip(f): continue
         if shallow(f): shallow_.add(f); continue
         deep.add(_top(f))
     # a root inside another root adds nothing
@@ -47,7 +50,7 @@ def find(pattern):
     out = set()
     for d in deep: out.update(files(d + "/**/" + pattern))
     for d in shallow: out.update(files(d + "/" + pattern))
-    return sorted(p for p in out if not any(s in p for s in SKIP) and os.access(p, os.R_OK))
+    return sorted(p for p in out if not skip(p) and os.access(p, os.R_OK))
 
 
 def label(path):
