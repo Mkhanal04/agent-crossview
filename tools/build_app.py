@@ -73,7 +73,9 @@ def folder_names():
             dirs[:] = [d for d in dirs if not d.startswith((".", "_", "node_modules"))]
             if root[len(base):].count(os.sep) >= 3: dirs[:] = []
             names.update(dirs)
+    global ALL_FOLDERS; ALL_FOLDERS = sorted(names)
     return {f: proj(f) for f in sorted(names) if proj(f) != f}
+ALL_FOLDERS = []
 
 def origin(where, plugin):
     if where.startswith("built"): return "Came with Claude Code"
@@ -226,7 +228,10 @@ def mask(path):
         if re.search(pat, path): return "Day job folder" if k == "day_job" else "Personal folder"
     if path == "~/Desktop/Claude_Projects/CLAUDE.md": return "Claude_Projects (the hub)"
     return path.replace("~/Desktop/Claude_Projects/", "").replace("/CLAUDE.md", "").replace("/AGENTS.md", " (AGENTS.md)") or path
-instruction_files = sorted([{"where": mask(f["path"]) if f["path"] != "~/.claude/CLAUDE.md" else "Every project (your main rule file)", "words": f["words"], "modified": f["modified"]} for f in inv["instruction_files"]], key=lambda f: f["modified"], reverse=True)
+# an AGENTS.md that Claude Code skips (a CLAUDE.md sits in its folder or above) isn't one of its rule files (Codex audit, Oct 19)
+try: _skipped = {s["file"] for s in json.load(open(os.path.join(DATA, "instructions.json"))).get("shadowed", [])}
+except Exception: _skipped = set()
+instruction_files = sorted([{"where": mask(f["path"]) if f["path"] != "~/.claude/CLAUDE.md" else "Every project (your main rule file)", "words": f["words"], "modified": f["modified"]} for f in inv["instruction_files"] if f["path"] not in _skipped], key=lambda f: f["modified"], reverse=True)
 conn = collections.Counter()
 for c in inv["connectors"]: conn[c["server"].replace(" (name inferred from its tools)", "")] += c["actions"]
 connectors = [{"name": k, "actions": v} for k, v in conn.most_common()]
@@ -388,6 +393,28 @@ if os.path.exists(_AL) and not DEMO:
     # a folder name that was itself renamed still finds its project name
     for f, pname in _fn_real.items():
         if _alias_str(f) != f: out["folder_names"][_alias_str(f)] = _alias_str(pname)
+    # a folder with no project of its own whose name holds a private name (a job application's folder, Oct 19) shows
+    # under its private display name, or with the private word swapped, wherever Setup or the rule files show folders
+    for f in ALL_FOLDERS:
+        if f in _names: out["folder_names"][f] = _names[f]
+        elif f not in out["folder_names"] and _alias_str(f) != f: out["folder_names"][f] = _alias_str(f)
+    # the same folders inside a file path shown on screen (a rule finding's files, Gemini's turn 24): the path a change
+    # needs stays real in the data, and the screens swap only the shown folder names
+    out["private_folders"] = {f: (_names[f] if f in _names else _alias_str(f)) for f in ALL_FOLDERS if f in _names or _alias_str(f) != f}
+# the writing rules the page can offer: their words live in tools/changes.py, so the page never sends its own text
+try:
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__))); import changes as _ch
+    out["writing_rules"] = _ch.WRITING
+except Exception: out["writing_rules"] = {}
+# what stops an unattended run, by week (release 3 slice 2, tools/runstops.py); the demo company gets a made-up week
+try: out["runstops"] = json.load(open(os.path.join(DATA, "runstops.json"))) if not DEMO else {}
+except Exception: out["runstops"] = {}
+if DEMO:  # the made-up company: four made-up weeks, mostly in the default mode, with a few steps blocked
+    _ws = datetime.date.fromisoformat(out.get("week_start") or datetime.date.today().isoformat())
+    out["runstops"] = {(_ws - datetime.timedelta(days=7 * k)).isoformat(): {"modes": {"default": 40 + 5 * k, "acceptEdits": 12}, "blocked": {"commands": 1 + (k % 2)}, "declined": {"connectors": k % 2}, "steps": {"commands": 120}} for k in range(4)}
+# plan names, prices and what comes with each plan: the one place they live (tools/plan-facts.json; his call, Oct 17)
+try: out["plan_facts"] = json.load(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "plan-facts.json")))
+except Exception: out["plan_facts"] = {"claude": [], "chatgpt": [], "unpriced": {}}
 os.makedirs(os.path.dirname(OUT), exist_ok=True)
 open(OUT, "w").write("window.GB = " + json.dumps(out) + ";\n")
 print("app/data.js:", len(agents), "agents,", len(skills), "skills,", len(work), "pieces of work,", len(out["notes"]), "notes")

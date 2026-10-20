@@ -163,3 +163,14 @@ body.lightpage .bar .w-asof{width:162px;min-width:0}
 /* the top bar below 1440 wide: a little less space around the tabs and the week switch, so the switch's first button
    is never cut by its own slot (it read "his week" from about 1281 to 1419; found Oct 17, older than that batch) */
 @media (max-width:1439px){.bar-refresh-t{display:none}.bar-refresh{padding:5px 9px}.tabs button{padding:6px 8px}body.lightpage .bar{gap:8px}.bar-slot{gap:8px}.bar-slot .w-seg button{padding-left:9px;padding-right:9px}.bar-slot .w-asof{padding-left:8px;padding-right:8px}}
+
+/* release 3 slice 2: the writing questions and the before-reset card */
+.q-ask{margin:12px 0}.q-qq{margin:0 0 6px;font-size:14px;font-weight:600;color:var(--ink)}
+.q-opts{display:inline-flex;flex-wrap:wrap}.q-opts button{font-size:13px}
+.q-h4{margin:16px 0 6px;font-size:14px;font-weight:600}
+.q-br{border-top:1px solid var(--rim);background:var(--lit-soft)}.q-br .q-h{margin-bottom:6px}.q-brl{margin:4px 0;font-size:14px;color:var(--ink-2)}
+.q-h2{margin:12px 0 4px;font-size:13px;font-weight:600;color:var(--ink)}.q-brs{margin:0 0 8px}
+.q-brp{margin:8px 16px 12px;font-size:13px}
+.q-br{padding:14px 22px 12px}.q-br .q-act{margin-top:8px}
+.q-h4{font-size:16px}.q-items .q-item b{font-weight:600}.q-h2{font-size:14px}
+.q-br .q-h{padding:0}.q-br{background:var(--mod-2);border:1px solid var(--rim);border-left:3px solid var(--lit);border-radius:12px;margin:16px 0 0}

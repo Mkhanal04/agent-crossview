@@ -19,7 +19,7 @@ window.GBWork = function (X) {
   const andList = (a) => (a.length > 1 ? `${a.slice(0, -1).join(", ")} and ${a[a.length - 1]}` : a[0] || "");
   const canDo = (p) => `It can ${andList(p.kinds)} things${p.outside ? " in another app" : ""}.`;
   const tip = (t) => `data-tip="${esc(t)}"`;
-  const workName = (w) => (w === "Not sure yet" ? "Not grouped yet" : w);
+  const workName = (w) => (w === "Not sure yet" ? "Not in a project yet" : w);
   const helperName = (t) => t;  // real names, the ones in the logs and the files (panel round 1)
   const builtIn = (t) => { const a = G.agents.find((x) => x.name === t); return a ? a.origin === "Came with Claude Code" : true; };
   const kept = () => new Set(store.get("kept", []));

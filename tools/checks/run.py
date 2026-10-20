@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Run the app's automated checks in headless Chrome, on your own numbers and on the demo company:
-every click (clicks.js), the first-minute walk (walkthrough.js), that nothing moves or resizes when you click a tab, a week, a project or a layer
+every click (clicks.js), the home (homecheck.js), that nothing moves or resizes when you click a tab, a week, a project or a layer
 (steady.js), that counts shown on two screens agree and orange connectors really act as you (agree.js), and, on the demo, that nothing from your own data shows on any screen (leaks.js).
 Copies the app to a temporary folder, so the app itself is untouched. Usage: python3 tools/checks/run.py [--demo-only]"""
 import glob, html, json, os, re, shutil, subprocess, sys, tempfile
@@ -54,22 +54,23 @@ if os.path.exists(pp):
     print("demo files:", "no private words" if not hits else "")
     for h in hits: print("  LEAK in", h[0])
     failed += len(hits)
-runs = [("demo", "?demo", ("clicks.js", "steady.js", "steady.js@1280", "leaks.js", "fit.js@1440s", "fit.js@1380", "fit.js@1280", "fit.js@1000", "fit.js@990s", "agree.js", "walkthrough.js@1440", "walkthrough.js@1000"))]
+runs = [("demo", "?demo", ("clicks.js", "steady.js", "steady.js@1280", "leaks.js", "fit.js@1440s", "fit.js@1380", "fit.js@1280", "fit.js@1000", "fit.js@990s", "agree.js", "homecheck.js@1440", "homecheck.js@1000", "receiptcheck.js@1440", "receiptcheck.js@1000"))]
 if "--demo-only" not in sys.argv and os.path.exists(os.path.join(ROOT, "app", "data.js")):
-    runs.insert(0, ("your data", "", ("clicks.js", "steady.js", "steady.js@1280", "fit.js@1440s", "fit.js@1380", "fit.js@1280", "fit.js@1000", "fit.js@990s", "agree.js", "walkthrough.js@1440", "walkthrough.js@1000")))
+    runs.insert(0, ("your data", "", ("clicks.js", "steady.js", "steady.js@1280", "fit.js@1440s", "fit.js@1380", "fit.js@1280", "fit.js@1000", "fit.js@990s", "agree.js", "homecheck.js@1440", "homecheck.js@1000", "receiptcheck.js@1440", "receiptcheck.js@1000")))
 open(os.path.join(tmp, "private-terms.js"), "w").write("window.PRIVATE = " + json.dumps(private_terms()) + ";\n")
 for mode, query, names in runs:
     for spec in names:
         name, _, w = spec.partition("@")
         bars = w.endswith("s"); w = w.rstrip("s")  # "990s": real scrollbars, the way his window looks (Oct 16)
         size = f"{w or 1440},{900 if w else 1000}"
-        tag = {"clicks.js": "live", "steady.js": "stab", "leaks.js": "leaks", "fit.js": "fit", "agree.js": "agree", "walkthrough.js": "walk"}[name]
+        tag = {"clicks.js": "live", "steady.js": "stab", "leaks.js": "leaks", "fit.js": "fit", "agree.js": "agree", "homecheck.js": "home", "receiptcheck.js": "receipt"}[name]
         shutil.copy(os.path.join(HERE, name), tmp)
         extra = '<script src="private-terms.js"></script>\n' if name == "leaks.js" else ""
         open(os.path.join(tmp, name + ".html"), "w").write(page.replace('<script src="app.js"></script>', f'<script src="app.js"></script>\n{extra}<script src="{name}"></script>'))
         # --use-mock-keychain and --password-store=basic: headless Chrome never reaches the Mac's login keychain (it asked on every run, Oct 17)
-        dom = subprocess.run([CH, "--headless=new", "--disable-gpu", "--use-mock-keychain", "--password-store=basic"] + ([] if bars else ["--hide-scrollbars"]) + ["--force-prefers-reduced-motion", f"--window-size={size}",
-                              "--virtual-time-budget=40000", "--dump-dom", pathlib.Path(tmp, name + ".html").as_uri() + (query + ("&walk" if query else "?walk") if name == "walkthrough.js" else query)], capture_output=True, text=True, encoding="utf-8", errors="replace").stdout
+        try: dom = subprocess.run([CH, "--headless=new", "--disable-gpu", "--use-mock-keychain", "--password-store=basic"] + ([] if bars else ["--hide-scrollbars"]) + ["--force-prefers-reduced-motion", f"--window-size={size}",
+                              "--virtual-time-budget=40000", "--dump-dom", pathlib.Path(tmp, name + ".html").as_uri() + query + ("" if name in ("homecheck.js", "receiptcheck.js", "fit.js") else "#week")], capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=240).stdout
+        except subprocess.TimeoutExpired: dom = ""  # a check that hangs is reported, not waited on forever (Oct 19)
         m = re.search(r'<pre id="%s">(.*?)</pre>' % tag, dom, re.S)
         text = html.unescape(m.group(1)) if m else "no result (the check didn't finish)"
         bad = [l for l in text.split("\n") if l.startswith(("FAIL", "MOVED", "LEAK", "OVERFLOW")) or (l.startswith("ERR ") and l.strip() != "ERR")] if m else [text]
@@ -78,7 +79,8 @@ for mode, query, names in runs:
         elif name == "steady.js": print(label, "nothing moved" if not bad else "")
         elif name == "fit.js": print(label, f"fits on {text.count('FIT ')} screens" if not bad else "")
         elif name == "agree.js": print(label, f"{text.count('AGREE')} counts agree" if not bad else "")
-        elif name == "walkthrough.js": print(label, f"{text.count('WALK ')} walk checks pass" if not bad else "")
+        elif name == "homecheck.js": print(label, f"{text.count('HOME ')} home checks pass" if not bad else "")
+        elif name == "receiptcheck.js": print(label, f"{text.count('RECEIPT ')} receipt checks pass" if not bad else "")
         else: print(label, f"no names from your own data on {text.count('SCREEN')} screens" if not bad else "")
         for l in bad: print("  " + l)
         failed += len(bad)

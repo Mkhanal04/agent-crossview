@@ -19,11 +19,11 @@ function scan(where) {
   if (!window.GB_DEMO) out.push("LEAK the demo didn't load");
   for (const per of [0, 1]) {
     click(document.querySelectorAll("[data-nper]")[per]); await wait(80);
-    click($('[data-go="screen:note"]')); await wait(120); scan("Your week " + per);
+    ((location.hash = "#limits"), 0); await wait(120); scan("Your week " + per);
     for (const k of ["limit", "reach", "carry", "stops", "pace"]) { const btn = $(`[data-w="q:sheet:${k}"]`); if (!btn) continue; click(btn); await wait(80); scan(`Your week ${per}, ${k} sheet`); click($('[data-w="q:close"]')); await wait(60); }
     click($('[data-w="q:detail"]')); await wait(120);
     document.querySelectorAll("details").forEach((d) => (d.open = true)); scan("The week in detail, opened " + per);
-    click($('[data-go="screen:machine"]')); await wait(120);
+    ((location.hash = "#chats"), 0); await wait(120);
     const n = document.querySelectorAll(".y-proj").length;
     for (let i = 0; i < n; i++) { click(document.querySelectorAll(".y-proj")[i]); await wait(60); scan(`Your work ${per}.${i}`); }
   }
@@ -32,7 +32,7 @@ function scan(where) {
     click($(`[data-a="tool:${t}"]`)); await wait(60);
     for (const l of [...document.querySelectorAll(".a-plate[data-a]")].map((p) => p.dataset.a)) { click($(`.a-plate[data-a="${l}"]`)); await wait(40); document.querySelectorAll(".a-row details").forEach((d) => (d.open = true)); scan(`Setup ${t} ${l}`); }
   }
-  click($('[data-go="screen:shapes"]')); await wait(150); scan("Your AI's instructions");
+  ((location.hash = "#instructions"), 0); await wait(150); scan("Your AI's instructions");
   for (const id of ["notes", "skills", "subagents", "connectors", "repeat"]) { const p = $(`[data-w="s:plate:${id}"]`); if (p) { click(p); await wait(80); scan(`What shapes Claude, ${id}`); } }
   for (const k of ["memory", "fixes", "archive"]) { const pl = $(`.s-g .a-plate[data-w="s:plate:${k === "fixes" ? "main" : "notes"}"]`); if (pl) { click(pl); await wait(80); } const btn = $(`[data-w="s:sheet:${k}"]`); if (!btn) continue; click(btn); await wait(80); scan(`What shapes Claude, ${k} sheet`); click($('[data-w="s:close"]')); await wait(60); }
   for (const sc of ["note", "machine"]) { click($(`[data-go="screen:${sc}"]`)); await wait(150); const all = $('[data-nper="all"]'); if (!all) continue; click(all); await wait(150); scan(sc + ", all weeks"); click($(`[data-nper="${window.GB.week_start}"]`)); await wait(100); }

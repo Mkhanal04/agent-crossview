@@ -127,7 +127,7 @@ def make(top, kind="personal"):
                 used = min(95, 10 + 20 * (2 - week) + 5 * r + 10 * k)
                 rows.append({"timestamp": iso(tt), "type": "event_msg", "payload": {"type": "token_count",
                     "info": {"last_token_usage": {"input_tokens": 30000, "cached_input_tokens": 24000, "output_tokens": 1200, "reasoning_output_tokens": 300, "total_tokens": 31200}},
-                    "rate_limits": {"primary": {"used_percent": 20 + r, "window_minutes": 300, "resets_at": int((tt + datetime.timedelta(hours=4)).timestamp())},
+                    "rate_limits": {"plan_type": "business" if kind == "business" else "plus", "primary": {"used_percent": 20 + r, "window_minutes": 300, "resets_at": int((tt + datetime.timedelta(hours=4)).timestamp())},
                                     "secondary": {"used_percent": used, "window_minutes": 10080, "resets_at": int((monday + datetime.timedelta(days=7 - 7 * week, hours=3)).timestamp())}}}})
             day = t.strftime("%Y/%m/%d").split("/")
             jl(os.path.join(codex, "sessions", *day, f"rollout-{t.strftime('%Y-%m-%dT%H-%M-%S')}-{sid}.jsonl"), rows)

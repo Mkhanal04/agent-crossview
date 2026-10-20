@@ -50,11 +50,12 @@ for event, groups in (settings.get("hooks") or {}).items():
             name = os.path.basename(cmd.split()[0]) if cmd.split() else "a command"
             hooks.append({"when": event, "name": name.replace("$HOME/", ""), "says": h.get("statusMessage") or ""})
 WHEN = {"SessionStart": "when a chat starts", "SessionEnd": "when a chat ends", "PreToolUse": "before it uses a tool",
-        "PostToolUse": "after it uses a tool", "UserPromptSubmit": "when you send a message", "Stop": "when it finishes a reply",
-        "SubagentStop": "when a subagent finishes", "Notification": "when it notifies you", "PreCompact": "before it shortens a long chat"}
+        "PostToolUse": "after it uses a tool", "UserPromptSubmit": "when you send a message", "Stop": "when Claude finishes a reply",
+        "SubagentStop": "when a subagent finishes", "Notification": "when Claude Code notifies you", "PreCompact": "before it shortens a long chat"}
 for h in hooks: h["when"] = WHEN.get(h["when"], h["when"])
 perm = settings.get("permissions") or {}
-memory = [p for p in files(CD + "/projects/*/memory/*.md") if os.path.basename(p) != "MEMORY.md"]
+# notes in subfolders of a memory folder count too (Codex audit, Oct 19), the same way tools/instructions.py reads them
+memory = sorted({p for p in files(CD + "/projects/*/memory/*.md") + files(CD + "/projects/*/memory/**/*.md") if os.path.basename(p) != "MEMORY.md"})
 memory_folders = {p.split("/memory/")[0] for p in memory}
 styles = [os.path.basename(p)[:-3] for p in files(CD + "/output-styles/*.md")]
 cc = {
@@ -68,7 +69,7 @@ cc = {
                          ["Automatic checks", f"{len(files(CD + '/hooks/*'))} script"],
                          ["Its notes (memory)", f"{len(memory)} notes in {len(memory_folders)} project folders"]]},
     "settings": {"items": [["How Claude writes to you", settings.get("outputStyle") or "default"],
-                           ["Rules for what it may do without asking", f"{len(perm.get('allow') or [])} allowed, {len(perm.get('deny') or [])} blocked" if perm else "none written; it asks, or follows the mode you pick"],
+                           ["Rules for what it may do without asking", f"{len(perm.get('allow') or [])} allowed, {len(perm.get('deny') or [])} blocked" if perm else "none written; Claude Code asks you, or follows the permission mode you pick when a chat starts"],
                            ["Auto mode notes", "written" if settings.get("autoMode") else "none"],
                            ["Extra add-on catalogs", str(len(settings.get("extraKnownMarketplaces") or {}))]]},
     "checks": {"items": hooks},
@@ -85,7 +86,7 @@ cw_first, cw_last = span(cw_logs)
 cowork = {
     "folder": {"where": "inside the Claude app's own folder (" + ("AppData" if SYSTEM == "windows" else "Application Support") + ")", "session_logs": len(cw_tasks), "mb": size_mb(cw_logs),
                "first": cw_first, "last": cw_last,
-               "parts": [["Task folders", f"{len(cw_tasks)} kept on this Mac"], ["Task logs", f"{len(cw_logs)} files"],
+               "parts": [["Task folders", f"{len(cw_tasks)} task folders on this Mac"], ["Task logs", f"{len(cw_logs)} files"],
                          ["Usage record", "your 5-hour and weekly limit readings" if os.path.exists(APP + "plan-usage-history.json") else "none"]]},
     "settings": {"items": [["Connectors set up in the Claude app", str(len(desk.get("mcpServers") or {}))], ["App extensions", str(len(ext))]]},
     "checks": {"items": []},
@@ -107,19 +108,22 @@ words_in = lambda f: len(re.findall(r"\S+", open(f, errors="ignore").read())) if
 cx_rules = ([{"path": cx_main.replace(H, "~"), "where": "main", "words": words_in(cx_main)}] if os.path.exists(cx_main) else []) + \
            [{"path": f.replace(H, "~"), "where": "folder", "folder": os.path.basename(os.path.dirname(f)), "words": words_in(f)} for f in agents_md]
 cx_skills = [os.path.basename(os.path.dirname(p)) for p in files(CX + "/skills/*/SKILL.md")]
+# the skills that come with Codex sit in a hidden .system folder (Codex audit, Oct 19: 5 were skipped)
+cx_system = [os.path.basename(os.path.dirname(p)) for p in files(CX + "/skills/.system/*/SKILL.md")]
+cx_skills += [n for n in cx_system if n not in cx_skills]
 # the plugins that came with Codex sit in its bundled caches; the rest were added from OpenAI's catalog (release 3)
 cx_bundled = sorted({os.path.basename(p) for d in ("openai-bundled", "openai-primary-runtime") for p in files(CX + f"/plugins/cache/{d}/*")})
 cx_first, cx_last = span(cx_logs)
 codex = {
     "folder": {"where": "a hidden folder in your home folder (.codex)", "session_logs": len(cx_logs), "mb": size_mb(cx_logs), "first": cx_first, "last": cx_last,
-               "parts": [["Session logs", f"{len(cx_logs)} chats"], ["Settings file", "one, read at start"],
+               "parts": [["Session logs", f"{len(cx_logs)} chats"], ["Settings file", "one file, read when Codex starts"],
                          ["Its own memory", "a small database" if files(CX + "/memories*.sqlite") else "none"]]},
     "settings": {"items": [["Model", tv("model") or "not set"], ["Thinking effort", tv("model_reasoning_effort") or "default"],
                            ["Approval rule", tv("approval_policy") or "default"], ["Sandbox", tv("sandbox_mode") or "default"]]},
-    "checks": {"items": [{"when": "when it finishes", "name": "notify", "says": ""}] if tv("notify") else []},
+    "checks": {"items": [{"when": "when Codex finishes a task", "name": "notify", "says": ""}] if tv("notify") else []},
     "instructions": {"files": len(agents_md), "main": os.path.exists(cx_main), "list": cx_rules},
     "memory": bool(files(CX + "/memories*.sqlite")),
-    "skills": cx_skills, "plugins": cx_plugins, "bundled": cx_bundled, "connectors": cx_servers,
+    "skills": cx_skills, "system_skills": cx_system, "plugins": cx_plugins, "bundled": cx_bundled, "connectors": cx_servers,
 }
 
 # ---------- settings your company set for Claude Code (business plans, Oct 17) ----------

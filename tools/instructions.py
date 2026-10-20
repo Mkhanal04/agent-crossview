@@ -70,7 +70,8 @@ def mem_project(folder):
     d = mem_dir(folder)
     return project_of(d) if d else None
 mem = []
-for p in fglob(CD + "/projects/*/memory/*.md"):
+# notes can sit in subfolders of a memory folder too (Codex audit, Oct 19: 8 were missed)
+for p in sorted(set(fglob(CD + "/projects/*/memory/*.md") + fglob(CD + "/projects/*/memory/**/*.md"))):
     if os.path.basename(p) == "MEMORY.md": continue
     add(p, "memory note")
     f = files[-1] if files and files[-1]["path"] == p else None

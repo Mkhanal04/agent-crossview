@@ -37,7 +37,7 @@ def piece(r):
     for name, pat, tool in CODEX_RULES:
         if r["tool"] == tool and pat in f: return name, "folder only"
     if not WR and by_folder(f): return by_folder(f), "folder only"
-    if r["tool"] == "Codex": return "Codex chats with no project", "folder only"
+    if r["tool"] == "Codex": return "Not sure yet", "folder only"  # one name for unfiled chats in every app (release 3)
     if not r.get("title"): return "Untitled", "none"
     return WR.get("fallback", "Not sure yet"), "none"
 out = []

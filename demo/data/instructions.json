@@ -1,5 +1,5 @@
 {
- "built": "2026-10-16T09:12",
+ "built": "2026-10-20T09:12",
  "files": {
   "count": 61,
   "public": 61,
@@ -16,10 +16,10 @@
  },
  "loads": {
   "chats": 34,
-  "since": "2026-08-15",
+  "since": "2026-08-19",
   "latest": {
    "route-planner": {
-    "when": "2026-10-15T10:12",
+    "when": "2026-10-19T10:12",
     "project": "route-planner",
     "ended_in": "route-planner",
     "moved": false,
@@ -60,7 +60,7 @@
     }
    },
    "triage-bot": {
-    "when": "2026-10-13T10:12",
+    "when": "2026-10-17T10:12",
     "project": "triage-bot",
     "ended_in": "triage-bot",
     "moved": false,
@@ -101,7 +101,7 @@
     }
    },
    "customer-interviews": {
-    "when": "2026-09-26T10:12",
+    "when": "2026-09-30T10:12",
     "project": "customer-interviews",
     "ended_in": "customer-interviews",
     "moved": false,
@@ -142,7 +142,7 @@
     }
    },
    "pricing-review": {
-    "when": "2026-10-10T10:12",
+    "when": "2026-10-14T10:12",
     "project": "pricing-review",
     "ended_in": "pricing-review",
     "moved": false,
@@ -185,13 +185,13 @@
   },
   "moved_memory": {
    "chats": 3,
-   "since": "2026-09-06",
+   "since": "2026-09-10",
    "examples": [
     {
      "started": "Projects",
      "ended": "route-planner",
      "memory": "Projects",
-     "when": "2026-10-14T10:12"
+     "when": "2026-10-18T10:12"
     }
    ]
   }
@@ -294,9 +294,9 @@
     "corrections": 11,
     "oldest_days": 40,
     "stale_90": 0,
-    "newest": "2026-10-15",
+    "newest": "2026-10-19",
     "stale_names": [],
-    "last_loaded": "2026-10-15T10:12"
+    "last_loaded": "2026-10-19T10:12"
    },
    {
     "folder": "triage-bot",
@@ -305,9 +305,9 @@
     "corrections": 7,
     "oldest_days": 40,
     "stale_90": 0,
-    "newest": "2026-10-14",
+    "newest": "2026-10-18",
     "stale_names": [],
-    "last_loaded": "2026-10-14T10:12"
+    "last_loaded": "2026-10-18T10:12"
    },
    {
     "folder": "customer-interviews",
@@ -316,7 +316,7 @@
     "corrections": 3,
     "oldest_days": 120,
     "stale_90": 9,
-    "newest": "2026-07-08",
+    "newest": "2026-07-12",
     "stale_names": [
      "customer-interviews-note-0",
      "customer-interviews-note-1",
@@ -337,9 +337,9 @@
     "corrections": 2,
     "oldest_days": 40,
     "stale_90": 0,
-    "newest": "2026-10-07",
+    "newest": "2026-10-11",
     "stale_names": [],
-    "last_loaded": "2026-10-07T10:12"
+    "last_loaded": "2026-10-11T10:12"
    },
    {
     "folder": "pricing-review",
@@ -348,14 +348,14 @@
     "corrections": 4,
     "oldest_days": 40,
     "stale_90": 0,
-    "newest": "2026-10-10",
+    "newest": "2026-10-14",
     "stale_names": [],
-    "last_loaded": "2026-10-10T10:12"
+    "last_loaded": "2026-10-14T10:12"
    }
   ]
  },
  "reviewed": {
-  "read": "2026-10-16",
+  "read": "2026-10-20",
   "by": "Claude, reading made-up files",
   "items": [
    {

@@ -1092,3 +1092,44 @@ body.lightpage .bar .bar-slot{min-height:34px;align-items:center}
 .wk-dots i.on{background:var(--ink)}
 .wk-go{padding:9px 14px;font-size:var(--t-base)}
 @media (max-width:520px){.wk-nums{flex-direction:column}}
+
+/* release 3 slice 1: the setup stack drawn with its status (concept data/concepts/setup-2026-10-19) */
+.a-plate.amber .a-top{stroke:var(--lit);stroke-width:2.4}
+.a-plate.amber .a-side{stroke:var(--lit-line)}
+.a-plate.sparse .a-top,.a-plate.sparse .a-side{stroke-dasharray:6 4;stroke:var(--amt-3)}
+.a-plate.sparse .a-top{fill:var(--mod-2)}
+.a-plate.sel .a-top{stroke:var(--ink);stroke-width:2.2}
+.a-plate.sel.amber .a-top{stroke:var(--lit);stroke-width:2.6}
+.a-selrim{fill:none;stroke:var(--ink);stroke-width:6;stroke-linejoin:round}
+.a-lift-sh{fill:rgba(21,23,27,.16);stroke:none;filter:blur(4px)}
+.a-plate.sel:hover,.a-plate.sel:focus-visible{transform:none}
+.a-blk.hot .t{fill:var(--lit);stroke:var(--lit-ink)}.a-blk.hot .l{fill:#E0491A;stroke:var(--lit-ink)}.a-blk.hot .r{fill:#C23D12;stroke:var(--lit-ink)}
+.a-blk.plain .t{fill:#DDE2E9}
+.a-label.amber .a-s{fill:var(--lit-ink);font-weight:600}
+.a-k{display:inline-block;width:20px;height:11px;border-radius:3px;background:var(--mod);border:1.5px solid var(--amt-3);vertical-align:-1px;margin-right:2px}
+.a-k.amber{border:2px solid var(--lit);background:var(--lit-soft)}.a-k.sparse{border-style:dashed;background:var(--mod-2)}.a-k.lift{border:2px solid var(--ink);box-shadow:0 3px 0 -1px var(--amt-3)}
+.a-k.blk{width:9px;height:9px;border:0;background:var(--amt-3);border-radius:2px}
+.a-q3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-bottom:12px}
+.a-q3c{background:var(--mod);border:1px solid var(--rim);border-radius:12px;padding:9px 11px;outline:none}
+.a-q3c:focus-visible{outline:2px solid var(--amber);outline-offset:2px}
+.a-q3c small{display:block;font-size:var(--t-sm);color:var(--muted);line-height:1.3}
+.a-q3c b{display:block;font-size:var(--t-2xl);font-weight:700;line-height:1.2;margin-top:2px}
+.a-q3c span{display:block;font-size:var(--t-sm);color:var(--muted);line-height:1.3}
+.a-q3c.amb{background:var(--lit-soft);border-color:var(--lit-line)}.a-q3c.amb b{color:var(--lit-ink)}
+.a-apart{margin-top:8px}
+.a-blk2{margin-top:12px;padding:12px 14px;background:var(--mod-2);border:1px solid var(--rim);border-radius:var(--r-lg)}
+.a-blk2 h4{margin:0 0 2px;font-size:var(--t-lg);font-weight:600;color:var(--ink)}
+.a-big{margin:0;font-size:var(--t-2xl);font-weight:700;letter-spacing:-.01em;line-height:1.25}
+.a-sup{margin:4px 0 0;font-size:var(--t-md);color:var(--ink-2)}
+.a-note{margin:4px 0 0;font-size:var(--t-sm);color:var(--muted)}
+.a-rbar{display:flex;height:14px;border-radius:4px;overflow:hidden;margin:8px 0 6px;gap:2px}
+.a-rb{display:inline-block;height:100%;background:var(--cat)}.a-rb.claude{background:var(--amt-4)}.a-rb.other{background:var(--amt-2)}
+.a-rkeys{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:var(--t-sm);color:var(--muted)}.a-rkeys span{display:flex;align-items:center;gap:6px}.a-rkeys .a-rb{width:10px;height:10px;border-radius:2px}
+.a-finds{list-style:none;margin:8px 0 0;padding:0}
+.a-finds li{display:flex;gap:10px;padding:6px 0;border-top:1px solid var(--rim);font-size:var(--t-md);color:var(--ink-2)}.a-finds li:first-child{border-top:0}
+.a-finds em{flex:none;width:20px;height:20px;border-radius:50%;background:var(--lit);color:#fff;font:700 11px var(--mono);font-style:normal;display:flex;align-items:center;justify-content:center}
+.a-finds b{font-weight:400}.a-finds small{display:block;color:var(--muted);font-size:var(--t-sm);margin-top:2px}
+.a-acts{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;margin-top:10px}
+.a-lift-sh{pointer-events:none}  /* the shadow never takes a click meant for the layer below (QA) */
+.a-cd-key{margin:0 0 6px}
+.a-plate:focus-visible .a-top,.a-plate:focus .a-top{stroke:var(--lit);stroke-width:3}.h-plate:focus-visible path,.h-plate:focus path{stroke:var(--lit);stroke-width:2.5}  /* the keyboard's place on the drawing (QA, Oct 19, night) */

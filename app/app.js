@@ -58,7 +58,8 @@
   const weekRuns = G.agents.reduce((t, a) => t + a.week, 0);
   const localDay = (ts) => { const d = new Date(ts + ":00Z"); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`; };
   const when = (ts) => new Date(ts + ":00Z").toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).replace(" AM", " am").replace(" PM", " pm");
-  const HITS = (G.limit_events || []).filter((e) => e.status === "hit");
+  // one stop per app, limit and time: the records can write the same stop twice (Codex's recheck, Oct 20)
+  const HITS = ((seen) => (G.limit_events || []).filter((e) => e.status === "hit" && !seen.has(e.tool + e.kind + e.ts) && seen.add(e.tool + e.kind + e.ts)))(new Set());
   const WARN = (G.limit_events || []).filter((e) => e.status === "warning");
   const weekHits = HITS.filter((h) => localDay(h.ts) >= weekStart);
   const KIND = { five_hour: "five-hour limit", seven_day: "weekly limit", unknown: "limit of a kind the log didn't record" };
@@ -415,7 +416,7 @@
         <span class="tmeta"><span class="st ${cls}"${stNote ? ` data-tip="${esc(stNote.charAt(0).toUpperCase() + stNote.slice(1))}."` : ""}>${word}</span><span class="tbar" title="${d} of ${n} steps"><i style="width:${n ? (100 * d) / n : 0}%"></i></span><small>${d} of ${n} steps · ${esc(t.estimate || "")}</small></span></summary>
         <ul class="steps">${list}</ul>${t.notes ? `<p class="when" style="color:var(--ink)">${esc(t.notes)}</p>` : ""}<p class="when">${when}</p></details>`;
     }).join("");
-    return `<div class="screen build-page"><nav class="q-back"><button class="w-link" data-go="screen:note">← Your week</button></nav><h2>How Crossview is being built</h2><p class="sub">The build's task list, in number order. Claude keeps it up to date, and this page reads it.</p>
+    return `<div class="screen build-page"><p class="r-crumb"><button class="w-link" data-go="screen:home">Home</button> › <b>How Crossview is being built</b></p><h2>How Crossview is being built</h2><p class="sub">The build's task list, in number order. Claude keeps it up to date, and this page reads it.</p>
       <div class="kpis"><div class="kpi"><div class="v">${fig(`<span class="measured">${done.length} of ${P.tasks.length}</span>`, "tasksDone")}</div><div class="l">tasks done</div></div>
       <div class="kpi"><div class="v"><span class="measured">${stepsDone} of ${steps.length}</span></div><div class="l">steps done</div></div>
       <div class="kpi"><div class="v">${fig(`<span class="estimate">${range(left)} h</span>`, "hours")}</div><div class="l">planned for what's left, out of ${range(est)} in all${P.tasks.some((t) => t.took != null) ? `. The finished tasks took ${P.tasks.reduce((a, t) => a + (t.took || 0), 0)} minutes by the clock` : ""}</div></div>
@@ -424,9 +425,11 @@
       <div class="tasks">${rows}</div></div>`;
   }
   function progressSide() {
-    const b = P && P.build;
-    const used = b ? `<div class="kv"><span>Chats</span>${measured(b.sessions)}<span>Subagents started</span>${measured(b.helpers)}<span>Since</span><span class="measured">${day(b.first)}</span><span>Pay-per-use price so far</span>${b.priced ? about(b.usd) : '<span class="unknown">being recounted in task 1</span>'}</div>
-      <p class="cant">Crossview counts its own build as one project, Agent Glass Box, the same way it counts your other work.</p>` : '<p class="empty">Not counted yet.</p>';
+    // the build's own project, counted the way Work counts it (QA, Oct 19, night: the old count looked for its old name)
+    const wb = (G.work || []).find((w) => /^Agent (Crossview|Glass Box)$/.test(w.name)), b0 = P && P.build;
+    const b = b0 ? Object.assign({}, b0, wb && !b0.sessions ? { sessions: Object.values(wb.tools || {}).reduce((x, y) => x + y, 0) } : {}) : null;
+    const used = b ? `<div class="kv"><span>Chats</span>${measured(b.sessions)}<span>Subagents started</span>${measured(b.helpers)}${b.first ? `<span>Since</span><span class="measured">${day(b.first)}</span>` : ""}<span>Pay-per-use price so far</span>${b.priced ? about(b.usd) : '<span class="unknown">being recounted in task 1</span>'}</div>
+      <p class="cant">Crossview counts its own build as one project, Agent Crossview, the same way it counts your other work.</p>` : '<p class="empty">Not counted yet.</p>';
     const wait = P && P.waiting.length ? P.waiting.map((w) => `<li><span>${esc(w)}</span></li>`).join("") : "";
     return `<div class="build-side"><div class="card"><h3>What this build has used</h3>${used}</div>
       ${wait ? `<div class="card"><h3>Waiting on you</h3><ul class="mini">${wait}</ul></div>` : ""}</div>`;
@@ -530,7 +533,7 @@
     const how = howCard(o.type === "agent" ? "agentSide" : o.type === "skill" ? "skillUses" : "workSide");
     if (o.type === "agent") {
       const rbt = o.runs_by_tool || {}, split = Object.keys(rbt).length > 1 ? `, with ${Object.entries(rbt).map(([t, n]) => `${n} in ${t}`).join(", ")}` : "";
-      const where = (o.where || []).map((x) => `<li class="linkish" data-id="work:${esc(x.work)}"><span>${x.work === "Not sure yet" ? "Not grouped yet" : esc(x.work)}</span><span><span class="measured">${x.runs} run${x.runs === 1 ? "" : "s"}</span> · ${about(x.usd)}</span></li>`).join("");
+      const where = (o.where || []).map((x) => `<li class="linkish" data-id="work:${esc(x.work)}"><span>${x.work === "Not sure yet" ? "Not in a project yet" : esc(x.work)}</span><span><span class="measured">${x.runs} run${x.runs === 1 ? "" : "s"}</span> · ${about(x.usd)}</span></li>`).join("");
       return `<div class="card det">${back}<h2>${esc(o.name)}</h2><span class="chip">${esc(o.origin)}</span><span class="chip">subagent</span>
         <p>${esc(o.plain)}</p><p class="ai">An AI wrote this description. ${o.raw ? "What its file says is below." : ""}</p>
         <div class="kv"><span>Runs in all the logs</span>${o.runs ? fig(`<span class="measured">${o.runs}${esc(split)}</span>`, "agentRuns") : '<span class="unknown">none in the logs</span>'}<span>Runs this week</span>${measured(o.week)}<span>Last ran</span>${lastText(o.last)}<span>Pay-per-use price, all time</span>${o.usd ? fig(about(o.usd), "agentUsd") : '<span class="unknown">none in the logs</span>'}<span>Pay-per-use price, this week</span>${o.usd_week ? about(o.usd_week) : '<span class="unknown">none</span>'}</div>
@@ -623,9 +626,15 @@
   let WORK = null;
   const workm = () => WORK || (WORK = window.GBWork ? window.GBWork({ G, S, esc, money, day, localDay, HITS, modelName, store, shares, riskOf, riskWords, since, snoozed, LIVE }) : null);
   let SHAPES = null;
+  let HOME = null;
+  // the receipt behind the home's cost card (release 2, Oct 19)
+  let RECEIPT = null, WLIST = null;
+  const wlist = () => WLIST || (WLIST = window.GBWorkList ? window.GBWorkList({ G, S, esc, day, modelName }) : null);
+  const rec = () => RECEIPT || (RECEIPT = window.GBReceipt ? window.GBReceipt({ G, S, esc, money, day, modelName }) : null);
+  const home = () => HOME || (HOME = window.GBHome ? window.GBHome({ G, S, esc, money, day, localDay, HITS, DEMO, LIVE, riskWords, note, anat }) : null);
   const shp = () => SHAPES || (SHAPES = window.GBShapes ? window.GBShapes({ G, S, esc, day, DEMO, LIVE, snoozed }) : null);
   let ANAT = null;
-  const anat = () => ANAT || (ANAT = window.GBAnatomy ? window.GBAnatomy({ G, S, esc, money, day, shares, riskOf, riskWords, since }) : null);
+  const anat = () => ANAT || (ANAT = window.GBAnatomy ? window.GBAnatomy({ G, S, esc, money, day, shares, riskOf, riskWords, since, shapes: () => shp() }) : null);
   let MACH = null;
   const mach = () => MACH || (MACH = window.GBMachine ? window.GBMachine({ G, S, esc, about, money, day, measured, modelName, colOf, wkOf, localDay, HITS }) : null);
   const res = (go, k, html) => `<span class="res" role="link" tabindex="0" data-go="${go}" data-tip="${esc(howText(k))}">${html}<span class="sr">. ${esc(howText(k))}</span></span>`;
@@ -650,7 +659,7 @@
   }
   // keyboard and screen readers (panel round 1): after a click redraws the page, focus goes back to the same control,
   // and a short line tells a screen reader what changed
-  const FOCUS_KEYS = ["a", "go", "nper", "w", "keep", "snooze", "nwork", "whelper", "wapp", "yport", "unkeep"];
+  const FOCUS_KEYS = ["r", "wl", "h", "a", "go", "nper", "w", "keep", "snooze", "nwork", "whelper", "wapp", "yport", "unkeep"];
   function focusSel(el) {
     if (!el || el === document.body || !el.dataset) return null;
     for (const k of FOCUS_KEYS) if (el.dataset[k] != null) return `[data-${k.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase())}="${CSS.escape(el.dataset[k])}"]`;
@@ -660,38 +669,50 @@
   function say() {
     let live = document.getElementById("gb-live");
     if (!live) { live = document.createElement("div"); live.id = "gb-live"; live.className = "sr"; live.setAttribute("aria-live", "polite"); document.body.appendChild(live); }
-    const per = S.nper === G.week_start ? "this week" : "last week", names = { note: "Your week", machine: "Your work", armory: "Your setup", shapes: "Your AI's instructions" };
+    const per = S.nper === G.week_start ? "this week" : "last week", names = { cost: "What it cost", list: "Your work", note: "Your week", machine: "Your work", armory: "Your setup", shapes: "Your AI's instructions" };
     const t = S.screen === "armory" ? `Your setup, ${S.atool}, ${(document.querySelector(".a-panel h3") || {}).textContent || ""}${S.afilter && S.afilter !== "all" ? ", filtered" : ""}` : `${names[S.screen] || "Crossview"}, ${per}${S.screen === "machine" && S.mwork ? ", " + S.mwork : ""}`;
     if (t !== lastSaid) { live.textContent = t; lastSaid = t; }
   }
   function render() {
     const focused = focusSel(document.activeElement);
-    const TABS = [["note", "Your week", "T"], ["machine", "Your work", "O"], ["armory", "Your setup", "S"], ["shapes", "Your AI's instructions", "I"]], MORE = [];  // the demo shows only the redesigned screens (Milan, Oct 13)
+    // release 2 (Oct 19, his yes after Gemini's review): Home, Work and Setup on top; the older views move under More until release 3 retires them
+    rooms();
+    const TABS = [["home", "Home", "H"], ["armory", "Setup", "S"], ["list", "Work", "W"]], MORE = [];  // Setup before Work (his call, Oct 20)  // the older views left every click path (his call, Oct 19, night): More keeps the design system; the demo company leaves it until slice 3 fixes its pages (his yes, Oct 20)
     demoBand();
-    const on = (k) => S.screen === k || (k === "machine" && (S.screen === "office" || S.screen === "work"));
-    const light = S.screen === "note" || S.screen === "armory" || S.screen === "machine" || S.screen === "shapes";
-    $("#bar").innerHTML = `<button class="brand" data-go="screen:note" aria-label="Agent Crossview: go to Your week"><i class="brand-mark" aria-hidden="true"></i>Agent Crossview</button>
+    const on = (k) => S.screen === k || (k === "home" && (S.screen === "cost" || S.screen === "note" || S.screen === "progress"));
+    const light = S.screen === "home" || S.screen === "cost" || S.screen === "list" || S.screen === "note" || S.screen === "armory" || S.screen === "machine" || S.screen === "shapes";
+    $("#bar").innerHTML = `<button class="brand" data-go="screen:home" aria-label="Agent Crossview: go to the home page"><i class="brand-mark" aria-hidden="true"></i>Agent Crossview</button>
       <nav class="tabs" aria-label="Main">${TABS.map(([k, l, kb]) => `<button data-go="screen:${k}" aria-pressed="${on(k)}"><i class="w-led" aria-hidden="true"></i>${l}<kbd aria-hidden="true">${kb}</kbd></button>`).join("")}</nav>
       <span class="spacer"></span>
-      <div class="bar-slot${S.screen === "shapes" ? " s-bar" : ""}">${light && note() && S.screen !== "shapes" ? note().barRight(S.screen === "note" || S.screen === "machine") : `<span class="w-asof" data-tip="${esc(`${DEMO ? "Built from made-up logs" : "Read from the logs on this Mac"} at ${String(G.built).replace(/^\w+ \d+, /, "").toLowerCase()}.`)}"><i class="w-led idle"></i>Read at ${esc(String(G.built).replace(/^\w+ \d+, /, "").toLowerCase())}</span>`}</div>
+      <div class="bar-slot${S.screen === "shapes" ? " s-bar" : ""}">${light && note() && S.screen !== "shapes" ? note().barRight(false) : `<span class="w-asof" data-tip="${esc(`${DEMO ? "Built from made-up logs" : "Read from the logs on this Mac"} at ${String(G.built).replace(/^\w+ \d+, /, "").toLowerCase()}.`)}"><i class="w-led idle"></i>Read at ${esc(String(G.built).replace(/^\w+ \d+, /, "").toLowerCase())}</span>`}</div>
       ${LIVE && light ? `<button class="w-btn quiet bar-refresh" data-refresh="1" aria-label="Refresh from the logs" data-tip="Reads the logs on this Mac again, about a minute. Nothing leaves this Mac."><span aria-hidden="true">↻</span><span class="bar-refresh-t"> Refresh</span></button>` : ""}
-      <details class="more-menu"><summary${MORE.some(([k]) => on(k)) ? ' class="on"' : ""}><i class="w-led" aria-hidden="true"></i>More ▾</summary><nav class="more-list" aria-label="More pages">${MORE.map(([k, l, kb]) => `<button data-go="screen:${k}" aria-pressed="${on(k)}"${k === "progress" && nowTask() ? ` title="Now building ${esc(nowTask().name)}"` : ""}>${l}${k === "progress" && nowTask() ? '<span class="busy" aria-label="building now"></span>' : ""}<kbd>${kb}</kbd></button>`).join("")}<a class="more-link" href="system.html${DEMO ? "?demo" : ""}">Design system<small>The colors, type and parts it's built from</small></a><a class="more-demo" href="${esc(demoHref(!DEMO))}">${DEMO ? "Leave the demo" : "Show the demo company"}<small>${DEMO ? "Back to your own numbers" : "Made-up data that's safe to show"}</small></a></nav></details>`;
-    $(".layout").classList.toggle("full", ["mission", "weeks", "work", "machine", "note", "armory", "shapes"].includes(S.screen));
+      <details class="more-menu"><summary${MORE.some(([k]) => on(k)) ? ' class="on"' : ""}><i class="w-led" aria-hidden="true"></i>More ▾</summary><nav class="more-list" aria-label="More pages">${MORE.map(([k, l, kb]) => `<button data-go="screen:${k}" aria-pressed="${on(k)}"${k === "progress" && nowTask() ? ` title="Now building ${esc(nowTask().name)}"` : ""}>${l}${k === "progress" && nowTask() ? '<span class="busy" aria-label="building now"></span>' : ""}<kbd>${kb}</kbd></button>`).join("")}<a class="more-link" href="system.html${DEMO ? "?demo" : ""}">Design system<small>The colors, type and parts it's built from</small></a>${DEMO ? `<a class="more-demo" href="${esc(demoHref(false))}">Leave the demo<small>Back to your own numbers</small></a>` : ""}</nav></details>`;
+    $(".layout").classList.toggle("full", ["home", "cost", "list", "mission", "weeks", "work", "machine", "note", "armory", "shapes"].includes(S.screen));
     document.body.classList.toggle("lightpage", true);  // one light look across the app since Oct 13
     // Your setup keeps the panel's scroll position while you stay on one layer, so a click never makes the list jump
     const pnl = document.querySelector(".a-panel"), keepTop = S.screen === "armory" && pnl && S.aKey === S.atool + S.alayer ? pnl.scrollTop : 0;
-    $("#stage").innerHTML = S.screen === "shapes" && shp() ? shp().board() : S.screen === "note" && note() ? note().board() : S.screen === "machine" && workm() ? workm().board() : S.screen === "office" ? office() : S.screen === "armory" ? (anat() ? anat().board() : armory()) : S.screen === "progress" ? progress() : S.screen === "work" ? workView() : S.screen === "weeks" ? weeksView() : mission();
+    $("#stage").innerHTML = S.screen === "home" && home() ? home().board() : S.screen === "cost" && rec() ? rec().board() : S.screen === "list" && wlist() ? wlist().board() : S.screen === "shapes" && shp() ? shp().board() : S.screen === "note" && note() ? note().board() : S.screen === "machine" && workm() ? workm().board() : S.screen === "office" ? office() : S.screen === "armory" ? (anat() ? anat().board() : armory()) : S.screen === "progress" ? progress() : S.screen === "work" ? workView() : S.screen === "weeks" ? weeksView() : mission();
+    if (S.qopen && ["home", "list", "cost", "armory"].includes(S.screen) && note() && note().sheetOver) $("#stage").insertAdjacentHTML("beforeend", note().sheetOver());
     drawer();
-    $("#side").innerHTML = S.screen === "machine" || S.screen === "note" || S.screen === "armory" || S.screen === "shapes" ? "" : S.side === "detail" && S.selected ? detailView(S.selected) : S.side === "limits" ? limitsView() : S.screen === "progress" ? progressSide() : listView();
-    $("#foot").innerHTML = S.screen === "machine" || S.screen === "note" || S.screen === "armory" || S.screen === "shapes" || S.screen === "progress" ? (DEMO ? `This demo company was built ${esc(G.built)} from made-up files. Nothing here comes from anyone's real logs, and Crossview sends nothing anywhere. <a href="reads.html${DEMO ? "?demo" : ""}">How Crossview counts</a> · <button class="w-link foot-walk" data-walk="1">Show the first walk again</button>` : `Built ${esc(G.built)} from the logs on this Mac. Crossview sends nothing anywhere. <a href="reads.html${DEMO ? "?demo" : ""}">How Crossview counts</a> · <button class="w-link foot-walk" data-walk="1">Show the first walk again</button>${P && P.tasks.length ? ` · <button class="w-link foot-built" data-go="screen:progress">How Crossview is being built</button>` : ""}${LIVE ? "" : " This copy is read-only. Double-click the Agent Crossview file to refresh it."}`) : `<div class="legend"><span><span class="measured">12</span> counted</span><span><span class="estimate">about $40</span> estimate, rounded</span><span><span class="unknown">not recorded</span> unknown</span><span><i style="background:#38bdf8"></i>Made by you</span><span><i style="background:#34d399"></i>Came with Claude Code</span><span><i style="background:#a78bfa"></i>Only in one project</span><span><i style="background:#fbbf24"></i>The advisor</span><span>${coinSvg(3)} Pay-per-use price, estimated, with each extra coin roughly doubling it</span><span><i style="background:#f87171;border-radius:4px"></i>Worth a decision</span></div>
-      Built ${esc(G.built)} from the logs on this Mac. ${LIVE ? '<button class="snooze" data-refresh="1">Refresh from the logs now</button> ' : "This copy is read-only. To refresh it or correct it, double-click the Agent Crossview file in its folder. "}Nothing leaves this Mac. ${esc(CANT)}`;
+    $("#side").innerHTML = S.screen === "home" || S.screen === "cost" || S.screen === "list" || S.screen === "machine" || S.screen === "note" || S.screen === "armory" || S.screen === "shapes" ? "" : S.side === "detail" && S.selected ? detailView(S.selected) : S.side === "limits" ? limitsView() : S.screen === "progress" ? progressSide() : listView();
+    $("#foot").innerHTML = S.screen === "home" || S.screen === "cost" || S.screen === "list" || S.screen === "machine" || S.screen === "note" || S.screen === "armory" || S.screen === "shapes" || S.screen === "progress" ? (DEMO ? `This demo company was built ${esc(G.built)} from made-up files. Nothing here comes from anyone's real logs, and Crossview sends nothing anywhere. <a href="reads.html${DEMO ? "?demo" : ""}">How Crossview counts</a>` : `Updated ${esc(G.built)} from the records on this Mac. Crossview sends nothing anywhere. <a href="reads.html${DEMO ? "?demo" : ""}">How Crossview counts</a>${P && P.tasks.length ? ` · <button class="w-link foot-built" data-go="screen:progress">How Crossview is being built</button>` : ""}${LIVE ? "" : " This copy is read-only. Double-click the Agent Crossview file to refresh it."}`) : `<div class="legend"><span><span class="measured">12</span> counted</span><span><span class="estimate">about $40</span> estimate, rounded</span><span><span class="unknown">not recorded</span> unknown</span><span><i style="background:#38bdf8"></i>Made by you</span><span><i style="background:#34d399"></i>Came with Claude Code</span><span><i style="background:#a78bfa"></i>Only in one project</span><span><i style="background:#fbbf24"></i>The advisor</span><span>${coinSvg(3)} Pay-per-use price, estimated, with each extra coin roughly doubling it</span><span><i style="background:#f87171;border-radius:4px"></i>Worth a decision</span></div>
+      Updated ${esc(G.built)} from the records on this Mac. ${LIVE ? '<button class="snooze" data-refresh="1">Refresh from the logs now</button> ' : "This copy is read-only. To refresh it or correct it, double-click the Agent Crossview file in its folder. "}Nothing leaves this Mac. ${esc(CANT)}`;
     if (S.screen === "armory") { const p2 = document.querySelector(".a-panel"); if (p2) p2.scrollTop = keepTop; S.aKey = S.atool + S.alayer; }
     reachable();
     if (focused) { const back = document.querySelector(focused); if (back) back.focus({ preventScroll: true }); }
+    // a sheet gives the focus back to the button that opened it when it closes, on every room (QA, Oct 20)
+    const sheetOpen = !!(S.qopen || S.sopen);
+    if (sheetOpen && !S.sheetWas) S.opener = focused;
+    if (!sheetOpen && S.sheetWas && S.opener) { const b = document.querySelector(S.opener); if (b) b.focus({ preventScroll: true }); S.opener = null; }
+    S.sheetWas = sheetOpen;
     say();
     // wires are drawn from where the boxes landed: now (reading the layout forces it), and again once fonts settle
     const wire = S.screen === "shapes" && shp() ? shp().after : S.screen === "note" && note() ? note().after : S.screen === "machine" && workm() ? workm().after : S.screen === "armory" && anat() ? anat().after : null;
     if (wire) { wire(); setTimeout(wire, 150); }
+    // the before-reset preview opens below the chart: bring it into view so the link visibly did something (QA, Oct 20)
+    if (S.qbrGo) { S.qbrGo = false; setTimeout(() => { const e = document.querySelector(".q-br"); if (e) e.scrollIntoView({ block: "nearest", behavior: "smooth" }); }, 200); }
+    // a change sheet opened over Home, Work, the receipt or Setup takes the focus, as it does on the limit page (QA, Oct 20)
+    if (S.qfocus && ["home", "list", "cost", "armory"].includes(S.screen)) { const h = document.querySelector("#q-sheet-h"); if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); S.qfocus = false; } }
     if (window.GBWords) window.GBWords();  // on Windows: the screen-reader notes set just above say "computer" too
     textScale(); setTimeout(textScale, 160); morePanel(); setTimeout(morePanel, 170); moreSheet(); setTimeout(moreSheet, 170);
     // every move between screens is one step in the browser's history, so Back returns to where you were (QA run 2)
@@ -699,14 +720,18 @@
     if (!S.fromHistory && decodeURIComponent(location.hash) !== want) history.pushState(null, "", "#" + encodeURIComponent(want.slice(1)).replace(/%3A/g, ":"));
     S.fromHistory = false;
   }
+  // three rooms only (his call, Oct 19, night): every screen belongs to Home, Work or Setup. The older views' screens open
+  // the room that now holds what they showed; Your week's limit chart is Home's limit page, one level down, and the week
+  // in detail and All weeks aren't reachable until release 4 brings past weeks into Work
+  function rooms() {
+    if (["machine", "office", "work", "mission", "weeks"].includes(S.screen)) S.screen = "list";
+    if (S.screen === "shapes") { S.screen = "armory"; S.atool = S.atool || "Claude Code"; S.alayer = "instructions"; S.asel = null; }
+    if (S.screen === "note") { S.nview = null; S.allw = false; }
+  }
   // the address bar names the tab the way the tab does (his note, Oct 16); the screens keep their old inside names
-  const ADDR = { note: "week", machine: "work", armory: "setup", shapes: "instructions" };
-  const FROM = { week: "note", work: "machine", setup: "armory", instructions: "shapes", office: "armory" };
+  const ADDR = { home: "home", cost: "cost", list: "chats", note: "limits", armory: "setup" };
+  const FROM = { chats: "list", limits: "note", week: "note", detail: "note", "all-weeks": "note", mission: "note", weeks: "note", work: "list", "all-projects": "list", setup: "armory", instructions: "shapes", office: "armory" };
   function addressOf() {
-    if (S.screen === "note" && S.nview === "detail") return "#detail";
-    if (S.screen === "note" && S.allw) return "#all-weeks" + (S.hweek ? ":" + S.hweek : "");
-    if (S.screen === "machine" && S.allw) return "#all-projects";
-    if (S.screen === "work" && S.work) return "#" + S.work;
     if (S.screen === "weeks" && S.week) return "#week:" + S.week;
     return "#" + (ADDR[S.screen] || S.screen);
   }
@@ -740,7 +765,7 @@
     });
   }
   function hitLine(h) {
-    const run = (h.running || []).slice(0, 3).map((r) => `<span class="linkish" data-id="work:${esc(r.work)}">${r.work === "Not sure yet" ? "Not grouped yet" : esc(r.work)}</span> <span class="estimate">${r.share}%</span>`).join(", ");
+    const run = (h.running || []).slice(0, 3).map((r) => `<span class="linkish" data-id="work:${esc(r.work)}">${r.work === "Not sure yet" ? "Not in a project yet" : esc(r.work)}</span> <span class="estimate">${r.share}%</span>`).join(", ");
     const gap = h.plan === "Claude" ? (G.cowork_end && localDay(h.ts) > G.cowork_end ? ` Cowork has no logs after ${day(G.cowork_end)}, and the Claude app shares this limit but keeps no logs on this Mac, so work in either is missing.` : " The Claude app shares this limit but keeps no logs on this Mac, so its work is missing.")
       : (G.unpriced || {})["codex-auto-review"] ? " Codex's automatic reviewer has no published price, so its work can't show in these shares." : "";
     return `<li class="hitrow"><div><b>${when(h.ts)}</b> · ${esc(h.tool)}, ${KIND[h.kind] || esc(h.kind)}${h.repeats > 1 ? `, hit ${h.repeats} times` : ""}</div><div class="cant" style="margin-top:4px">In the ${h.kind === "seven_day" ? "week" : "five hours"} before, by share of the pay-per-use price, this ran: ${run || '<span class="unknown">nothing in the logs</span>'}.${gap}</div></li>`;
@@ -768,7 +793,7 @@
   function weekDetail(w, hits) {
     const v = G.weekly[w] || {}, tot = Object.values(v).reduce((a, b) => a + b, 0), tools = (G.weekly_tool || {})[w] || {};
     const ents = Object.entries(v).sort((a, b) => (a[0] === "Not sure yet") - (b[0] === "Not sure yet") || b[1] - a[1]);
-    const rows = ents.slice(0, 9).map(([k, u]) => `<li class="linkish" data-id="work:${esc(k)}"><span>${k === "Not sure yet" ? "Not grouped yet" : esc(k)}</span><span>${about(u)} <span class="estimate">${((x) => (u > 0 && x < 1 ? "under 1" : x))((((G.weekly_share || {})[w] || {})[k]) ?? pctOf(u, tot))}%</span></span></li>`).join("");
+    const rows = ents.slice(0, 9).map(([k, u]) => `<li class="linkish" data-id="work:${esc(k)}"><span>${k === "Not sure yet" ? "Not in a project yet" : esc(k)}</span><span>${about(u)} <span class="estimate">${((x) => (u > 0 && x < 1 ? "under 1" : x))((((G.weekly_share || {})[w] || {})[k]) ?? pctOf(u, tot))}%</span></span></li>`).join("");
     const grouped = ents.filter(([k]) => k !== "Not sure yet").length;
     const end = new Date(new Date(w + "T12:00:00").getTime() + 6 * 864e5).toISOString().slice(0, 10);
     const warns = WARN.filter((e) => localDay(e.ts) >= w && localDay(e.ts) <= end);
@@ -809,13 +834,24 @@
     if (S.screen === "machine" && S.ypeek && !at(".y-peek") && !at('[data-w^="work:peek:"]')) { S.ypeek = null; if (!at("button,a,summary,[data-go],[data-nwork],[data-id]")) return render(); }
     if (S.screen === "armory" && S.asel && !at(".a-peek") && !at("[data-a]")) { S.asel = null; if (!at("button,a,summary,[data-go],[data-nwork],[data-id]")) return render(); }
     if (at("[data-closedrawer]")) { S.drawer = false; return render(); }
+    // on a narrow window the panel sits under the list, so picking a line brings it into view (QA, Oct 19)
+    const seePanel = (sel) => { if (window.innerWidth > 1100) return; const p = document.querySelector(sel); if (p && p.getBoundingClientRect().top > window.innerHeight - 80) p.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); };
+    if (at("[data-wl]") && wlist()) { const el = at("[data-wl]"), r = wlist().click(el); if (r) { render(); if (r === "go") window.scrollTo(0, 0); else if (/^chat:/.test(el.dataset.wl)) seePanel(".wl-ev"); } return; }
+    if (at("[data-r]") && rec()) { const el = at("[data-r]"), r = rec().click(el); if (r) { render(); if (r === "go") window.scrollTo(0, 0); else if (/^sel:/.test(el.dataset.r)) seePanel(".r-ev"); } return; }
+    if (at("[data-h]") && home()) { const r = home().click(at("[data-h]")); if (r) { render(); if (r === "go") window.scrollTo(0, 0); } return; }
     if (at("[data-w]")) { const el = at("[data-w]"); const fromPic = !!el.closest(".g-canvas, .a-canvas"); const r = (shp() && shp().click(el)) || (workm() && workm().click(el)) || (note() && note().click(el)); if (r) { render(); if (r !== "stay" && !el.dataset.w.startsWith("work:")) window.scrollTo(0, 0); if (fromPic && window.innerWidth <= 1180) { const p = document.querySelector(".g-panel"); if (p && p.getBoundingClientRect().top > window.innerHeight - 120) p.scrollIntoView({ block: "start", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" }); } } return; }
     if (at("[data-a]") && anat()) { if (anat().click(at("[data-a]"))) render(); return; }
     if (at("[data-nper]")) { const np = at("[data-nper]").dataset.nper; if (np === "all") { S.allw = true; S.hstops = false; } else { S.allw = false; S.nper = np; } S.hback = false; if (np === "all" && S.screen === "note") S.nview = null; S.qpick = null; S.qscroll = 0; return render(); }
     if (at("[data-keep]") && note()) { note().kept.add(at("[data-keep]").dataset.keep); store.set("kept", [...note().kept]); return render(); }
     if (at("[data-unkeep]") && note()) { note().kept.clear(); store.set("kept", []); S.snoozed.clear(); store.set("snoozed", []); unsnoozeAll(); return render(); }
-    if (at("[data-nwork]")) { S.qopen = null; const nwk = at("[data-nwork]").dataset.nwork; if (!(((G.machine || {}).periods || {})[S.nper] || {})[nwk]) return select("work:" + nwk); S.screen = "machine"; S.mper = S.nper; S.mwork = at("[data-nwork]").dataset.nwork; S.mlevel = 20; S.mapp = null; S.mitem = null; render(); window.scrollTo(0, 0); return; }
-    if (!m || S.screen !== "machine") { if (at("[data-mw],[data-mw2]")) { S.screen = "machine"; S.mwork = (at("[data-mw],[data-mw2]").dataset.mw || at("[data-mw],[data-mw2]").dataset.mw2); S.mlevel = 20; return render(); } return; }
+    if (at("[data-nwork],[data-mw],[data-mw2]")) {
+      const e2 = at("[data-nwork],[data-mw],[data-mw2]"), nwk = e2.dataset.nwork || e2.dataset.mw || e2.dataset.mw2, CHS = (G.machine || {}).chats || {};
+      // the week shown, if the project has chats in it; otherwise the latest week that does (QA, Oct 19, night)
+      const has = (w) => (CHS[w] || []).some((c) => c.work === nwk);
+      if (!has(S.nper)) { const w = Object.keys(CHS).sort().reverse().find(has); if (w) S.nper = w; }
+      S.qopen = null; S.screen = "list"; S.wlopen = new Set([nwk]); S.wlsel = ((CHS[S.nper] || []).find((c) => c.work === nwk) || {}).id || null; render(); window.scrollTo(0, 0); return;
+    }
+    if (!m || S.screen !== "machine") return;
     if (at("[data-mw]")) { S.mwork = at("[data-mw]").dataset.mw; m.go(20); return render(); }
     if (at("[data-mapp]")) { S.mapp = at("[data-mapp]").dataset.mapp; S.mallhelpers = false; m.go(10); return render(); }
     if (at("[data-mitem]")) { S.mitem = at("[data-mitem]").dataset.mitem; m.go(1); return render(); }
@@ -831,7 +867,7 @@
     svg.querySelectorAll(".m-wire[data-mw]").forEach((p) => p.classList.toggle("hov", !!c && p.dataset.mw === c.dataset.mw));
   });
   document.addEventListener("click", (ev) => {
-    if (ev.target.closest("[data-nper],[data-keep],[data-unkeep],[data-nwork],[data-closedrawer],[data-w],[data-a]")) return;
+    if (ev.target.closest("[data-nper],[data-keep],[data-unkeep],[data-nwork],[data-closedrawer],[data-w],[data-a],[data-h],[data-r],[data-wl]")) return;
     if (S.screen === "machine" && ev.target.closest("[data-mw],[data-mapp],[data-mitem],[data-mlevel],[data-mper],[data-allworks],[data-allhelpers],[data-mfull]")) return;
     const wkEl = ev.target.closest("[data-week]");
     if (wkEl) { S.week = wkEl.dataset.week; return render(); }
@@ -869,7 +905,7 @@
   function toast(t) { let el = document.getElementById("toast"); if (!el) { el = document.createElement("div"); el.id = "toast"; el.className = "toast"; el.setAttribute("role", "status"); document.body.appendChild(el); } el.textContent = t; el.style.opacity = 1; clearTimeout(el._t); el._t = setTimeout(() => (el.style.opacity = 0), 4000); }
   document.addEventListener("keydown", (ev) => {
     const k = ev.key.toLowerCase();
-    if ((k === "enter" || k === " ") && ev.target.matches && ev.target.matches('svg [data-w][tabindex], div[role="button"][data-w][tabindex]')) { ev.preventDefault(); ev.target.dispatchEvent(new MouseEvent("click", { bubbles: true })); return; }
+    if ((k === "enter" || k === " ") && ev.target.matches && ev.target.matches('svg [data-w][tabindex], div[role="button"][data-w][tabindex], svg [data-h][tabindex], [data-r][tabindex]')) { ev.preventDefault(); ev.target.dispatchEvent(new MouseEvent("click", { bubbles: true })); return; }
     // the arrow keys move between plates on the tabs built on the shared stage (task 33)
     if ((k === "arrowup" || k === "arrowdown") && !(ev.target.closest && ev.target.closest("input,textarea,select,[contenteditable]")) && !document.querySelector(".q-sheet")) {
       const m = S.screen === "note" ? note() : S.screen === "machine" ? workm() : S.screen === "shapes" ? shp() : null;
@@ -880,13 +916,13 @@
       if (note().step(k === "arrowleft" ? -1 : 1)) { ev.preventDefault(); render(); const sel = document.querySelector(".h-svg .h-week.sel"); if (sel) sel.focus({ preventScroll: true }); }
       return;
     }
-    if (k === "escape" && S.screen === "note" && note() && note().closeSheet()) { ev.preventDefault(); return render(); }
-    if (k === "escape" && S.screen === "shapes" && shp() && shp().closeSheet()) { ev.preventDefault(); return render(); }
+    if (k === "escape" && ["note", "home", "list", "cost", "armory"].includes(S.screen) && note() && note().closeSheet()) { ev.preventDefault(); return render(); }
+    if (k === "escape" && (S.screen === "shapes" || S.screen === "armory") && shp() && shp().closeSheet()) { ev.preventDefault(); return render(); }
     if (k === "escape" && S.screen === "machine" && workm() && workm().closePeek && workm().closePeek()) { ev.preventDefault(); return render(); }
     if (ev.target.closest && ev.target.closest("input,textarea,select")) return;
     if ((k === "enter" || k === " ") && ev.target.matches && ev.target.matches("[tabindex][data-go],[tabindex][data-id],[tabindex][data-open],[tabindex][data-week],[tabindex][data-mw],[tabindex][data-port],[data-allports],[tabindex][data-a],[tabindex][data-nwork]")) { ev.preventDefault(); if (ev.target.dataset.a && anat()) { anat().click(ev.target); render(); const f = document.querySelector(`[data-a="${ev.target.dataset.a}"][tabindex]`); if (f) f.focus(); return; } return ev.target.click ? ev.target.click() : ev.target.dispatchEvent(new MouseEvent("click", { bubbles: true })); }
     if ((k === "arrowup" || k === "arrowdown") && S.screen === "armory" && anat()) { ev.preventDefault(); anat().click({ dataset: { a: k === "arrowup" ? "step:1" : "step:-1" } }); return render(); }
-    if (k === "t") select("screen:note"); else if (k === "o") select("screen:machine"); else if (k === "s") select("screen:armory"); else if (k === "c" || k === "i") select("screen:shapes"); else if ((k === "m" || k === "w" || k === "a") && !DEMO) select("screen:weeks"); else if (k === "p" && !DEMO) select("screen:progress");
+    if (k === "h") select("screen:home"); else if (k === "w") select("screen:list"); else if (k === "s") select("screen:armory"); else if (k === "p" && !DEMO) select("screen:progress");
     else if (k === "1") { S.mode = "week"; render(); } else if (k === "2") { S.mode = "all"; render(); }
     else if ((k === "escape" || k === "backspace") && S.screen === "machine" && S.drawer) { S.drawer = false; render(); }
     else if ((k === "escape" || k === "backspace") && S.screen === "machine" && S.mlevel < 30 && mach()) { mach().go(S.mlevel === 1 ? 10 : S.mlevel === 10 ? 20 : 30); render(); }
@@ -925,27 +961,45 @@
   document.addEventListener("focusin", (ev) => { const t = ev.target.closest && ev.target.closest("[data-tip]"); if (!t) return; tipFor = t; placeTip(t); });
   document.addEventListener("focusout", () => (tip.style.opacity = 0));
   const start0 = decodeURIComponent(location.hash.slice(1)), start = FROM[start0] || start0;
-  if (["note", "machine", "armory", "shapes", "progress"].includes(start) && !(DEMO && start === "progress")) S.screen = start;
-  if (start === "mission" || start === "weeks") { S.screen = "note"; S.allw = true; }
-  if (DEMO && !["note", "machine", "armory", "shapes"].includes(S.screen)) S.screen = "note";
-  if (start.startsWith("week:")) { S.screen = "note"; S.allw = true; S.hweek = start.slice(5); }
-  if (start === "detail") { S.screen = "note"; S.nview = "detail"; }
-  if (start === "all-weeks") { S.screen = "note"; S.allw = true; }
-  if (start.startsWith("all-weeks:")) { S.screen = "note"; S.allw = true; S.hweek = start.slice(10); }
-  if (start === "all-projects") { S.screen = "machine"; S.allw = true; }
+  S.screen = "home";  // the home is the way in (release 1 of the redesign, Oct 18)
+  // it opens on this week unless nothing has happened yet this week and last week has work (QA, Oct 18: light users always
+  // landed on last week under Your week's older rule)
+  { const P = (G.machine || {}).periods || {}, has = (w) => Object.values(P[w] || {}).some((t) => t.usd > 0), lw = Object.keys(P).filter((k) => k !== "all" && k < G.week_start).sort().pop();
+    if (!S.nper) S.nper = has(G.week_start) || !lw || !has(lw) ? G.week_start : lw; }
+  if (["home", "cost", "list", "note", "machine", "armory", "shapes", "progress"].includes(start) && !(DEMO && start === "progress")) S.screen = start;
+  if (FROM[start]) S.screen = FROM[start];
+  if (DEMO && !["home", "cost", "list", "note", "machine", "armory", "shapes"].includes(S.screen)) S.screen = "home";
+  if (start.startsWith("week:") || start.startsWith("all-weeks:")) S.screen = "note";
   // Back, Forward, or an address typed into this tab: show the screen it names
   window.addEventListener("popstate", () => {
     const h0 = decodeURIComponent(location.hash.slice(1)), h = FROM[h0] || h0;
     S.qopen = null; S.sopen = null; S.ypeek = null; S.side = "list"; S.selected = null;
-    if (h === "detail") { S.screen = "note"; S.nview = "detail"; S.allw = false; }
-    else if (h === "all-weeks" || h.startsWith("all-weeks:")) { S.screen = "note"; S.nview = null; S.allw = true; S.hstops = false; S.hweek = h.startsWith("all-weeks:") ? h.slice(10) : null; }
-    else if (h === "all-projects") { S.screen = "machine"; S.allw = true; }
-    else if (h.startsWith("work:")) { S.screen = "machine"; S.allw = true; S.yall = h.slice(5); }
-    else if (h.startsWith("week:") || h === "mission" || h === "weeks") { S.screen = "note"; S.allw = true; S.nview = null; S.hweek = h.startsWith("week:") ? h.slice(5) : null; }
-    else if (["note", "machine", "armory", "shapes", "mission", "progress", "weeks"].includes(h) && !(DEMO && !["note", "machine", "armory", "shapes"].includes(h))) { S.screen = h; if (h === "note") S.nview = null; if (h === "note" || h === "machine") { S.allw = false; S.nper = G.week_start; } }
+    if (h.startsWith("all-weeks:") || h.startsWith("week:")) { S.screen = "note"; }
+    else if (h.startsWith("work:")) { S.screen = "list"; S.wlopen = new Set([h.slice(5)]); }
+    else if (h === "" || h === "home") { S.screen = "home"; }
+    else if (h === "cost") { S.screen = "cost"; }
+    else if (h === "list" || h === "chats") { S.screen = "list"; }
+    else if (["note", "machine", "armory", "shapes", "mission", "progress", "weeks"].includes(h) && !(DEMO && !["note", "machine", "armory", "shapes"].includes(h))) { S.screen = h; if (h === "note") S.nview = null; if (h === "note" || h === "machine") { S.allw = false; } }
     else return;
     S.fromHistory = true; render(); window.scrollTo(0, (S.scrollAt || {})[S.screen] || 0);
   });
+  // Esc closes the home's "How this was made" panel (QA, Oct 19)
+  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && S.screen === "home" && S.hhow) { S.hhow = null; render(); const b = document.querySelector('[data-h^="how:"]'); if (b) b.focus(); } });
   render();
   if (start.includes(":") && (byId[start] || start === "advisor")) select(start, true);
+  // the first open (Oct 18): while the refresh started by the double-click is reading, the home shows it happening;
+  // when it's done, the page loads the new numbers once
+  if (LIVE) (async () => {
+    let was = null;
+    for (;;) {
+      let st = null;
+      try { st = await (await fetch("/api/scan", { cache: "no-store" })).json(); } catch (e) { return; }
+      if (!st || st.none) return;
+      if (!st.done) { was = st; S.scan = st; if (S.screen === "home") render(); await new Promise((r) => setTimeout(r, 700)); continue; }
+      S.scan = null; S.scanDone = st;
+      if (was) { if (G.sessions > 0 && !DEMO) { S.scanReady = true; render(); } else location.reload(); return; }
+      if (S.screen === "home") render();
+      return;
+    }
+  })();
 })();

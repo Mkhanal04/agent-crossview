@@ -1,186 +1,184 @@
 {
- "built": "2026-10-16T20:13",
+ "built": "2026-10-20T10:26",
  "weekly": {
-  "2026-08-10": {
-   "Weekly status reports": 6.2364,
-   "Learning and setup": 2.1608,
-   "Not sure yet": 8.8805,
-   "Customer interview synthesis": 11.2892
-  },
   "2026-08-17": {
-   "Customer interview synthesis": 11.3404,
-   "Weekly status reports": 4.527,
-   "Learning and setup": 7.1743,
-   "Not sure yet": 7.516
+   "Weekly status reports": 5.8261,
+   "Learning and setup": 8.5318,
+   "Not sure yet": 7.9943,
+   "Customer interview synthesis": 7.5604
   },
   "2026-08-24": {
-   "Customer interview synthesis": 15.0719,
-   "Weekly status reports": 9.9625,
-   "Learning and setup": 3.1095,
-   "Not sure yet": 2.6198
+   "Customer interview synthesis": 11.5355,
+   "Weekly status reports": 4.4968,
+   "Learning and setup": 7.2798,
+   "Not sure yet": 4.1582
   },
   "2026-08-31": {
-   "Route planner redesign": 75.7943,
-   "Customer interview synthesis": 12.2863,
-   "Weekly status reports": 5.6604,
-   "Board deck, Q3 results": 38.5522,
-   "Learning and setup": 2.4182,
-   "Not sure yet": 5.9626
+   "Customer interview synthesis": 44.3191,
+   "Weekly status reports": 8.5548,
+   "Learning and setup": 5.4218,
+   "Not sure yet": 10.9696
   },
   "2026-09-07": {
-   "Route planner redesign": 121.6277,
-   "Carrier onboarding flow": 21.1669,
-   "Customer interview synthesis": 16.289,
-   "Weekly status reports": 7.8706,
-   "Board deck, Q3 results": 27.2317,
-   "Learning and setup": 4.0416,
-   "Not sure yet": 5.3224
+   "Route planner redesign": 88.2763,
+   "Customer interview synthesis": 15.4938,
+   "Weekly status reports": 3.3737,
+   "Board deck, Q3 results": 17.6379,
+   "Learning and setup": 5.9414,
+   "Q4 pricing review": 3.7066
   },
   "2026-09-14": {
-   "Route planner redesign": 88.7723,
-   "Carrier onboarding flow": 12.8815,
-   "Customer interview synthesis": 22.9774,
-   "Weekly status reports": 2.1287,
-   "Board deck, Q3 results": 43.1054,
-   "Learning and setup": 1.9932,
-   "Not sure yet": 2.1765
+   "Route planner redesign": 117.6627,
+   "Carrier onboarding flow": 21.6989,
+   "Customer interview synthesis": 43.0105,
+   "Weekly status reports": 4.4197,
+   "Board deck, Q3 results": 52.1141,
+   "Learning and setup": 3.0363,
+   "Not sure yet": 1.9756
   },
   "2026-09-21": {
-   "Route planner redesign": 93.3246,
-   "Q4 pricing review": 61.2704,
-   "Carrier onboarding flow": 8.8682,
-   "Customer interview synthesis": 11.1307,
-   "Weekly status reports": 7.8772,
-   "Support triage bot": 10.7552,
-   "Learning and setup": 3.9772,
-   "Not sure yet": 7.7647
+   "Route planner redesign": 112.4541,
+   "Carrier onboarding flow": 20.6218,
+   "Customer interview synthesis": 20.6133,
+   "Weekly status reports": 5.7775,
+   "Board deck, Q3 results": 60.8511,
+   "Learning and setup": 4.7608,
+   "Not sure yet": 8.6663
   },
   "2026-09-28": {
-   "Route planner redesign": 80.6033,
-   "Q4 pricing review": 37.5437,
-   "Carrier onboarding flow": 28.1974,
-   "Customer interview synthesis": 35.9867,
-   "Weekly status reports": 6.2523,
-   "Warehouse cleanup": 26.0556,
-   "Support triage bot": 9.5874,
-   "Learning and setup": 5.7485,
-   "Not sure yet": 1.6109
+   "Route planner redesign": 86.5664,
+   "Q4 pricing review": 41.955,
+   "Carrier onboarding flow": 36.0145,
+   "Customer interview synthesis": 18.2542,
+   "Weekly status reports": 6.2175,
+   "Support triage bot": 10.9148,
+   "Learning and setup": 6.571,
+   "Not sure yet": 8.637
   },
   "2026-10-05": {
-   "Route planner redesign": 164.4631,
-   "Q4 pricing review": 43.6101,
-   "Carrier onboarding flow": 28.819,
-   "Customer interview synthesis": 11.4781,
-   "Weekly status reports": 4.8932,
-   "Warehouse cleanup": 32.4335,
-   "Support triage bot": 8.1269,
-   "Learning and setup": 6.2882,
-   "Not sure yet": 2.3357
+   "Route planner redesign": 131.3971,
+   "Q4 pricing review": 84.6081,
+   "Carrier onboarding flow": 39.2925,
+   "Customer interview synthesis": 18.4422,
+   "Weekly status reports": 2.8862,
+   "Warehouse cleanup": 37.6306,
+   "Support triage bot": 6.2433,
+   "Learning and setup": 5.9416,
+   "Not sure yet": 4.9598
   },
   "2026-10-12": {
-   "Route planner redesign": 158.2714,
-   "Q4 pricing review": 49.518,
-   "Customer interview synthesis": 20.5033,
-   "Weekly status reports": 7.841,
-   "Warehouse cleanup": 30.0194,
-   "Learning and setup": 6.7996
+   "Route planner redesign": 179.5966,
+   "Q4 pricing review": 17.0733,
+   "Carrier onboarding flow": 26.6062,
+   "Customer interview synthesis": 19.9182,
+   "Weekly status reports": 5.6926,
+   "Warehouse cleanup": 24.1664,
+   "Support triage bot": 19.0782,
+   "Learning and setup": 5.4017,
+   "Not sure yet": 5.781
+  },
+  "2026-10-19": {
+   "Route planner redesign": 81.4931,
+   "Q4 pricing review": 25.4637,
+   "Customer interview synthesis": 13.2266,
+   "Weekly status reports": 5.8133,
+   "Warehouse cleanup": 11.6236,
+   "Learning and setup": 6.6513,
+   "Not sure yet": 7.9222
   }
  },
  "weekly_tool": {
-  "2026-08-10": {
-   "Cowork": 6.2364,
-   "Claude Code": 22.3305
-  },
   "2026-08-17": {
-   "Cowork": 23.3834,
-   "Claude Code": 7.1743
+   "Cowork": 5.8261,
+   "Codex": 8.5318,
+   "Claude Code": 15.5547
   },
   "2026-08-24": {
-   "Claude Code": 20.8012,
-   "Cowork": 9.9625
+   "Claude Code": 18.8153,
+   "Cowork": 8.655
   },
   "2026-08-31": {
-   "Cowork": 105.296,
-   "Claude Code": 32.9598,
-   "Codex": 2.4182
+   "Claude Code": 24.3471,
+   "Cowork": 44.9182
   },
   "2026-09-07": {
-   "Claude Code": 148.8621,
-   "Cowork": 50.6462,
-   "Codex": 4.0416
+   "Cowork": 105.9496,
+   "Claude Code": 28.4801
   },
   "2026-09-14": {
-   "Cowork": 99.045,
-   "Claude Code": 72.9968,
-   "Codex": 1.9932
+   "Claude Code": 141.3927,
+   "Cowork": 102.5251
   },
   "2026-09-21": {
-   "Cowork": 57.0505,
-   "Claude Code": 104.9589,
-   "Codex": 42.9588
+   "Cowork": 150.3908,
+   "Claude Code": 83.3541
   },
   "2026-09-28": {
-   "Claude Code": 108.0006,
-   "Cowork": 84.2041,
-   "Codex": 39.3811
+   "Claude Code": 76.1725,
+   "Cowork": 138.9579
   },
   "2026-10-05": {
-   "Claude Code": 171.188,
-   "Cowork": 92.5381,
-   "Codex": 38.7217
+   "Claude Code": 200.4528,
+   "Cowork": 90.8007,
+   "Codex": 40.1479
   },
   "2026-10-12": {
-   "Claude Code": 158.5894,
-   "Cowork": 87.8018,
-   "Codex": 26.5615
+   "Claude Code": 226.902,
+   "Cowork": 64.465,
+   "Codex": 11.9472
+  },
+  "2026-10-19": {
+   "Claude Code": 81.7976,
+   "Cowork": 58.7726,
+   "Codex": 11.6236
   }
  },
  "model_cost": {
-  "claude-opus-5-5": 1445.27,
-  "gpt-6.1-sol": 156.08,
-  "claude-sonnet-5-5": 14.87,
-  "claude-haiku-5-5": 3.88
+  "claude-opus-5-5": 1634.92,
+  "gpt-6.1-sol": 72.25,
+  "claude-sonnet-5-5": 24.58,
+  "claude-haiku-5-5": 9.02
  },
  "token_kinds": {
-  "re-reading context": 2164078659,
-  "storing context": 140772471,
-  "answers": 25960410,
-  "new input": 76292
+  "re-reading context": 2327318942,
+  "storing context": 154072765,
+  "answers": 28303705,
+  "new input": 79653
  },
  "usd_kinds": {
-  "read": 401.23,
-  "fresh": 0.28,
-  "out": 491.49,
-  "write": 727.1
+  "read": 436.69,
+  "fresh": 0.29,
+  "out": 544.03,
+  "write": 759.77
  },
  "limit_hits": [
   {
-   "date": "2026-10-12",
-   "ts": "2026-10-12T21:20",
+   "date": "2026-10-19",
+   "ts": "2026-10-19T21:20",
    "kind": "five_hour",
    "session": null,
-   "resets": 1791850800
+   "resets": 1792455600
   },
   {
-   "date": "2026-10-07",
-   "ts": "2026-10-07T21:20",
+   "date": "2026-10-14",
+   "ts": "2026-10-14T21:20",
    "kind": "five_hour",
    "session": null,
-   "resets": 1791418800
+   "resets": 1792023600
   },
   {
-   "date": "2026-10-08",
-   "ts": "2026-10-08T20:20",
+   "date": "2026-10-15",
+   "ts": "2026-10-15T20:20",
    "kind": "five_hour",
    "session": null,
-   "resets": 1791501600
+   "resets": 1792106400
   },
   {
-   "date": "2026-09-16",
-   "ts": "2026-09-16T20:20",
+   "date": "2026-09-23",
+   "ts": "2026-09-23T20:20",
    "kind": "five_hour",
    "session": null,
-   "resets": 1789600800
+   "resets": 1790205600
   }
  ],
  "limit_events": [
@@ -189,17 +187,33 @@
    "plan": "Claude",
    "status": "hit",
    "kind": "five_hour",
-   "ts": "2026-09-16T20:20",
+   "ts": "2026-09-23T20:20",
    "session": null,
    "util": 100,
-   "running": []
+   "running": [
+    {
+     "work": "Board deck, Q3 results",
+     "share": 48,
+     "usd": 23.73
+    },
+    {
+     "work": "Carrier onboarding flow",
+     "share": 41,
+     "usd": 20.62
+    },
+    {
+     "work": "Customer interview synthesis",
+     "share": 11,
+     "usd": 5.56
+    }
+   ]
   },
   {
    "tool": "Codex",
    "plan": "ChatGPT",
    "status": "warning",
    "kind": "five_hour",
-   "ts": "2026-09-29T19:20",
+   "ts": "2026-10-06T19:20",
    "session": null,
    "util": 82,
    "running": []
@@ -209,24 +223,50 @@
    "plan": "Claude",
    "status": "hit",
    "kind": "five_hour",
-   "ts": "2026-10-07T21:20",
+   "ts": "2026-10-14T21:20",
    "session": null,
    "util": 100,
-   "running": []
+   "running": [
+    {
+     "work": "Support triage bot",
+     "share": 38,
+     "usd": 19.08
+    },
+    {
+     "work": "Route planner redesign",
+     "share": 32,
+     "usd": 16.17
+    },
+    {
+     "work": "Carrier onboarding flow",
+     "share": 30,
+     "usd": 15.14
+    }
+   ]
   },
   {
    "tool": "Cowork",
    "plan": "Claude",
    "status": "warning",
    "kind": "five_hour",
-   "ts": "2026-10-08T16:20",
+   "ts": "2026-10-15T16:20",
    "session": null,
    "util": 91,
+   "running": []
+  },
+  {
+   "tool": "Claude Code",
+   "plan": "Claude",
+   "status": "hit",
+   "kind": "five_hour",
+   "ts": "2026-10-15T20:20",
+   "session": null,
+   "util": 100,
    "running": [
     {
-     "work": "Not sure yet",
+     "work": "Route planner redesign",
      "share": 100,
-     "usd": 2.34
+     "usd": 21.23
     }
    ]
   },
@@ -235,40 +275,19 @@
    "plan": "Claude",
    "status": "hit",
    "kind": "five_hour",
-   "ts": "2026-10-08T20:20",
+   "ts": "2026-10-19T21:20",
    "session": null,
    "util": 100,
    "running": [
     {
      "work": "Route planner redesign",
-     "share": 48,
-     "usd": 14.8
+     "share": 87,
+     "usd": 43.89
     },
     {
-     "work": "Carrier onboarding flow",
-     "share": 45,
-     "usd": 13.91
-    },
-    {
-     "work": "Not sure yet",
-     "share": 8,
-     "usd": 2.34
-    }
-   ]
-  },
-  {
-   "tool": "Claude Code",
-   "plan": "Claude",
-   "status": "hit",
-   "kind": "five_hour",
-   "ts": "2026-10-12T21:20",
-   "session": null,
-   "util": 100,
-   "running": [
-    {
-     "work": "Route planner redesign",
-     "share": 100,
-     "usd": 47.1
+     "work": "Learning and setup",
+     "share": 13,
+     "usd": 6.65
     }
    ]
   }
@@ -278,7 +297,7 @@
    [
     "Claude",
     "hit",
-    1791850800,
+    1792455600,
     "five_hour"
    ],
    {
@@ -286,7 +305,7 @@
     "plan": "Claude",
     "status": "hit",
     "kind": "five_hour",
-    "ts": "2026-10-12T21:20",
+    "ts": "2026-10-19T21:20",
     "session": null,
     "util": 100
    }
@@ -295,7 +314,7 @@
    [
     "Claude",
     "hit",
-    1791418800,
+    1792023600,
     "five_hour"
    ],
    {
@@ -303,7 +322,7 @@
     "plan": "Claude",
     "status": "hit",
     "kind": "five_hour",
-    "ts": "2026-10-07T21:20",
+    "ts": "2026-10-14T21:20",
     "session": null,
     "util": 100
    }
@@ -312,7 +331,7 @@
    [
     "Claude",
     "hit",
-    1791501600,
+    1792106400,
     "five_hour"
    ],
    {
@@ -320,7 +339,7 @@
     "plan": "Claude",
     "status": "hit",
     "kind": "five_hour",
-    "ts": "2026-10-08T20:20",
+    "ts": "2026-10-15T20:20",
     "session": null,
     "util": 100
    }
@@ -329,7 +348,7 @@
    [
     "Claude",
     "warning",
-    1791487200,
+    1792092000,
     "five_hour"
    ],
    {
@@ -337,7 +356,7 @@
     "plan": "Claude",
     "status": "warning",
     "kind": "five_hour",
-    "ts": "2026-10-08T16:20",
+    "ts": "2026-10-15T16:20",
     "session": null,
     "util": 91
    }
@@ -346,7 +365,7 @@
    [
     "ChatGPT",
     "warning",
-    1790720400,
+    1791325200,
     "five_hour"
    ],
    {
@@ -354,7 +373,7 @@
     "plan": "ChatGPT",
     "status": "warning",
     "kind": "five_hour",
-    "ts": "2026-09-29T19:20",
+    "ts": "2026-10-06T19:20",
     "session": null,
     "util": 82
    }
@@ -363,7 +382,7 @@
    [
     "Claude",
     "hit",
-    1789600800,
+    1790205600,
     "five_hour"
    ],
    {
@@ -371,47 +390,47 @@
     "plan": "Claude",
     "status": "hit",
     "kind": "five_hour",
-    "ts": "2026-09-16T20:20",
+    "ts": "2026-09-23T20:20",
     "session": null,
     "util": 100
    }
   ]
  ],
  "by_tool": {
-  "Claude Code": 847.86,
-  "Cowork": 616.16,
-  "Codex": 156.08
+  "Claude Code": 897.27,
+  "Cowork": 771.26,
+  "Codex": 72.25
  },
  "est_tool": {
-  "Claude Code": 5.81,
-  "Cowork": 5.1,
+  "Claude Code": 6.19,
+  "Cowork": 6.98,
   "Codex": 0.0
  },
  "ranges": {
   "Claude Code": [
-   "2026-08-13",
-   "2026-10-16"
+   "2026-08-18",
+   "2026-10-20"
   ],
   "Cowork": [
-   "2026-08-14",
-   "2026-10-16"
+   "2026-08-21",
+   "2026-10-20"
   ],
   "Codex": [
-   "2026-09-04",
-   "2026-10-14"
+   "2026-08-17",
+   "2026-10-20"
   ]
  },
  "checks": {
   "Claude Code": {
    "sessions": 12,
-   "theirs": 272.16,
-   "ours": 254.36,
+   "theirs": 288.02,
+   "ours": 269.18,
    "recorded_sessions": 18
   },
   "Cowork": {
    "sessions": 20,
-   "theirs": 283.44,
-   "ours": 308.08,
+   "theirs": 354.78,
+   "ours": 385.63,
    "recorded_sessions": 26
   }
  },
@@ -420,87 +439,87 @@
   "claude-sonnet-5-5": 900,
   "claude-haiku-5-5": 400
  },
- "prices_checked": "Oct 10, 2026",
+ "prices_checked": "Oct 19, 2026",
  "price_sources": {
   "Claude": "platform.claude.com/docs/en/about-claude/pricing",
   "OpenAI": "developers.openai.com/api/docs/pricing"
  },
  "unpriced": {},
  "work": {
-  "Customer interview synthesis": {
-   "sessions": 13,
-   "usd": 168.35,
-   "helpers": 15,
-   "last": "2026-10-15"
-  },
   "Learning and setup": {
    "sessions": 10,
-   "usd": 43.71,
-   "helpers": 4,
-   "last": "2026-10-16"
+   "usd": 59.53,
+   "helpers": 6,
+   "last": "2026-10-19"
   },
   "Not sure yet": {
    "sessions": 9,
-   "usd": 44.19,
+   "usd": 61.07,
    "helpers": 0,
-   "last": "2026-10-08"
+   "last": "2026-10-19"
+  },
+  "Customer interview synthesis": {
+   "sessions": 14,
+   "usd": 212.37,
+   "helpers": 22,
+   "last": "2026-10-20"
   },
   "Weekly status reports": {
    "sessions": 10,
-   "usd": 63.25,
+   "usd": 53.06,
    "helpers": 0,
-   "last": "2026-10-16"
-  },
-  "Board deck, Q3 results": {
-   "sessions": 6,
-   "usd": 108.9,
-   "helpers": 9,
-   "last": "2026-09-17"
+   "last": "2026-10-20"
   },
   "Route planner redesign": {
    "sessions": 25,
-   "usd": 782.86,
-   "helpers": 42,
-   "last": "2026-10-13"
+   "usd": 797.46,
+   "helpers": 53,
+   "last": "2026-10-19"
+  },
+  "Q4 pricing review": {
+   "sessions": 9,
+   "usd": 172.8,
+   "helpers": 6,
+   "last": "2026-10-20"
+  },
+  "Board deck, Q3 results": {
+   "sessions": 5,
+   "usd": 130.61,
+   "helpers": 10,
+   "last": "2026-09-25"
   },
   "Carrier onboarding flow": {
-   "sessions": 7,
-   "usd": 99.93,
-   "helpers": 8,
-   "last": "2026-10-08"
+   "sessions": 9,
+   "usd": 144.23,
+   "helpers": 10,
+   "last": "2026-10-14"
   },
   "Support triage bot": {
    "sessions": 3,
-   "usd": 28.48,
-   "helpers": 5,
-   "last": "2026-10-09"
-  },
-  "Q4 pricing review": {
-   "sessions": 10,
-   "usd": 191.96,
-   "helpers": 6,
+   "usd": 36.23,
+   "helpers": 3,
    "last": "2026-10-14"
   },
   "Warehouse cleanup": {
-   "sessions": 6,
-   "usd": 88.51,
-   "helpers": 1,
-   "last": "2026-10-16"
+   "sessions": 5,
+   "usd": 73.42,
+   "helpers": 2,
+   "last": "2026-10-20"
   }
  },
  "sessions": 99,
  "tools": {
-  "Claude Code": 47,
-  "Cowork": 38,
-  "Codex": 14
+  "Codex": 5,
+  "Claude Code": 54,
+  "Cowork": 40
  },
  "skills": [
   {
    "name": "prd-template",
    "where": "yours (every project)",
    "plugin": null,
-   "calls": 17,
-   "last": "2026-10-13"
+   "calls": 12,
+   "last": "2026-10-19"
   },
   {
    "name": "status-update",
@@ -520,22 +539,22 @@
    "name": "interview-notes",
    "where": "yours (every project)",
    "plugin": null,
-   "calls": 4,
-   "last": "2026-09-29"
+   "calls": 5,
+   "last": "2026-10-20"
   },
   {
    "name": "okr-check",
    "where": "yours (every project)",
    "plugin": null,
-   "calls": 12,
-   "last": "2026-10-13"
+   "calls": 10,
+   "last": "2026-10-19"
   },
   {
    "name": "carrier-glossary",
    "where": "one project only: Product/carrier-onboarding",
    "plugin": null,
-   "calls": 4,
-   "last": "2026-10-05"
+   "calls": 3,
+   "last": "2026-10-12"
   },
   {
    "name": "docx",
@@ -569,8 +588,8 @@
    "name": "dataviz",
    "where": "your Claude account (synced)",
    "plugin": null,
-   "calls": 10,
-   "last": "2026-10-13"
+   "calls": 11,
+   "last": "2026-10-19"
   },
   {
    "name": "brand-voice",
@@ -591,14 +610,14 @@
    "where": "your Claude account (synced)",
    "plugin": null,
    "calls": 4,
-   "last": "2026-10-16"
+   "last": "2026-10-19"
   },
   {
    "name": "meeting-notes",
    "where": "your Claude account (synced)",
    "plugin": null,
-   "calls": 3,
-   "last": "2026-09-14"
+   "calls": 6,
+   "last": "2026-10-16"
   },
   {
    "name": "competitive-brief",
@@ -625,8 +644,8 @@
    "name": "sql-helper",
    "where": "your Claude account (synced)",
    "plugin": null,
-   "calls": 3,
-   "last": "2026-10-16"
+   "calls": 5,
+   "last": "2026-10-13"
   },
   {
    "name": "roadmap-builder",
@@ -639,22 +658,22 @@
    "name": "update-config",
    "where": "built into Claude Code (list as of Oct 10 2026)",
    "plugin": null,
-   "calls": 0,
-   "last": null
+   "calls": 4,
+   "last": "2026-09-24"
   },
   {
    "name": "simplify",
    "where": "built into Claude Code (list as of Oct 10 2026)",
    "plugin": null,
-   "calls": 0,
-   "last": null
+   "calls": 1,
+   "last": "2026-10-01"
   },
   {
    "name": "code-review",
    "where": "built into Claude Code (list as of Oct 10 2026)",
    "plugin": null,
-   "calls": 2,
-   "last": "2026-10-08"
+   "calls": 5,
+   "last": "2026-10-07"
   },
   {
    "name": "security-review",
@@ -689,14 +708,14 @@
    "where": "built into Claude Code (list as of Oct 10 2026)",
    "plugin": null,
    "calls": 1,
-   "last": "2026-10-01"
+   "last": "2026-10-14"
   },
   {
    "name": "run",
    "where": "built into Claude Code (list as of Oct 10 2026)",
    "plugin": null,
    "calls": 1,
-   "last": "2026-09-23"
+   "last": "2026-10-14"
   }
  ],
  "agents": [
@@ -704,25 +723,25 @@
    "name": "spec-writer",
    "where": "yours (every project)",
    "calls": 7,
-   "last": "2026-10-13"
+   "last": "2026-10-19"
   },
   {
    "name": "ux-reviewer",
    "where": "yours (every project)",
-   "calls": 5,
-   "last": "2026-10-13"
+   "calls": 12,
+   "last": "2026-10-19"
   },
   {
    "name": "research-synth",
    "where": "yours (every project)",
-   "calls": 9,
-   "last": "2026-10-05"
+   "calls": 15,
+   "last": "2026-10-20"
   },
   {
    "name": "qa-checker",
    "where": "yours (every project)",
    "calls": 3,
-   "last": "2026-10-01"
+   "last": "2026-10-10"
   },
   {
    "name": "metrics-analyst",
@@ -740,31 +759,31 @@
    "name": "interview-coder",
    "where": "one project only: Product/customer-interviews",
    "calls": 2,
-   "last": "2026-08-13"
+   "last": "2026-08-20"
   },
   {
    "name": "general-purpose",
    "where": "built into Claude Code",
-   "calls": 43,
-   "last": "2026-10-15"
+   "calls": 49,
+   "last": "2026-10-19"
   },
   {
    "name": "Explore",
    "where": "built into Claude Code",
-   "calls": 7,
+   "calls": 12,
    "last": "2026-10-16"
   },
   {
    "name": "Plan",
    "where": "built into Claude Code",
-   "calls": 10,
-   "last": "2026-10-13"
+   "calls": 6,
+   "last": "2026-10-15"
   },
   {
    "name": "claude-code-guide",
    "where": "built into Claude Code",
-   "calls": 4,
-   "last": "2026-10-02"
+   "calls": 6,
+   "last": "2026-10-07"
   },
   {
    "name": "statusline-setup",
@@ -774,24 +793,23 @@
   }
  ],
  "agent_week": {
-  "general-purpose": 7,
-  "Plan": 2,
   "spec-writer": 2,
-  "Explore": 1,
+  "research-synth": 2,
+  "general-purpose": 2,
   "ux-reviewer": 1
  },
  "skill_week": {
-  "okr-check": 5,
-  "prd-template": 3,
-  "dataviz": 3,
-  "sql-helper": 3,
+  "prd-template": 2,
+  "okr-check": 1,
+  "dataviz": 1,
+  "interview-notes": 1,
   "skill-creator": 1
  },
  "connectors": [
   {
    "server": "Google Drive (name inferred from its tools)",
-   "id": "5d3a6b4f-bcc2-7159-2371-64e9df6b1aa3",
-   "actions": 233,
+   "id": "beeab0fe-1491-444b-0d82-2a21f2dd6f87",
+   "actions": 237,
    "tools_seen": [
     "create_file",
     "read_file_content",
@@ -802,8 +820,8 @@
   },
   {
    "server": "Gmail (name inferred from its tools)",
-   "id": "7ce592b7-fc34-a11b-0775-dca51822b09c",
-   "actions": 150,
+   "id": "e9e6b20c-37b5-7525-8364-da09f17ebb52",
+   "actions": 172,
    "tools_seen": [
     "create_draft",
     "get_message",
@@ -814,7 +832,7 @@
   {
    "server": "Slack (name inferred from its tools)",
    "id": "16090082-bf3b-0803-f060-56a7b9064367",
-   "actions": 265,
+   "actions": 219,
    "tools_seen": [
     "post_message",
     "read_channel",
@@ -824,7 +842,7 @@
   {
    "server": "Jira (name inferred from its tools)",
    "id": "1045d997-ae39-7eb5-26b3-06e73be5a5d6",
-   "actions": 266,
+   "actions": 373,
    "tools_seen": [
     "create_issue",
     "get_issue",
@@ -835,7 +853,7 @@
   {
    "server": "Figma (name inferred from its tools)",
    "id": "b34e86dc-56eb-8283-332e-32f3ee67f9c6",
-   "actions": 349,
+   "actions": 216,
    "tools_seen": [
     "get_design_context",
     "get_metadata",
@@ -844,8 +862,8 @@
   },
   {
    "server": "Snowflake (name inferred from its tools)",
-   "id": "b7e32d8d-ff7e-61a9-26f3-e94cf28a40d5",
-   "actions": 97,
+   "id": "4e8e551a-5e22-fbd3-2065-52f38c9f36ba",
+   "actions": 193,
    "tools_seen": [
     "describe_table",
     "list_tables",
@@ -854,8 +872,8 @@
   },
   {
    "server": "GitHub (name inferred from its tools)",
-   "id": "b7ed2115-0e81-8b4a-a45e-edb1f18c0374",
-   "actions": 95,
+   "id": "a9dbcf35-177a-4201-6dda-aa1bde77c860",
+   "actions": 96,
    "tools_seen": [
     "add_comment",
     "get_file",
@@ -865,7 +883,7 @@
   {
    "server": "claude-in-chrome",
    "id": "claude-in-chrome",
-   "actions": 100,
+   "actions": 142,
    "tools_seen": [
     "computer",
     "form_input",
@@ -877,7 +895,7 @@
   {
    "server": "Claude app's own tools",
    "id": "ccd_session",
-   "actions": 59,
+   "actions": 133,
    "tools_seen": [
     "list_sessions",
     "set_session_title"

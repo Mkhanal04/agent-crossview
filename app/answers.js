@@ -28,7 +28,7 @@ window.GBAnswers = function (X) {
 
   // ---------- small parts ----------
   const card = (key, q, hot, body, act) => `<section class="w-mod q-card" data-q-card="${key}">${screws}<p class="q-q"><i class="w-led${hot ? "" : " idle"}"></i>${esc(q)}</p>${body}<div class="q-act">${act}</div></section>`;
-  const later = (key) => `<button class="w-btn quiet" data-snooze="q:${key}" ${tip("Hides this suggestion for a week. The answer stays on the card.")}>Not now</button>`;
+  const later = (key) => `<button class="w-btn quiet" data-snooze="q:${key}" ${tip("Hides this suggestion for a week. The rest of this card stays.")}>Not now</button>`;
   const hiddenAct = (key, label) => `<span class="q-lead">${esc(label)} hidden until ${esc(day(plus(snoozedDay(key), 7)))}.</span><button class="w-btn quiet" data-w="q:unsnooze:${key}">Show it again</button>`;
   const snoozedDay = (key) => { try { return (JSON.parse(localStorage.getItem("gb:snoozedAt")) || {})["q:" + key] || G.today; } catch (e) { return G.today; } };
   const madeAct = (c, what) => `<span class="q-lead q-done"><b>Changed ${esc(when(c.when))}.</b> ${what}</span><button class="w-btn quiet" data-w="q:sheet:undo:${esc(c.id)}">Undo</button>`;
@@ -53,20 +53,15 @@ window.GBAnswers = function (X) {
   // the plans people have, checked Oct 17 2026 on claude.com/pricing and learn.chatgpt.com's pricing page: [key, name,
   // monthly price, kind]. A work plan (Team, Enterprise, Business) has no price here, since seat prices vary: your company
   // pays for it, or you type what you pay. "api" is paying per use with an API key, with no monthly plan.
-  const CATALOG = {
-    claude: [["none", "No Claude plan", 0, "none"], ["pro", "Claude Pro", 20, "personal"], ["max5", "Claude Max 5x", 100, "personal"], ["max20", "Claude Max 20x", 200, "personal"],
-      ["team_std", "Claude Team, Standard seat", null, "work"], ["team_prem", "Claude Team, Premium seat", null, "work"], ["ent", "Claude Enterprise", null, "work"], ["work", "Not sure which plan", null, "work"],
-      ["api", "I pay per use with an API key", null, "api"], ["other", "Another Claude plan", null, "other"]],
-    chatgpt: [["none", "No ChatGPT plan", 0, "none"], ["plus", "ChatGPT Plus", 20, "personal"], ["pro100", "ChatGPT Pro", 100, "personal"], ["pro200", "ChatGPT Pro", 200, "personal"], ["pro500", "ChatGPT Pro", 500, "personal"],
-      ["business", "ChatGPT Business", null, "work"], ["ent", "ChatGPT Enterprise", null, "work"], ["work", "Not sure which plan", null, "work"],
-      ["api", "I pay per use with an API key", null, "api"], ["other", "Another ChatGPT plan", null, "other"]],
-  };
+  // the plan catalog lives in one place, tools/plan-facts.json (Codex audit, Oct 19: it was copied here and on the home)
+  const PFX = G.plan_facts || { claude: [], chatgpt: [] }, row4 = (p) => [p.key, p.name, p.monthly_usd, p.kind];
+  const CATALOG = { claude: (PFX.claude || []).map(row4), chatgpt: (PFX.chatgpt || []).map(row4) };
   const vendorOf = (p) => ((p.covers || []).includes("Codex") ? "chatgpt" : "claude");
   function planPicks() {
     if (S.qplans) return S.qplans;
     const pick = { claude: "none", chatgpt: "none", claudeUsd: "", chatgptUsd: "", claudeWho: "company", chatgptWho: "company" };
     (B.plans || []).forEach((p) => {
-      const v = vendorOf(p), hit = CATALOG[v].find((c) => (p.plan ? c[0] === p.plan : c[2] === p.monthly_usd && c[0] !== "none"));
+      const v = vendorOf(p), fact = window.GBStage.planFact(G.plan_facts, p), hit = fact ? CATALOG[v].find((c) => c[0] === fact.key) : null;  // the shared plan lookup (Codex recheck, Oct 19)
       pick[v] = hit ? hit[0] : "other"; if (p.monthly_usd != null && (!hit || hit[2] == null)) pick[v + "Usd"] = p.monthly_usd;
       if (hit && hit[3] === "work") pick[v + "Who"] = payOf(p) === "company" ? "company" : "self";
     });
@@ -137,7 +132,8 @@ window.GBAnswers = function (X) {
     const fig = `<div class="q-fig"><div class="q-big" ${tip(`What your plans cost for ${plural(nd, "day")} ${wk(per)}, as a daily share of what you pay each month. ${list((B.plans || []).map((p) => `${p.name} is $${p.monthly_usd} a month`))}.`)}>$${Math.round(paid)}<small>${nd < 7 ? `Your plans for ${plural(nd, "day")} so far` : "Your plans for the week"}</small></div><span class="q-vs">vs</span>
       <div class="q-big dim" ${tip(`The pay-per-use price is what the same work would cost at published per-use prices, without a plan. Each reply ${wk(per)} is priced at its model's published rate, checked ${G.prices_checked}. It's an estimate and may run a little low.`)}>${money(use)}<small>Pay-per-use price for the same work</small></div></div>`;
     // the stops, how long each kept you waiting, and the limit readings
-    const pk = per === thisWeek && M.plan && M.plan.latest ? M.plan.latest : M.plan && M.plan.week_peaks ? M.plan.week_peaks[per] : null;
+    const rsw = resetIn(per), fresh = (r) => !!r && (!rsw || !r.at || r.at >= rsw);
+    const pk = per === thisWeek ? (M.plan && fresh(M.plan.latest) ? M.plan.latest : null) : M.plan && M.plan.week_peaks ? M.plan.week_peaks[per] : null;
     const days = [...new Set(ch.map((h) => weekday(h.ts)))], waits = ch.map(waited).filter((m) => m != null);
     let line = "";
     if (ch.length) {
@@ -154,9 +150,8 @@ window.GBAnswers = function (X) {
     let option = "";
     if (ch.length && claude && workPlan(claude)) option = `<p class="q-why">Your company's plan sets these limits. If they keep stopping you, ask your admin.</p>`;
     else if (ch.length && claude) {
-      option = claude.monthly_usd >= 200 ? "You're already on the largest Max plan. The next step up is a Team plan or an API plan."
-        : claude.monthly_usd >= 100 ? "Max 20x costs $100 more a month and gives you four times as much room in each 5-hour window. Anthropic doesn't say how much bigger the weekly limit gets."
-        : "Max 5x costs $100 a month and gives you five times as much room as Pro in each 5-hour window.";
+      // what the next plan up offers lives with the plan facts (tools/plan-facts.json), not here (Codex recheck, Oct 19)
+      option = (window.GBStage.planFact(G.plan_facts, claude) || {}).next_step || "Check your Claude account for the plans you can switch to.";
       option = `<p class="q-why" ${tip(`Your limits are the 5-hour and weekly caps on your plan. This comes from ${PLAN_SRC}. Plans change, so check before you switch. You switch plans in your Claude account.`)}>${esc(option)}</p>`;
     }
     const act = `<span class="q-lead">${line}</span>${ch.length ? `<button class="w-btn" data-w="q:sheet:stops">Show me ${ch.length === 1 ? "the stop" : ch.length === 2 ? "both stops" : "the stops"}</button>` : ""}`;
@@ -178,7 +173,7 @@ window.GBAnswers = function (X) {
     const rows = ch.map((h) => {
       const r = (h.running || [])[0], m = waited(h), c = causes(h);
       c.fix.forEach((x) => fixes.add(x));
-      return `<li>On <b>${esc(shortWhen(h.ts))}</b>, the ${limitName(h)} limit stopped you${r ? ` while ${esc(workName(r.work))} was running` : ""}.${m != null ? ` It opened again ${dur(m)} later.` : ""}${c.why ? `<br><small>${c.why}</small>` : ""}</li>`;
+      return `<li>On <b>${esc(shortWhen(h.ts))}</b>, the ${limitName(h)} limit stopped you${r ? inChat(r.work, "") : ""}.${m != null ? ` It opened again ${dur(m)} later.` : ""}${c.why ? `<br><small>${c.why}</small>` : ""}</li>`;
     }).join("");
     const top = ch.map((h) => ((h.running || [])[0] || {}).work).filter(Boolean)[0], lf = limitFacts(per);
     return { title: `Why the limit stopped you ${wk(per)}`, body: `<ul class="q-list">${rows}</ul>
@@ -204,11 +199,13 @@ window.GBAnswers = function (X) {
       return sum + u * Math.min(1, r);
     }, 0);
   }
+  // the weekly reset that falls inside a week, if Crossview knows it; a reading before it belongs to the week before
+  const resetIn = (per) => { const W = (M.plan || {}).weekly_reset || {}; return [W.last, W.next].find((t) => t && t.slice(0, 10) >= per && t.slice(0, 10) <= plus(per, 6)) || null; };
   function limitFacts(per) {
     const P = M.periods[per] || {}, ch = hitsIn(per).filter((h) => h.tool !== "Codex");
     const ran = ch.map((h) => ((h.running || [])[0] || {}).work).filter(Boolean), count = {};
     ran.forEach((w) => (count[w] = (count[w] || 0) + 1));
-    const top = Object.entries(P).sort((a, b) => b[1].usd - a[1].usd)[0];
+    const top = Object.entries(P).sort((a, b) => (b[1].cusd != null ? b[1].cusd : b[1].usd) - (a[1].cusd != null ? a[1].cusd : a[1].usd))[0];  // Claude's apps only (Codex's recheck)
     const work = Object.keys(count).sort((a, b) => count[b] - count[a])[0] || (top && top[0]);
     const t = P[work] || null;
     // helpers on that work you could move to a smaller model: ones with a file of yours, not already on Sonnet or Haiku
@@ -224,31 +221,33 @@ window.GBAnswers = function (X) {
   function limit(per) {
     const f = limitFacts(per), { ch, count, work, t, cands } = f, done = active("limit")[0];
     if (!t) return card("limit", "What used up my limit?", false, `<p class="q-a">No work was recorded ${wk(per)}${soFar(per)}.</p>`, "");
-    const hp = helperShare(t), k = t.kinds || {}, kt = Object.values(k).reduce((a, b) => a + b, 0) || 1;
-    const parts = [["read", "Re-reading the chat so far", "var(--amt-5)"], ["write", "Saving it to re-read", "var(--amt-3)"], ["out", "Writing answers", "var(--amt-1)"], ["fresh", "New input", "var(--mod-3)"]].filter(([x]) => (k[x] || 0) / kt >= 0.01);
+    // Claude's limit: only Claude's apps' work, never Codex's (a cold read, Oct 20)
+    const hp = helperShare(t), k = t.ckinds || t.kinds || {}, kt = Object.values(k).reduce((a, b) => a + b, 0) || 1;
+    const parts = [["read", "Re-reading the chat so far", "var(--amt-5)"], ["write", "Saving the chat to re-read", "var(--amt-3)"], ["out", "Writing answers", "var(--amt-1)"], ["fresh", "New input", "var(--mod-3)"]].filter(([x]) => (k[x] || 0) / kt >= 0.01);
     const p = shares(parts.map(([x]) => k[x] || 0)), carry = Math.round((100 * ((k.read || 0) + (k.write || 0))) / kt);
     const n = ch.length, times = count[work] || 0, share = t.share != null ? t.share : pct(t.usd, useOf(per));
     let a;
     if (n) a = `${esc(workName(work))} was running ${n === 1 ? "when the limit stopped you" : times === n ? (n === 2 ? "both times the limit stopped you" : `all ${n} times the limit stopped you`) : `at ${times} of the ${n} stops`}${hp > 50 ? ", and its subagents did most of its work" : ""}.${carry >= 60 ? " Most of its use went on re-reading long chats." : ""}`;
-    else a = `${(() => { const cxn = hitsIn(per).filter((h) => h.tool === "Codex").length; return cxn ? `Claude's limits haven't stopped you${soFar(per)}` : `No limit has stopped you${soFar(per)}`; })()}. ${esc(workName(work))} used the most, ${share}% of ${wk(per)}'s use${hp > 50 ? ", mostly through its subagents" : ""}.`;
+    else a = `${(() => { const cxn = hitsIn(per).filter((h) => h.tool === "Codex").length; return cxn ? `Claude's limits haven't stopped you${soFar(per)}` : `No limit has stopped you${soFar(per)}`; })()}. ${share >= 99 ? `All of ${wk(per)}'s use was in the ${esc(workName(work))} project` : `The ${esc(workName(work))} project used the most of ${wk(per)}'s limit`}${hp > 50 ? ", mostly through its subagents" : ""}.`;
     const bar = `<div class="q-bar" role="img" aria-label="${esc(`${workName(work)}'s use ${wk(per)}: ${parts.map(([, l], i) => `${l} ${p[i]}%`).join(", ")}`)}" ${tip(`Where ${workName(work)}'s use went ${wk(per)}, as shares of its pay-per-use price. Re-reading costs little per word, but it happens before every step, so long chats add up. Anthropic doesn't publish how the limit counts each kind, so treat these shares as a guide.`)}>${parts.map(([, , c], i) => `<i style="width:${p[i]}%;background:${c}"></i>`).join("")}</div>
       <div class="q-key">${parts.map(([, l, c], i) => `<span><i style="background:${c}"></i>${esc(l)} ${p[i]}%</span>`).join("")}</div>`;
     // why: the models its helpers ran on
     const fams = Object.entries(t.models || {}).reduce((o, [m, u]) => { const x = family(m); if (x) o[x] = (o[x] || 0) + u; return o; }, {});
-    const topFam = Object.keys(fams).filter((x) => x === "Opus" || x === "Fable"), topPct = pct(topFam.reduce((a, x) => a + fams[x], 0), t.usd);
+    const topFam = Object.keys(fams).filter((x) => x === "Opus" || x === "Fable"), topPct = pct(topFam.reduce((a, x) => a + fams[x], 0), t.cusd || t.usd);
     const named = f.helpers.filter((h) => agentOf(h.type) && agentOf(h.type).model).length;
     // where this week is heading, before it happens: the weekly limit at this pace, from the readings
     const wp = M.plan && M.plan.weekly_pace, wr = M.plan && M.plan.weekly_reset;
     let ahead = "", soon = false;
-    if (per === thisWeek && wp && wr && wp.at >= per) {
+    // a pace worked out from a reading before this week's reset says nothing about this week (QA, Oct 19, night)
+    if (per === thisWeek && wp && wr && wp.at >= per && (!resetIn(per) || wp.at >= resetIn(per))) {
       const rt = new Date(wr.next), rday = rt.toLocaleDateString("en-US", { weekday: "long" });
       if (wp.runs_out) { soon = true; ahead = `At this week's pace, the weekly limit would run out around ${esc(ampm(new Date(wp.runs_out).toLocaleString("en-US", { weekday: "short", hour: "numeric" })))}, before it resets on ${rday}.`; }
       else ahead = `At this week's pace, the weekly limit would reach about ${wp.at_reset}% before it resets on ${rday} morning.`;
-      ahead = `<p class="q-why q-ahead-line" ${tip(`This assumes the rest of the week goes like the first ${wp.hours_in} hours after the weekly reset, when you'd used ${wp.sd}%. The reset time is worked out from ${wr.drops} drops in the Claude app's readings, so it falls somewhere between ${wr.from} and ${wr.to}. Switch on the warning in Claude Code to make this exact.`)}><b>${ahead}</b></p>`;
+      ahead = `<p class="q-why q-ahead-line" ${tip(`This assumes the rest of the week goes like the first ${wp.hours_in} hours after the weekly reset, when you'd used ${wp.sd}%. The reset time is worked out from ${wr.drops} times the Claude app's reading fell back toward zero, so it falls somewhere between ${wr.from} and ${wr.to}. Switch on the warning in Claude Code to make this exact.`)}><b>${ahead}</b></p>`;
     }
     let why = "";
     const fableNote = fams.Fable ? ` Fable also has its own weekly limit, which isn't recorded on this Mac. Claude Code shows it in its own usage panel.` : "";
-    if (cands.length) why = `${topPct}% of ${esc(workName(work))}'s use ran on <span class="w-link" tabindex="0" ${tip("Claude comes in models of different sizes. Fable and Opus are the largest, Sonnet is in the middle and Haiku is the smallest. Larger models use more of your limit for the same step.")}>${list(topFam)}</span>, ${topFam.length === 1 ? "one of the top models" : "the top models"}.${named ? "" : " None of its subagents' files name a model, so each one uses the same model as the chat."} Anthropic says Opus uses more of your limit per step than Sonnet, and suggests Sonnet for routine work.`;
+    if (cands.length) why = `${topPct}% of ${esc(workName(work))}'s use ran on <span class="w-link" tabindex="0" ${tip("Claude comes in models of different sizes. Fable and Opus are the largest, Sonnet is in the middle and Haiku is the smallest. Larger models use more of your limit for the same step.")}>${list(topFam)}</span>, ${topFam.length === 1 ? "one of the top models" : "the top models"}.${named ? "" : ` ${esc(workName(work))}'s subagents use the same model as the chat that calls them.`} Anthropic says Opus uses more of your limit per step than Sonnet, and suggests Sonnet for routine work.`;
     else if (f.helpers.length) why = `Its subagents came with Claude Code or already run on a smaller model, so there's nothing to change.`;
     else why = `No subagents ran on it ${wk(per)}. The chat did all the work itself.`;
     why += fableNote;
@@ -270,14 +269,14 @@ window.GBAnswers = function (X) {
     const f = limitFacts(per), { cands, work } = f;
     const picked = (S.qpick.limit = S.qpick.limit || new Set(cands.filter((h) => h.pick).map((h) => h.type)));
     const rows = cands.map((h) => `<li class="q-item${picked.has(h.type) ? " on" : ""}"><label><input type="checkbox" data-w="q:pick:limit:${esc(h.type)}" ${picked.has(h.type) ? "checked" : ""}>
-        <span><b>${esc(h.type)}</b> <small>${esc(short(h.a.file))}</small><br><small>It ran ${nWord(h.runs)} on ${esc(workName(work))} ${wk(per)}, with a pay-per-use price of ${money(h.usd)}. On Sonnet, the same steps would come to ${money(h.sonnet)}.${h.pick ? " It's ticked because its file says it reviews or tests work." : " It's left unticked because its file doesn't say it reviews or tests, so its work may need the top model."}${/^~\/\.claude\/agents\//.test(h.a.file) ? " It's yours in every project, so the change applies everywhere." : ""}</small></span></label>
+        <span><b>${esc(h.type)}</b> <small>${esc(short(h.a.file))}</small><br><small>It ran ${nWord(h.runs)} on ${esc(workName(work))} ${wk(per)}, with a pay-per-use price of ${money(h.usd)}. On Sonnet, the same steps would come to ${money(h.sonnet)}.${h.pick ? ` ${esc(h.a.name || "This subagent")} is ticked because its file says it reviews or tests work.` : ` ${esc(h.a.name || "This subagent")} is left unticked because its file doesn't say it reviews or tests, so its work may need the top model.`}${/^~\/\.claude\/agents\//.test(h.a.file) ? " It's yours in every project, so the change applies everywhere." : ""}</small></span></label>
         ${picked.has(h.type) ? `<pre class="q-diff">${h.a.model ? `<del>- model: ${esc(h.a.model)}</del>\n` : ""}<ins>+ model: sonnet</ins></pre>` : ""}</li>`).join("");
     const sel = cands.filter((h) => picked.has(h.type)), was = sel.reduce((x, h) => x + h.usd, 0), now = sel.reduce((x, h) => x + h.sonnet, 0);
     const sum = sel.length ? `<p class="q-sum"><b>${sel.length === 1 ? "The one you ticked" : `The ${sel.length} you ticked`}</b> used ${money(was)} of ${wk(per)}'s use at pay-per-use prices. On Sonnet, the same steps would come to ${money(now)}. On your plan, the saving shows up as more room in your limit.</p>` : `<p class="q-sum">Tick the subagents you want to move to Sonnet.</p>`;
     return { title: "Run these subagents on Sonnet", kind: "helper-model", body: `<p>This adds one line, ${code("model: sonnet")}, to the top of each subagent's file and leaves the rest of the file alone. Claude Code uses it the next time it calls that subagent, without a restart.</p>
       <ul class="q-items">${rows}</ul>${sum}
       <p class="q-small">Crossview can't tell whether Sonnet does this work as well as the top model, so try it for a week and compare.</p>
-      <p class="q-small">Undo on Your week puts each file back as it was. Crossview keeps a copy of every file on this Mac first, and you can also delete the line yourself.</p>`,
+      <p class="q-small">Undo puts each file back as it was. Crossview keeps a copy of every file on this Mac first, and you can also delete the line yourself.</p>`,
       req: sel.length ? { kind: "helper-model", model: "sonnet", files: sel.map((h) => h.a.file), for: "limit", summary: `${list(sel.map((h) => h.type))} ${sel.length === 1 ? "runs" : "run"} on Sonnet.` } : null,
       ask: `Please add the line "model: sonnet" to the header block (between the --- lines) of ${sel.length === 1 ? "this subagent file" : "these subagent files"}, and change nothing else: ${sel.map((h) => h.a.file).join(", ")}. Show me each change before you save it.` };
   }
@@ -310,12 +309,13 @@ window.GBAnswers = function (X) {
     const { ports, open } = reachFacts(per), done = active("reach")[0];
     if (!ports.length) return card("reach", "What can Claude reach outside my Mac?", false, `<p class="q-a">None of your connectors can change anything outside this Mac.</p>`, "");
     const asYou = ports.filter((p) => p.as_you), busiest = ports.slice().sort((a, b) => b.used - a.used)[0];
-    const a = `${plural(ports.length, "connector")} can act outside your Mac.${asYou.length ? ` ${list(asYou.map((p) => esc(p.name)))} can act as you.` : ""}`;
+    const hotN = ports.filter((p) => riskOf(p) >= 2).length;
+    const a = `${hotN ? `${plural(hotN, "connector")} can act for you: send, delete or act as you outside your Mac.` : "None of your connectors can send, delete or act as you outside your Mac."}${asYou.length ? ` ${list(asYou.map((p) => esc(p.name)))} can act as you.` : ""}`;
     const chips = ports.slice(0, 5).map((p) => `<button class="q-chip${riskOf(p) >= 2 ? " hot" : ""}${p.covered ? " calm" : ""}" data-w="setup:port:${esc(p.name)}" ${tip(`${p.name} ${riskWords(p)}. ${p.used ? `It was used ${plural(p.used, "time")} ${wk(per)}` : `It wasn't used ${wk(per)}`}, and about ${plural(p.weekly, "time")} a week on average over the last ten weeks.${p.covered ? " Claude Code already asks you before it acts." : ""} Click to see every connector in Your setup.`)}>${esc(p.name)} <em>${esc(chipWords(p))}</em></button>`).join("") + (ports.length > 5 ? `<button class="q-chip" data-w="setup:layer:connectors">+ ${ports.length - 5} more</button>` : "");
     // the same question for Codex: plugins and connectors that control the computer or a browser can act as you there too
     const CX = (G.anatomy || {}).Codex || {}, cxYou = [...new Set([...(CX.plugins || []), ...(CX.connectors || [])].filter((n) => /computer|chrome|browser/i.test(n)))];
     const cxPlain = [...new Set(cxYou.map(cxName))];
-    const why = `${asYou.length ? `The change below leaves out ${list(asYou.map((p) => esc(p.name)))}, because asking before every step in your browser would mean hundreds of questions a week. ` : ""}${((n) => (n.length ? `${list(n.map((p) => esc(p.name)))} ${n.length === 1 ? "isn't" : "aren't"} in it either, because ${n.length === 1 ? "it has" : "they have"} nothing that sends or deletes. ` : ""))(ports.filter((p) => !p.as_you && !p.covered && !(p.rules || []).length))}${busiest && busiest.used ? `The busiest ${wk(per)} was ${esc(busiest.name)}, ${plural(busiest.used, "time")}.` : `None of them ran ${wk(per)}.`}${cxPlain.length ? ` Codex can act as you too, because its ${esc(list(cxPlain))} ${cxPlain.length === 1 ? "tool is" : "tools are"} switched on there.` : ""}`;
+    const why = `${asYou.length ? `The change below leaves out ${list(asYou.map((p) => esc(p.name)))}, because asking before every step in your browser would mean hundreds of questions a week. ` : ""}${((n) => (n.length ? `The change also leaves out ${list(n.map((p) => esc(p.name)))}, because ${n.length === 1 ? "that connector can't" : "those connectors can't"} send or delete anything. ` : ""))(ports.filter((p) => !p.as_you && !p.covered && !(p.rules || []).length))}${busiest && busiest.used ? `The connector used most ${wk(per)} was ${esc(busiest.name)}, ${plural(busiest.used, "time")}.` : `No connector was used ${wk(per)}.`}${cxPlain.length ? ` Codex can act as you too, because its ${esc(list(cxPlain))} ${cxPlain.length === 1 ? "tool is" : "tools are"} switched on in Codex's settings.` : ""}`;
     const sel = open.filter((p) => ((S.qpick && S.qpick.reach) || new Set(open.filter((x) => x.pick).map((x) => x.name))).has(p.name));
     const yous = sel.filter((p) => p.as_you).map((p) => `<b>${esc(p.name)}</b>`), sends = sel.filter((p) => !p.as_you).length;
     let act;
@@ -329,7 +329,7 @@ window.GBAnswers = function (X) {
     const CX = (G.anatomy || {}).Codex || {}, you = [...new Set([...(CX.plugins || []), ...(CX.connectors || [])].filter((n) => /computer|chrome|browser/i.test(n)))];
     if (!you.length) return "";
     const st = Object.fromEntries(((CX.settings || {}).items || []).map(([k, v]) => [k, v]));
-    return `<div class="q-grp"><h4>In Codex <small>not part of this change</small></h4><p class="q-tags">${[...new Set(you.map(cxName))].map((n) => `<span class="q-tag">${esc(n)}</span>`).join("")}</p>
+    return `<div class="q-grp"><h4>In Codex <small>(this change doesn't touch Codex)</small></h4><p class="q-tags">${[...new Set(you.map(cxName))].map((n) => `<span class="q-tag">${esc(n)}</span>`).join("")}</p>
       <p class="q-small">These let Codex control your computer or a browser. ${esc(cxRules(st))} Crossview can't change Codex yet, so switch these off in Codex's settings if you don't use them there. Crossview hasn't checked yet what Codex asks before each action.</p></div>`;
   }
   // Codex's own names for its tools and settings, in plain words
@@ -344,12 +344,12 @@ window.GBAnswers = function (X) {
     const { open, weeks } = reachFacts(per);
     const picked = (S.qpick.reach = S.qpick.reach || new Set(open.filter((p) => p.pick).map((p) => p.name)));
     const rows = open.map((p) => `<li class="q-item${picked.has(p.name) ? " on" : ""}"><label><input type="checkbox" data-w="q:pick:reach:${esc(p.name)}" ${picked.has(p.name) ? "checked" : ""}>
-        <span><b>${esc(p.name)}</b> <small>${esc(riskWords(p))}</small><br><small>${p.as_you ? `Claude Code would ask before every action. That's about ${plural(p.weekly, "question")} a week on average over the last ten weeks, going by the last ${plural(weeks.length, "week")}.${p.pick ? "" : " It's left unticked because that many questions would get in the way. Tick it if you want them anyway."}` : `Claude Code would ask only before actions like ${esc(p.risky_tools.slice(0, 4).map(plainAct).join(", "))}${p.risky_tools.length > 4 ? `, and ${p.risky_tools.length - 4} more like them` : ""}. Reading and everything else stay the same. ${p.risky_uses ? `Those actions ran ${plural(p.risky_uses, "time")} since ${since("Claude Code")}.` : `None of them have run since ${since("Claude Code")}.`}`}</small></span></label>
+        <span><b>${esc(p.name)}</b> <small>${esc(riskWords(p))}</small><br><small>${p.as_you ? `Claude Code would ask before every action. That's about ${plural(p.weekly, "question")} a week, on average over the last ${plural(weeks.length, "week")}.${p.pick ? "" : " It's left unticked because that many questions would get in the way. Tick it if you want the questions anyway."}` : `Claude Code would ask only before actions like ${esc(p.risky_tools.slice(0, 4).map(plainAct).join(", "))}${p.risky_tools.length > 4 ? `, and ${p.risky_tools.length - 4} more like them` : ""}. Reading and everything else stay the same. ${p.risky_uses ? `Those actions ran ${plural(p.risky_uses, "time")} since ${since("Claude Code")}.` : `None of them have run since ${since("Claude Code")}.`}`}</small></span></label>
         ${picked.has(p.name) ? `<details class="q-exact"><summary>Show the exact lines</summary><pre class="q-diff"><ins>${esc(p.rules.map((r) => `+ "${r}"`).join("\n"))}</ins></pre></details>` : ""}</li>`).join("");
     const sel = open.filter((p) => picked.has(p.name)), rules = sel.flatMap((p) => p.rules);
     return { title: "Ask me before these connectors act", kind: "ask-first", body: `<p>This adds rules to the "ask" list in <span class="w-link" tabindex="0" ${tip("The file is ~/.claude/settings.json, in your home folder.")}>Claude Code's settings file</span> and leaves the rest of the file alone. Claude Code then stops and asks you before those actions, even when you've told it to work without asking.</p>
       <p class="q-small">It applies to Claude Code in every project, including the Code tab of the Claude app. Cowork and the Claude app's chats keep their own connector settings.</p>
-      <p class="q-small">Undo on Your week takes out only the rules this added and leaves any you add later. Crossview keeps a copy of the file on this Mac first.</p>
+      <p class="q-small">Undo takes out only the rules this change added and keeps any rules you add later. Crossview keeps a copy of the file on this Mac first.</p>
       <ul class="q-items">${rows}</ul>${cxSheet()}`,
       req: rules.length ? { kind: "ask-first", rules, for: "reach", summary: `Claude Code asks before ${list(sel.map((p) => p.name))} ${sel.length === 1 && sel[0].as_you ? "acts" : "act"}${sel.some((p) => !p.as_you) ? ", and for some only before sending or deleting" : ""}.` } : null,
       ask: `Please add these rules to the "ask" list under "permissions" in ~/.claude/settings.json, and change nothing else in that file: ${rules.join(", ")}. Show me the change before you save it.` };
@@ -369,41 +369,97 @@ window.GBAnswers = function (X) {
       ["From your Claude account", unused.filter((s) => s.origin === "From your Claude account"), "You can switch these off in claude.ai's settings, where skills are turned on and off. That changes the Claude app too, and its use isn't recorded on this Mac, so check you don't use one there first."],
       ["Made by you", unused.filter((s) => s.origin === "Made by you"), null],
       ["Came with Claude Code", unused.filter((s) => s.origin === "Came with Claude Code"), "These are part of Claude Code itself, so there's nothing to remove."],
-      ["Only in one project", unused.filter((s) => s.scope === "one project"), "Claude reads these only in that project's chats, so they cost nothing anywhere else."],
+      ["Only in one project", unused.filter((s) => s.scope === "one project"), "Claude reads these only in the chats of the project they belong to, so they cost nothing anywhere else."],
     ];
     return { sk, unused, helpers, tokens, usd, use, groups };
   }
   function carry(per) {
     const f = carryFacts(per), { sk, unused, helpers, usd, use } = f;
     const acct = f.groups[0][1].length;
-    const a = `${unused.length} of your ${sk.length} skills have never been used.${acct ? ` You could switch off ${acct} of them.` : ""}`;
+    const a = `${unused.length} of your ${sk.length} skills haven't been used${since("Claude Code") ? ` since ${since("Claude Code")}` : ""}.${acct ? ` You could switch off ${acct} of these skills.` : ""}`;
     const order = sk.slice().sort((x, y) => (y.uses || 0) - (x.uses || 0)), mx = Math.max(1, ...sk.map((s) => s.uses || 0));
-    const tiles = `<div class="q-tiles" role="img" aria-label="${esc(`${sk.length} skills, ${sk.length - unused.length} used and ${unused.length} never used`)}">${order.map((s) => `<i class="${s.uses ? "t" + Math.min(4, 1 + Math.floor((3 * Math.log(1 + s.uses)) / Math.log(1 + mx))) : "never"}" ${tip(`${s.name} ${s.uses ? `was used ${plural(s.uses, "time")}` : "has never been used"}. ${{ "Made by you": "You made it.", "From your Claude account": "It comes from your Claude account.", "Came with Claude Code": "It came with Claude Code." }[s.origin] || `It's ${String(s.origin).charAt(0).toLowerCase() + String(s.origin).slice(1)}.`}`)}></i>`).join("")}</div>`;
+    const tiles = `<div class="q-tiles" role="img" aria-label="${esc(`${sk.length} skills, ${sk.length - unused.length} used and ${unused.length} not used since ${since("Claude Code") || "the records start"}`)}">${order.map((s) => `<i class="${s.uses ? "t" + Math.min(4, 1 + Math.floor((3 * Math.log(1 + s.uses)) / Math.log(1 + mx))) : "never"}" ${tip(`${s.name} ${s.uses ? `was used ${plural(s.uses, "time")}` : `hasn't been used${since("Claude Code") ? ` since ${since("Claude Code")}` : ""}`}. ${{ "Made by you": "You made it.", "From your Claude account": "It comes from your Claude account.", "Came with Claude Code": "It came with Claude Code." }[s.origin] || `It's ${String(s.origin).charAt(0).toLowerCase() + String(s.origin).slice(1)}.`}`)}></i>`).join("")}</div>`;
     const share = use ? (100 * usd) / use : 0;
-    const why = `${acct ? "The rest came with Claude Code, are new, or load in only one project. " : ""}Claude reads every skill's name and description before each reply. For the skills you never use, that came to ${usd < 1 ? "less than $1" : `about $${Math.round(usd)}`} of ${wk(per)}'s use${use ? `, which is ${share < 1 ? "under 1%" : Math.round(share) + "%"} of it` : ""}. Every chat reads the whole list before it starts.`;
-    const act = `<span class="q-lead">You can see which ones you could switch off, and where to do it.${helpers.length ? ` The list also shows ${plural(helpers.length, "subagent")} that never ran.` : ""}</span><button class="w-btn main" data-w="q:sheet:carry">Show me the list</button><button class="w-btn quiet" data-w="setup:never">Show them in Your setup</button>`;
-    return card("carry", "What have I set up that I never use?", false, `<p class="q-a" ${tip(`A skill is a set of instructions for one kind of task, which Claude or a subagent loads when that task comes up. Never used means not once since Claude Code's records start on ${since("Claude Code")}.`)}>${a}</p>${tiles}<p class="q-why" ${tip(`This is an estimate. It counts about four characters per token, gives built-in skills the average length, and prices them at the re-read rate of the models used ${wk(per)}. Claude Code shortens the list when it's long, so the real figure may be lower.`)}>${why}</p>`, act);
+    const why = `${acct ? "The other unused skills came with Claude Code, are new, or load in only one project. " : ""}Claude reads every skill's name and description before each reply, including the skills you never use. For the unused skills that load in every chat, that reading cost ${usd < 1 ? "less than $1" : `about $${Math.round(usd)}`} ${wk(per)}, if paid per use.`;
+    const act = `<span class="q-lead">You can see which ones you could switch off, and where to do it.${helpers.length ? ` The list also shows ${plural(helpers.length, "subagent")} that haven't run since ${since("Claude Code") || "the records start"}.` : ""}</span><button class="w-btn main" data-w="q:sheet:carry">Show me the list</button><button class="w-btn quiet" data-w="setup:never">Show them in Your setup</button>`;
+    return card("carry", "What have I set up that I never use?", false, `<p class="q-a" ${tip(`A skill is a set of instructions for one kind of task, which Claude or a subagent loads when that task comes up. "Not used" means not once since Claude Code's records start on ${since("Claude Code")}.`)}>${a}</p>${tiles}<p class="q-why" ${tip(`This is an estimate. A token is the unit AI apps count text in, about four characters. It gives built-in skills the average length, and prices them at the re-read rate of the models used ${wk(per)}. Claude Code shortens the list when it's long, so the real figure may be lower.`)}>${why}</p>`, act);
   }
   function carrySheet(per) {
     // "new" only where the date is when it was made: an account skill's date on this Mac is when it last synced
     const f = carryFacts(per), recent = (s) => s.origin !== "From your Claude account" && s.added && daysSince(s.added) < 30;
     const grp = ([label, items, note]) => !items.length ? "" : `<div class="q-grp"><h4>${esc(label)} <small>${items.length}</small></h4><p class="q-tags">${items.map((s) => `<span class="q-tag" ${tip(s.plain || s.name)}>${esc(s.name)}${recent(s) ? " <small>new</small>" : ""}</span>`).join("")}</p>
-      <p class="q-small">${note || (items.every(recent) ? "These were added in the last 30 days, so they're too new to judge." : "You made these, so they're yours to keep or delete. Each one is a folder in your skills folder.")}</p></div>`;
+      <p class="q-small">${note || (items.every(recent) ? "These were added in the last 30 days, so they're too new to judge." : "You made these, so they're yours to keep or delete. Each one is a folder in your skills folder; moving the folder out switches the skill off.")}</p></div>`;
     const acct = f.groups[0][1];
-    const help = f.helpers.length ? `<div class="q-grp"><h4>Subagents that never ran <small>${f.helpers.length}</small></h4><p class="q-tags">${f.helpers.map((a) => `<span class="q-tag" ${tip(a.plain || a.name)}>${esc(a.name)}</span>`).join("")}</p><p class="q-small">${f.helpers.map((a) => `${a.name} ${builtIn(a.name) ? "is part of Claude Code" : `is ${esc(String(a.origin).charAt(0).toLowerCase() + String(a.origin).slice(1))}`}`).join("; ")}.</p></div>` : "";
-    return { title: "What you could switch off", body: `<p>None of these has been used in Claude Code since its records start on ${esc(since("Claude Code"))}. Crossview can't change your Claude account, so this is a list for you to work through.</p>${f.groups.map(grp).join("")}${help}`,
-      req: null, cant: "Crossview can't switch skills off in your Claude account, so it can't make this change for you.", ask: acct.length ? `Please open claude.ai in my signed-in Chrome, go to the settings page where skills are turned on and off, and show it to me. These ${acct.length} skills have never been used in my Claude Code logs: ${acct.map((s) => s.name).join(", ")}. Ask me before switching off each one, and don't change anything else.` : null };
+    const help = f.helpers.length ? `<div class="q-grp"><h4>Subagents not run since ${esc(since("Claude Code") || "the records start")} <small>${f.helpers.length}</small></h4><p class="q-tags">${f.helpers.map((a) => `<span class="q-tag" ${tip(a.plain || a.name)}>${esc(a.name)}</span>`).join("")}</p><p class="q-small">${f.helpers.map((a) => `${a.name} ${builtIn(a.name) ? "is part of Claude Code" : `is ${esc(String(a.origin).charAt(0).toLowerCase() + String(a.origin).slice(1))}`}`).join("; ")}.</p></div>` : "";
+    return { title: "What you could switch off", body: `<p>None of these has been used in Claude Code since its records start on ${esc(since("Claude Code"))}. Where a skill lives decides how it's switched off. Skills you made are folders on this computer. Skills from your Claude account are turned on and off in claude.ai's settings. Skills that came with Claude Code can't be removed.</p>${f.groups.map(grp).join("")}${help}`,
+      req: null, cant: "Crossview can't switch skills off in your Claude account, so it can't make this change for you.", ask: acct.length ? `Please open claude.ai in my signed-in Chrome, go to the settings page where skills are turned on and off, and show it to me. These ${acct.length} skills haven't been used in my Claude Code logs${since("Claude Code") ? ` since ${since("Claude Code")}` : ""}: ${acct.map((s) => s.name).join(", ")}. Ask me before switching off each one, and don't change anything else.` : null };
   }
 
   // ---------- the warning in Claude Code (tools/statusline.py), switched on only after a yes ----------
+  // ---------- how Claude writes to you (release 3 slice 2): three questions about last week's writing, then the rules
+  // your answers point to, added to your main rule file with Make this change and Undo. The rules' words live in
+  // tools/changes.py (G.writing_rules); the page sends only which ones ----------
+  const WR = G.writing_rules || {};
+  const WQ = [
+    ["files", "Plan, summary and handoff files Claude wrote: how many did you read?", [["most", "Most of them"], ["some", "Some"], ["few", "Hardly any"]]],
+    ["length", "How long were Claude's replies to you?", [["long", "Too long"], ["right", "About right"], ["short", "Too short"]]],
+    ["updates", "How useful were the updates Claude sends while it works?", [["useful", "Useful"], ["more", "More than I needed"]]],
+  ];
+  const RULE_FOR = { files: { some: "plans-on-ask", few: "plans-on-ask" }, length: { long: "short-replies" }, updates: { more: "quiet-updates" } };
+  const ansKey = () => "gb:writing:" + (DEMO ? "demo:" : "") + thisWeek;  // the demo never shares his answers (QA, Oct 20)
+  const answers = () => { if (!S.qans) { try { S.qans = JSON.parse(localStorage.getItem(ansKey()) || "{}"); } catch (e) { S.qans = {}; } } return S.qans; };
+  const suggested = () => { const a = answers(); return new Set(Object.entries(RULE_FOR).map(([q, m]) => m[a[q]]).filter((id) => id && WR[id])); };
+  const wroteLast = () => { const lw = plus(thisWeek, -7), t = ((((M.receipt || {})[lw] || {}).tools || {})["Claude Code"] || {}).out || 0; return Math.round(t * 0.75); };
+  const bigW = (n) => (n >= 1e6 ? `${(Math.round(n / 1e5) / 10).toLocaleString()} million` : (Math.round(n / 1e4) * 1e4).toLocaleString());
+  function writingSheet() {
+    const a = answers(); S.qpick = S.qpick || {};
+    if (!S.qpick.writing) S.qpick.writing = suggested();
+    const picked = S.qpick.writing, sug = suggested(), w = wroteLast();
+    const qs = WQ.map(([q, text, opts]) => `<div class="q-ask"><p class="q-qq">${esc(text)}</p><div class="w-seg q-opts" role="group" aria-label="${esc(text)}">${opts.map(([v, l]) => `<button data-w="q:ans:${q}:${v}" aria-pressed="${a[q] === v}">${esc(l)}</button>`).join("")}</div></div>`).join("");
+    const rows = Object.entries(WR).map(([id, text]) => `<li class="q-item${picked.has(id) ? " on" : ""}"><label><input type="checkbox" data-w="q:pick:writing:${esc(id)}" ${picked.has(id) ? "checked" : ""}><span><b>${esc(text)}</b>${sug.has(id) ? "<br><small>Your answers point to this one.</small>" : ""}</span></label></li>`).join("");
+    const ids = [...picked].filter((id) => WR[id]);
+    return { title: "How Claude writes to you", kind: "writing-rule",
+      body: `<p>${w ? `Claude wrote about ${bigW(w)} words in Claude Code last week, counting code and files as well as its replies to you. ` : ""}Three questions about what you needed. Your answers stay on this computer.</p>${qs}
+        <h4 class="q-h4">Rules you can add</h4><ul class="q-items">${rows}</ul>
+        <p class="q-small">Crossview adds the lines you tick to your main rule file, under their own heading, and keeps a copy of the file first. Undo takes them out again.</p>`,
+      req: ids.length ? { kind: "writing-rule", rules: ids, for: "writing", summary: `${ids.length === 1 ? "One writing rule" : `${ids.length} writing rules`} added to your main rule file.` } : null,
+      ask: ids.length ? `Please add these lines to my main rule file (~/.claude/CLAUDE.md), under a heading "How Claude writes to me", and change nothing else: ${ids.map((id) => `"${WR[id]}"`).join(" ")}` : null };
+  }
+  // ---------- before the weekly reset (release 3 slice 2): what's left, when it resets, and what could stop a long run
+  // started now. Shown in the last day and a half of the week, and as a preview from the limit page at any time ----------
+  // the next weekly reset after now: the one Crossview worked out, moved on by whole weeks if it has already passed
+  const nextReset = () => { const n = ((M.plan || {}).weekly_reset || {}).next; if (!n) return null; let t = new Date(n).getTime(); while (t <= Date.now()) t += 7 * 864e5; return t; };
+  const resetSoon = () => { const t = nextReset(); if (!t) return null; const h = (t - Date.now()) / 36e5; return h > 0 && h <= 36 ? { at: t, hours: Math.round(h) } : null; };
+  function beforeReset(preview) {
+    const r = resetSoon(), wr = (M.plan || {}).weekly_reset || {}, at = r ? r.at : nextReset();
+    if (!at) return "";
+    // a reading counts only if it was taken this week, after this week's reset (Codex's audit, Oct 20)
+    const L = (M.plan || {}).latest, rsw = resetIn(thisWeek), fresh = !!(L && L.at && L.at.slice(0, 10) >= thisWeek && (!rsw || L.at >= rsw));
+    // the four calendar weeks up to this one, whether or not each has records
+    const RS = G.runstops || {}, wks = [0, 1, 2, 3].map((k) => plus(thisWeek, -7 * k));
+    const sum = (k) => wks.reduce((t, w) => t + Object.values((RS[w] || {})[k] || {}).reduce((a, b) => a + b, 0), 0);
+    const modes = wks.reduce((m, w) => { Object.entries((RS[w] || {}).modes || {}).forEach(([k, v]) => (m[k] = (m[k] || 0) + v)); return m; }, {}), all = Object.values(modes).reduce((a, b) => a + b, 0);
+    const top = Object.entries(modes).sort((a, b) => b[1] - a[1])[0];
+    const MODEW = { auto: "auto mode, where Claude Code decides which steps need your OK", default: "the default mode, where Claude Code asks before commands and file edits", acceptEdits: "the mode that accepts file edits and asks before commands", plan: "plan mode, where Claude Code plans before it changes anything", bypassPermissions: "the mode that skips permission questions" };
+    const when = new Date(at).toLocaleString("en-US", { weekday: "long", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" }).replace(" AM", " am").replace(" PM", " pm");
+    const blocked = sum("blocked"), declined = sum("declined");
+    return `<div class="q-ch q-br"><p class="q-h">Before your weekly limit resets${preview && !r ? " <small>(a preview)</small>" : ""}</p>
+      <p class="q-brl" ${tip(`Crossview works the reset time out from the Claude app's readings, so it could be a few hours either way: somewhere between ${wr.from || "early"} and ${wr.to || "late"} that morning.`)} tabindex="0">${r ? `Claude's weekly limit resets around ${esc(when)}, in about ${plural(r.hours, "hour")}.` : `Claude's weekly limit resets around ${esc(when)}. In the day and a half before each reset, this card shows here by itself.`}</p>
+      <p class="q-brl">${fresh ? `At the last reading, ${L.sd}% of the weekly limit was used, so about ${100 - L.sd}% is left.` : "Crossview has no reading since the limit reset, so it can't tell how much is left. To get a new reading, open the Claude app on your Mac."}</p>
+      <p class="q-h2">What could stop a long job you leave running</p>
+      <ul class="q-list q-brs">${fresh ? `<li>The 5-hour limit, which was ${L.fh}% used at the last reading.</li>` : "<li>The 5-hour limit, which Crossview can't read until there's a new reading.</li>"}
+        <li>${top && all ? `Claude Code stopping to ask for your OK. Most of your chats run in ${esc(MODEW[top[0]] || top[0])}. In the last four weeks, Claude Code ${blocked === 0 ? "blocked no actions" : `blocked ${plural(blocked, "action")}`}, such as running a command or editing a file${declined ? `, and you turned down ${plural(declined, "action")}` : ""}.` : "Claude Code stopping to ask for your OK. Crossview has no record of how your chats ran."}</li></ul>
+      <div class="q-act"><span class="q-lead">Claude Code can show what's left at the bottom of every chat and warn you before you run out.</span><button class="w-btn" data-w="q:sheet:pace">Show me the warning line</button></div></div>`;
+  }
   function paceSheet() {
-    const L = M.plan && M.plan.latest, wr = M.plan && M.plan.weekly_reset;
+    const L0 = M.plan && M.plan.latest, wr = M.plan && M.plan.weekly_reset, rs0 = resetIn(thisWeek);
+    const L = L0 && L0.at && L0.at.slice(0, 10) >= thisWeek && (!rs0 || L0.at >= rs0) ? L0 : null;  // only a reading since the reset (QA, Oct 20)
     const now = `5-hour ${L ? L.fh : 17}% · <span class="dim">resets 7 pm</span> · week ${L ? L.sd : 9}%`;
     const cmd = `"python3" "…/Agent-Glass-Box/tools/statusline.py"`;
     return { title: "Warn me in Claude Code before I run out", kind: "status-line", body: `<p>This adds a line from Crossview to the bottom of Claude Code. After each reply it shows your 5-hour and weekly limits. If the pace of the last 45 minutes would use up a limit before it resets, the line turns orange.</p>
       <div class="q-term" aria-label="What the line looks like"><div><span class="lbl">Most of the time, with your last reading and an example reset time</span>${now}</div><div><span class="lbl">An example of when you're on pace to run out</span>5-hour 62% · <span class="or">at this pace, out by 3:40 pm</span> (resets 4 pm) · week 41%</div><div><span class="lbl">When a limit stops you</span><span class="or">5-hour limit reached · reopens 4 pm</span> · week 63%</div></div>
       <p class="q-small">It saves the time of each reading, the two percentages and their reset times in Crossview's data folder on this Mac. That makes the forecast here exact.${wr ? ` Today the weekly reset is only known to fall between ${esc(wr.from)} and ${esc(wr.to)}.` : ""} It saves nothing about your chats.</p>
-      <p class="q-small">Undo on Your week takes the line out. Crossview keeps a copy of the settings file first.</p>
+      <p class="q-small">Undo takes the line out. Crossview keeps a copy of the settings file first.</p>
       <details class="q-exact"><summary>Show the exact lines</summary><pre class="q-diff"><ins>+ "statusLine": {\n+   "type": "command",\n+   "command": ${esc(cmd)}\n+ }</ins></pre></details>
       <p class="q-small">Claude Code shows it under the box where you type. Crossview hasn't checked yet whether the Claude app's Code tab shows it too. If you already have your own line there, Crossview won't replace it.</p>`,
       req: { kind: "status-line", for: "pace", summary: "Claude Code shows your limits and warns before you run out." },
@@ -417,7 +473,7 @@ window.GBAnswers = function (X) {
     const hs = Object.values(H).filter((h) => h.runs).sort((a, b) => b.runs - a.runs), runs = hs.reduce((a, h) => a + h.runs, 0), apps = [...new Set(hs.flatMap((h) => [...h.apps]))];
     const chips = hs.slice(0, 4).map((h) => `<button class="q-chip" data-w="setup:helper:${esc(h.type)}" ${tip(`${h.type} ran ${nWord(h.runs)} ${wk(per)}. Click to see it in Your setup.`)}><i class="w-light on"></i>${esc(h.type)} <em>${h.runs}</em></button>`).join("") + (hs.length > 4 ? `<button class="q-chip" data-w="setup:helpers">+ ${hs.length - 4} more</button>` : "");
     return `<section class="w-mod q-row" aria-label="Your subagents">${screws}<b class="q-row-t">Your subagents ${wk(per)}</b><span class="q-row-n">${hs.length ? `${plural(hs.length, "subagent")} ran ${plural(runs, "time")}${apps.length ? " in " + list(apps) : ""}` : `No subagents ran${soFar(per)}`}</span>
-      <div class="q-chips">${chips}</div><button class="w-btn" data-w="q:detail" ${tip("Opens the week in detail, with each app wired to the subagents it used, your limits and what you paid.")}>Show me how they connect</button></section>`;
+      <div class="q-chips">${chips}</div></section>`;
   }
 
   // ---------- the sheet: a prepared change, opened over the page so nothing moves ----------
@@ -431,25 +487,27 @@ window.GBAnswers = function (X) {
     else if (S.qopen === "carry") s = carrySheet(per);
     else if (S.qopen === "pace") s = paceSheet(per);
     else if (S.qopen === "plans") s = plansSheet();
+    else if (S.qopen === "writing") s = writingSheet();
     else if (S.qopen.startsWith("undo:")) {
       const c = (G.changes || []).find((x) => x.id === S.qopen.slice(5));
       if (!c) return "";
       s = { title: "Undo this change?", body: `<p><b>Made ${esc(when(c.when))}.</b> ${esc(c.summary)}</p><ul class="q-list">${c.items.map((it) => `<li>In ${code(short(it.file))}, ${it.added ? `this takes out the ${plural(it.added.length, "rule")} Crossview added` : it.set ? "this takes out Crossview's line" : it.before ? `this puts back ${code(it.before)}` : `this takes out ${code(it.after)}`}.</li>`).join("")}</ul>
         <p class="q-small">Anything you've changed in those files since then stays as it is. If something changed in the same spot, Crossview leaves it alone and tells you.</p>`, undo: c.id,
-        ask: `Please undo this change Crossview made, and change nothing else: ${c.items.map((it) => it.added ? `in ${it.file}, take ${it.added.join(", ")} out of the "ask" list under "permissions"` : it.set ? `in ${it.file}, remove the "statusLine" setting` : it.before ? `in ${it.file}, change "${it.after}" back to "${it.before}"` : `in ${it.file}, remove the line "${it.after}" from the header block`).join("; ")}. Show me each change before you save it.` };
+        ask: `Please undo this change Crossview made, and change nothing else: ${c.items.map((it) => it.added && c.kind === "writing-rule" ? `in ${it.file}, take out these lines: ${it.added.join(" ")}` : it.added ? `in ${it.file}, take ${it.added.join(", ")} out of the "ask" list under "permissions"` : it.set ? `in ${it.file}, remove the "statusLine" setting` : it.before ? `in ${it.file}, change "${it.after}" back to "${it.before}"` : `in ${it.file}, remove the line "${it.after}" from the header block`).join("; ")}. Show me each change before you save it.` };
     }
     if (!s) return "";
     const locked = s.kind && !s.undo ? lockOf(s.kind, s.req) : "";
     if (locked) { s = Object.assign({}, s, { req: null, ask: null, cant: locked }); }
-    const off = DEMO ? "This is the demo company, so changes are turned off." : LIVE ? "" : `To ${S.qopen.startsWith("undo:") ? "undo" : "make"} it, start Crossview by double-clicking “Agent Crossview.command” in its folder (Agent-Glass-Box).${s.ask ? " You can also copy the request for Claude Code." : ""}`;
+    const app = s.app || "Claude Code";  // the app the copied request is for; every change offered today is a Claude Code one (his note, Oct 20)
+    const off = DEMO ? "This is the demo company, so changes are turned off." : LIVE ? "" : `To ${S.qopen.startsWith("undo:") ? "undo" : "make"} it, start Crossview by double-clicking “Agent Crossview.command” in its folder (Agent-Glass-Box).${s.ask ? ` You can also copy the request for ${app}.` : ""}`;
     const copied = S.qcopied === S.qopen;
     // one row on every sheet: Make this change, Copy it for Claude Code, Close; what a sheet can't do is said in a line,
     // not by a different row (QA run 4, finding 9)
     // a sheet that only explains (the stops) has no change to make or copy, so it keeps just its own buttons (QA run 5, finding 1)
     const explains = !s.kind && !s.ask && !s.undo && s.kind !== "plans";
-    const why = s.kind === "plans" || s.undo || explains ? "" : locked ? locked : [!s.kind ? (s.cant || "Crossview can't make this change itself, so copy the request instead.") : "", !s.ask ? "Crossview makes this change itself, so there's nothing to copy for Claude Code." : ""].filter(Boolean).join(" ");
+    const why = s.kind === "plans" || s.undo || explains ? "" : locked ? locked : s.kind === "writing-rule" && !s.req ? "Tick a rule above to add it." : [!s.kind ? (s.cant || "Crossview can't make this change itself, so copy the request instead.") : "", !s.ask ? `Crossview makes this change itself, so there's nothing to copy for ${app}.` : ""].filter(Boolean).join(" ");
     const btns = s.kind === "plans" ? `<button class="w-btn main" data-w="q:saveplans" ${LIVE ? "" : "disabled"}>Save my plans</button><button class="w-btn quiet" data-w="q:close">Close</button>` : (s.undo ? (LIVE ? `<button class="w-btn main" data-w="q:undo:${esc(s.undo)}">Undo it</button>` : "") : explains ? "" : `<button class="w-btn main" data-w="q:make" ${!s.kind || !LIVE || !s.req ? "disabled" : ""}>Make this change</button>`)
-      + (s.kind === "plans" || explains ? "" : `<button class="w-btn" data-w="q:copy" data-prompt="${esc(s.ask || "")}" ${s.ask ? tip("Copies a request to paste into Claude Code. Claude then makes the same change and asks before saving. Nothing happens until you paste it.") : "disabled"}>${copied ? "Copied. Paste it into Claude Code" : "Copy it for Claude Code"}</button>`)
+      + (s.kind === "plans" || explains ? "" : `<button class="w-btn" data-w="q:copy" data-prompt="${esc(s.ask || "")}" ${s.ask ? tip(s.kind ? `Copies a request to paste into ${app}. It then makes the same change and asks before saving. Nothing happens until you paste it.` : `Copies a request to paste into ${app}. Nothing happens until you paste it.`) : "disabled"}>${copied ? `Copied. Paste it into ${app}` : `Copy it for ${app}`}</button>`)
       + (s.foot || "") + (s.kind === "plans" ? "" : `<button class="w-btn quiet" data-w="q:close">Close</button>`);
     return `<div class="q-veil" data-w="q:close"></div><div class="q-sheet" role="dialog" aria-modal="true" aria-labelledby="q-sheet-h">
       <header><h3 id="q-sheet-h">${esc(s.title)}</h3><button class="q-x" data-w="q:close" aria-label="Close">×</button></header>
@@ -457,7 +515,7 @@ window.GBAnswers = function (X) {
       <div class="g-more q-more" aria-hidden="true">More below ↓</div><footer>${btns}</footer></div>`;
   }
   function current(per) {
-    return S.qopen === "limit" ? limitSheet(per) : S.qopen === "reach" ? reachSheet(per) : S.qopen === "carry" ? carrySheet(per) : S.qopen === "stops" ? stopsSheet(per) : S.qopen === "pace" ? paceSheet(per) : null;
+    return S.qopen === "limit" ? limitSheet(per) : S.qopen === "reach" ? reachSheet(per) : S.qopen === "carry" ? carrySheet(per) : S.qopen === "stops" ? stopsSheet(per) : S.qopen === "pace" ? paceSheet(per) : S.qopen === "writing" ? writingSheet() : null;
   }
 
   // a Mac with no chats in any of the three apps yet: say so, and offer the made-up company
@@ -576,8 +634,8 @@ window.GBAnswers = function (X) {
   // Claude's weekly limit through the week, from the Claude app's readings on this Mac, with every limit stop marked
   function pace(per, noCodex) {
     const P = M.plan || {}, t0 = new Date(per + "T00:00").getTime(), D = 86400000, off = (d) => (new Date(d).getTime() - t0) / D;
-    const R = (P.readings || []).filter(([t, sd]) => sd != null && off(t) >= 0 && off(t) < 7).map(([t, sd]) => [off(t), sd, t]);
-    const reset = P.weekly_reset && P.weekly_reset.last && off(P.weekly_reset.last) >= 0 && off(P.weekly_reset.last) < 7 ? off(P.weekly_reset.last) : null;
+    const rsw = resetIn(per), reset = rsw ? off(rsw) : null;
+    const R = (P.readings || []).filter(([t, sd]) => sd != null && off(t) >= 0 && off(t) < 7 && (reset == null || off(t) >= reset)).map(([t, sd]) => [off(t), sd, t]);
     const isNow = per === thisWeek, last = R[R.length - 1], END = 7, x = (d) => 96 + d * 116, y = (v) => 222 - v * 1.84;
     // a company plan or paying per use with no readings at all: no empty grid, only the days and the sentence saying why (Oct 17)
     const bare = !R.length && noClaudeReadings();
@@ -592,7 +650,7 @@ window.GBAnswers = function (X) {
       g += `<circle cx="${x(last[0])}" cy="${y(last[1])}" r="5" class="q-p-dot"/>`;
       const wp = P.weekly_pace || {};
       if (isNow) {
-        g += `<line x1="${x(last[0])}" y1="${y(100) - 18}" x2="${x(last[0])}" y2="${y(0)}" class="q-p-now"/>${((t, cx0) => { const half = t.length * 3.6, end = cx0 + half > 936, start = cx0 - half < 96; return `<text x="${end ? 936 : start ? 96 : cx0}" y="${y(100) - 22}" text-anchor="${end ? "end" : start ? "start" : "middle"}" class="q-p-lab strong">${esc(t)}</text>`; })(`the Claude app's last reading, ${ampm(new Date(last[2]).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }).replace(",", ""))}`, x(last[0]))}`;
+        g += `<line x1="${x(last[0])}" y1="${y(100) - 18}" x2="${x(last[0])}" y2="${y(0)}" class="q-p-now"/>${((t, cx0) => { const end = cx0 >= 520, start = !end; return `<text x="${end ? Math.min(936, cx0 + 12) : Math.max(96, cx0 - 12)}" y="${y(100) - 12}" text-anchor="${end ? "end" : start ? "start" : "middle"}" class="q-p-lab strong">${esc(t)}</text>`; })(`the Claude app's last reading, ${ampm(new Date(last[2]).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }).replace(",", ""))}`, x(last[0]))}`;
         // near the right edge the label goes on the left of the dot (Windows' font is a little wider, Oct 18)
         g += ((t) => { const left = x(last[0]) + 10 + t.length * 8.5 > 936; return `<text x="${x(last[0]) + (left ? -10 : 10)}" y="${y(last[1]) + 20}"${left ? ' text-anchor="end"' : ""} class="q-p-lab strong">${t}</text>`; })(`${last[1]}% used`);
         if (wp.runs_out) { const ro = Math.min(END, off(wp.runs_out)); g += `<path d="M${x(last[0])} ${y(last[1])} L${x(ro)} ${y(100)}" class="q-p-proj hot"/><text x="${x(ro) - 8}" y="${y(100) + 18}" text-anchor="end" class="q-p-lab hot">at this pace it runs out ${esc(shortWhen(wp.runs_out))}</text>`; }
@@ -616,7 +674,7 @@ window.GBAnswers = function (X) {
   }
 
   // one name for each plan everywhere: the name it's sold under (QA run 7, finding 5)
-  const planName = (p) => { const n = String(p.name).replace(/\s*\(for Codex\)$/i, ""); return /^Claude Max$/i.test(n) ? (p.monthly_usd >= 200 ? "Claude Max 20x" : "Claude Max 5x") : /^ChatGPT$/i.test(n) && p.monthly_usd === 20 ? "ChatGPT Plus" : n; };
+  const planName = (p) => window.GBStage.planName(G.plan_facts, p);  // the plan catalog's name (tools/plan-facts.json)
   const dollars = (v) => (v < 100 ? `about $${Math.max(1, Math.round(v))}` : money(v));
   function plansBlock(per, app) {
     if (!B.plans.length) return `<p class="q-p-none">Crossview doesn't know which plans you pay for yet.</p>`;
@@ -656,10 +714,10 @@ window.GBAnswers = function (X) {
       // a new path where Codex's week started over, so the line drops instead of sliding down
       g += `<path d="${R.map(([d, v], k) => `${k && starts.some((s0) => R[k - 1][0] < s0 && s0 <= d) ? "M" : k ? "L" : "M"}${x(d).toFixed(1)} ${y(v).toFixed(1)}`).join(" ")}" class="q-p-line"/>`;
       g += `<circle cx="${x(last[0])}" cy="${y(last[1])}" r="5" class="q-p-dot"/>`;
-      if (isNow) g += `<line x1="${x(last[0])}" y1="${y(100) - 18}" x2="${x(last[0])}" y2="${y(0)}" class="q-p-now"/>${((t, cx0) => { const half = t.length * 3.6, end = cx0 + half > 936, start = cx0 - half < 96; return `<text x="${end ? 936 : start ? 96 : cx0}" y="${y(100) - 22}" text-anchor="${end ? "end" : start ? "start" : "middle"}" class="q-p-lab strong">${esc(t)}</text>`; })(`Codex's last reading, ${ampm(new Date(last[2]).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }).replace(",", ""))}`, x(last[0]))}`;
+      if (isNow) g += `<line x1="${x(last[0])}" y1="${y(100) - 18}" x2="${x(last[0])}" y2="${y(0)}" class="q-p-now"/>${((t, cx0) => { const end = cx0 >= 520, start = !end; return `<text x="${end ? Math.min(936, cx0 + 12) : Math.max(96, cx0 - 12)}" y="${y(100) - 12}" text-anchor="${end ? "end" : start ? "start" : "middle"}" class="q-p-lab strong">${esc(t)}</text>`; })(`Codex's last reading, ${ampm(new Date(last[2]).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" }).replace(",", ""))}`, x(last[0]))}`;
       g += ((t) => { const left = x(last[0]) + 10 + t.length * 8.5 > 936; return `<text x="${x(last[0]) + (left ? -10 : 10)}" y="${y(last[1]) - 10}"${left ? ' text-anchor="end"' : ""} class="q-p-lab strong">${t}</text>`; })(`${Math.round(last[1])}% used`);
     } else g += `<text x="${x(3.5)}" y="${y(50)}" text-anchor="middle" class="q-p-ax">No readings of Codex's weekly limit ${wk(per)}</text>`;
-    starts.forEach((d, k) => (g += `<line x1="${x(d)}" y1="${y(100)}" x2="${x(d)}" y2="${y(0)}" class="q-p-start"/><text x="${x(d) + 6}" y="${y(100) + (isNow && last && Math.abs(d - last[0]) < 0.6 ? 52 : 34)}" class="q-p-ax">${k === 0 && (!R.length || R[0][0] >= d - 0.01) ? "its week started" : "its week started over"}</text>`));
+    starts.forEach((d, k) => (g += `<line x1="${x(d)}" y1="${y(100)}" x2="${x(d)}" y2="${y(0)}" class="q-p-start"/><text x="${x(d) > 760 ? x(d) - 6 : x(d) + 6}" text-anchor="${x(d) > 760 ? "end" : "start"}" y="${y(100) + (isNow && last && Math.abs(d - last[0]) < 0.6 ? 52 : 34)}" class="q-p-ax">${k === 0 && (!R.length || R[0][0] >= d - 0.01) ? "its week started" : "its week started over"}</text>`));
     // Codex keeps its readings for about two weeks, so last week's start can come before them; each reading carries when its
     // week resets and how long the week is, which places the start even then (release 3)
     const first = R.length && !starts.length ? (C.readings || []).find(([t, sd]) => sd != null && t === R[0][2]) : null;
@@ -670,6 +728,11 @@ window.GBAnswers = function (X) {
     const h = hs[hs.length - 1];
     const line = `<div class="q-p-stops"><p class="q-p-stopline${hs.length ? " hot" : ""}"><i aria-hidden="true"></i>${!hs.length ? `No Codex limit stopped you ${wk(per)}${soFar(per)}.` : hs.length === 1 ? `Codex's ${esc(limitName(h))} limit stopped you on ${esc(shortWhen(h.ts))}.` : `Codex's limits stopped you ${nWord(hs.length)}, the last on ${esc(shortWhen(h.ts))}.`}</p></div>`;
     return `<svg class="q-pace" viewBox="0 0 940 ${y(0) + 30}" role="img" aria-label="${esc(lab)}">${g}</svg>${line}`;
+  }
+  // where a stop happened, named as the chat's project (QA, Oct 20: "while Agent Crossview was running" read as the app itself)
+  function inChat(work, app) {
+    const n = workName(work);
+    return /no project|^Not in a project|^Not sure yet/i.test(n) || /no project/i.test(work) ? ` during a ${app}chat that isn't in a project yet` : ` during a ${app}chat in ${esc(n)}`;
   }
   function codexChanges(per) {
     const out = [], hs = cxHits(per);
@@ -684,7 +747,7 @@ window.GBAnswers = function (X) {
   function codexStops(per) {
     const hs = cxHits(per);
     if (!hs.length) return `<p>No Codex limit stopped you ${wk(per)}${soFar(per)}.</p>`;
-    return `<ul class="q-list">${hs.map((h) => { const r = (h.running || [])[0], m = waited(h); return `<li>On <b>${esc(shortWhen(h.ts))}</b>, its ${esc(limitName(h))} limit stopped you${r ? (/^Codex chats with no project$/.test(r.work) ? " while a Codex chat with no project was running" : ` while ${esc(workName(r.work))} was running`) : ""}.${m != null ? ` It opened again ${dur(m)} later.` : ""}</li>`; }).join("")}</ul>`;
+    return `<ul class="q-list">${hs.map((h) => { const r = (h.running || [])[0], m = waited(h); return `<li>On <b>${esc(shortWhen(h.ts))}</b>, its ${esc(limitName(h))} limit stopped you${r ? inChat(r.work, "Codex ") : ""}.${m != null ? ` It opened again ${dur(m)} later.` : ""}</li>`; }).join("")}</ul>`;
   }
   const localWhen = (t) => ampm(new Date(t).toLocaleString("en-US", { weekday: "short", hour: "numeric", minute: "2-digit" })).replace(/^(\w+),? /, "$1 at ");
   function codexPlanPanel(per) {
@@ -705,12 +768,15 @@ window.GBAnswers = function (X) {
   }
 
   function page(per) {
+    // the limit page opens on the app whose limit stopped you, when only one did (Gemini's turn 28)
+    if (S.qapp == null && hasCodex()) { const h0 = hitsIn(per); S.qapp = !h0.some((h) => h.tool !== "Codex") && h0.some((h) => h.tool === "Codex") ? "Codex" : "Claude"; }
     const St = window.GBStage, html = { plan: plan(per), limit: limit(per), reach: reach(per), carry: carry(per) };
     const ans = (k) => ((html[k].match(/<p class="q-a"[^>]*>([\s\S]*?)<\/p>/) || [])[1] || "").replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
     const first = (k) => { const t = ans(k), m = t.match(/^.*?[.?!](\s|$)/); return (m ? m[0] : t).trim(); };
     const ch = changes(per), shown = ch.slice(0, 3), rest = ch.slice(3);
-    const ids = ["limit"].concat(shown.map((c) => c.id), rest.length ? ["more"] : [], ["plan", "reach", "carry"]);
-    if (appOf() !== "Codex" && !ids.includes(S.qsel)) S.qsel = (ch.find((c) => c.hot) || {}).id || "limit";
+    // Home's limit page answers one question, the limit (Gemini's turn 27): cost lives on the receipt, setup in Setup
+    const ids = ["limit"];
+    if (appOf() !== "Codex") S.qsel = "limit";
     // the lead: is the plan right, and did a limit stop you (his pick: a verdict on top, no dollar figure)
     const hs = hitsIn(per), tools = [...new Set(hs.map((h) => (h.tool === "Codex" ? "Codex" : "Claude")))];
     const planLine = !B.plans.length ? "" : /^Yes\b/.test(ans("plan")) ? (per === thisWeek ? "You're on the right plan." : "You were on the right plan.") : first("plan");
@@ -718,41 +784,44 @@ window.GBAnswers = function (X) {
     // the first sentence answers one question, "am I okay?", in plain words; the stop is on the chart and the thing to
     // act on is the orange row right below (screen-words, copy deck Oct 15)
     const unpriced = (B.plans || []).filter((p) => !priced(p) && (!hasCodex() || !(p.covers || []).includes("Codex"))), coPays = unpriced.some((p) => payOf(p) === "company");
-    const covered = /^Yes\b/.test(ans("plan")), lead = esc(!B.plans.length ? "Crossview doesn't know which plans you pay for yet." : unpriced.length ? (coPays ? (per === thisWeek ? "Your company pays for your plan, so this week costs you nothing extra." : "Your company paid for your plan, so last week cost you nothing extra.") : (per === thisWeek ? "You pay per use, so this week's bill grows with the work." : "You paid per use, so last week's bill grew with the work.")) : covered ? (per === thisWeek ? "Your plans are covering the cost of this week's work." : "Your plans covered the cost of last week's work.") : (per === thisWeek ? "Your plans cost more than this week's work would have." : "Your plans cost more than last week's work would have."));
-    void planLine; void stopLine;
+    const covered = /^Yes\b/.test(ans("plan")), leadCost = esc(!B.plans.length ? "Crossview doesn't know which plans you pay for yet." : unpriced.length ? (coPays ? (per === thisWeek ? "Your company pays for your plan, so this week costs you nothing extra." : "Your company paid for your plan, so last week cost you nothing extra.") : (per === thisWeek ? "You pay per use, so this week's bill grows with the work." : "You paid per use, so last week's bill grew with the work.")) : covered ? (per === thisWeek ? "Your plans are covering the cost of this week's work." : "Your plans covered the cost of last week's work.") : (per === thisWeek ? "Your plans cost more than this week's work would have." : "Your plans cost more than last week's work would have."));
+    void planLine; void leadCost; void covered;
+    const cxN = cxHits(per).length, clN = hs.length - cxN;
+    // the page answers for both apps at once (a cold read, Oct 20): a stop first, then where each limit stands
+    const cxL = (M.codex_plan || {}).latest, cxNow = per === thisWeek && cxL && cxL.at && cxL.at.slice(0, 10) >= per ? Math.round(cxL.sd) : null;
+    const clL = (M.plan || {}).latest, rsw0 = resetIn(per), clNow = per === thisWeek && clL && clL.at && clL.at.slice(0, 10) >= per && (!rsw0 || clL.at >= rsw0) ? Math.round(clL.sd) : null;
+    const where = per !== thisWeek ? "" : ` ${clNow != null ? `Claude is at ${clNow}%` : "Claude has no reading since the reset"}${hasCodex() ? `; Codex is ${cxNow != null ? `at ${cxNow}%` : "without a reading"}` : ""}.`;
+    const lead = esc(clN && cxN ? `Both limits stopped you ${wk(per)}.` : clN ? `Claude's limit stopped you ${nWord(clN)} ${wk(per)}.` : cxN ? `Codex's limit stopped you ${nWord(cxN)} ${wk(per)}.` : `${hasCodex() ? "Neither limit has" : "Claude's limit hasn't"} stopped you ${wk(per)}${soFar(per)}.`) + esc(where);
     const sw = !hasCodex() ? "" : `<div class="w-seg q-app" role="group" aria-label="Which app">${["Claude", "Codex"].map((a) => `<button data-w="q:app:${a}" aria-pressed="${appOf() === a}" ${tip(a === "Claude" ? "Claude Code, Cowork and the Claude app share one plan and one set of limits." : `Codex has its own plan and its own limits.${appOf() !== "Codex" && cxHits(per).length ? " The orange dot means a Codex limit stopped you " + wk(per) + "." : ""}`)}>${a}${a === "Codex" && appOf() !== "Codex" && cxHits(per).length ? '<i class="q-app-dot" aria-label="a Codex limit stopped you"></i>' : ""}</button>`).join("")}</div>`;
-    const headRight = sw + `<button class="w-btn q-detail-btn" data-w="q:detail" ${tip("Opens the week in detail, with your limits, the subagents each app used and what you paid.")}>Show me the week in detail →</button>`;
+    const headRight = sw;  // the week in detail left the click paths (his call, Oct 19, night): this page is one level down from Home
     const TIP = { subs: "A subagent is a separate AI with its own instructions, which Claude Code can hand part of a job to.", spike: "A connector is a link to another app, like your browser or Google Drive. Claude's settings call them MCP servers.", new: "A connector is a link to another app, like your browser or Google Drive. Claude's settings call them MCP servers.", skills: "A skill is instructions packaged for one kind of task, which Claude loads when that task comes up.", sub: "A subagent is a separate AI with its own instructions, which Claude Code can hand part of a job to.", proj: "A project is one of your project folders. Crossview groups your chats by project." };
     const row = (id, q, a, mini, hot, kind) => `<button class="q-row${S.qsel === id ? " sel" : ""}${hot ? " hot" : ""}" data-w="q:plate:${esc(id)}" aria-pressed="${S.qsel === id}" ${kind && TIP[kind] ? tip(TIP[kind]) : ""}><i class="q-dot" aria-hidden="true"></i><span><b>${esc(q)}</b><small>${esc(a)}</small></span><span class="q-mini">${mini || ""}</span><span class="q-chev" aria-hidden="true">›</span></button>`;
     const miniOf = (c) => c.kind === "spike" ? spark(c.hist, c.hot) : c.kind === "new" ? c.ports.map((p) => `<em class="q-tag${riskWords.hot(p) ? " hot" : ""}">${esc(p.name)}</em>`).join("") : c.kind === "skills" ? c.skills.map((k) => `<i class="q-sq${k.uses > 0 ? " on" : ""}"></i>`).join("") : "";
     if (appOf() === "Codex") {
-      const cch = codexChanges(per), cids = ["limit"].concat(cch.map((c) => c.id), ["plan"]);
+      const cch = codexChanges(per).filter((c) => c.kind === "cxstop"), cids = ["limit"].concat(cch.map((c) => c.id));
       if (!cids.includes(S.qsel)) S.qsel = (cch.find((c) => c.hot) || {}).id || "limit";
       const cc = cch.find((x) => x.id === S.qsel), ck = cids.indexOf(S.qsel);
       const ccanvas = `<div class="q-wk">
       <div class="q-pace-b${S.qsel === "limit" ? " sel" : ""}" data-w="q:plate:limit" role="button" tabindex="0" aria-pressed="${S.qsel === "limit"}" aria-label="Codex's weekly limit"><span class="q-h">${per === thisWeek ? "How much of Codex's weekly limit you've used" : "How much of Codex's weekly limit you used"} <small>Its week runs from when you first use it, so it can start over midweek.${per === thisWeek && ((M.codex_plan || {}).latest || {}).resets ? ` This one resets ${esc(localWhen(M.codex_plan.latest.resets).replace(/^(\w+) at/, (m0, d0) => d0 + " " + new Date(M.codex_plan.latest.resets).toLocaleDateString("en-US", { month: "short", day: "numeric" }) + " at"))}.` : ""}</small></span>${codexPace(per)}</div>
-      <div class="q-ch"><p class="q-h">What changed in Codex ${wk(per)} <small ${tip("Crossview compares the week with the four weeks before it: a Codex limit that stopped you, and Codex used far more than usual.")} tabindex="0" class="q-hint">compared with the four weeks before</small></p>
-        ${cch.map((c) => row(c.id, c.title, c.line, "", c.hot)).join("")}<p class="q-quiet">${cch.length ? "Nothing else changed in Codex" : "Nothing changed in Codex"} ${wk(per)}. Crossview can't see which subagents or connectors Codex used yet.</p></div>
-      <div class="q-plan-b${S.qsel === "plan" ? " sel" : ""}" data-w="q:plate:plan" role="button" tabindex="0" aria-pressed="${S.qsel === "plan"}" aria-label="Your plan for Codex: open Am I on the right plan?"><span class="q-h">Your plan for Codex</span>${plansBlock(per, "Codex")}</div></div>`;
+      ${cch.length ? `<div class="q-ch"><p class="q-h">When Codex's limit stopped you</p>${cch.map((c) => row(c.id, c.title, c.line, "", c.hot)).join("")}</div>` : ""}</div>`;
       const cbody = cc ? (cc.kind === "cxstop" ? codexStops(per) : `<p>${esc(cc.line)}</p><p class="q-why">A chat is one conversation in Codex. Crossview counts them from Codex's records on this Mac.</p>`) : S.qsel === "plan" ? codexPlanPanel(per) : codexLimitPanel(per);
       const ctitle = cc ? cc.title : S.qsel === "plan" ? "Am I on the right plan for Codex?" : (per === thisWeek ? "How much of Codex's weekly limit you've used" : "How much of Codex's weekly limit you used");
-      const ckey = `<span class="q-cue" aria-hidden="true">More below ↓</span><span><i class="q-k ink"></i>From Codex's records on this Mac</span><span><i class="q-k blue"></i>What you pay</span><span><i class="y-jack hot" aria-hidden="true"></i>Something you can act on</span>`;
+      const ckey = `<span><i class="q-k ink"></i>From Codex's records on this Mac</span>`;
       const cstrip = `<span>${esc(plural(cxChats(per), "Codex chat"))} ${wk(per)}, across your projects.</span>`;
-      return `${empty()}${St.page({ lead, title: `Your week ${per === thisWeek ? "so far" : ""}`.trim(), headRight, hint: false, canvas: ccanvas, key: ckey, strip: cstrip, cls: "q-page q-new q-cx", panel: { k: ck, n: cids.length, act: "q:plate:", unit: "Item", title: ctitle, line: cc ? esc(cc.line) : "", body: cbody } })}${sheet(per)}`;
+      return `${empty()}${St.page({ lead, title: `Codex's weekly limit ${wk(per)}`, headRight, hint: false, canvas: ccanvas, key: ckey, strip: cstrip, cls: "q-page q-new q-cx", panel: { k: 0, n: 1, act: "q:plate:", unit: "Item", title: ctitle, line: cc ? esc(cc.line) : "", body: cbody } })}${sheet(per)}`;
     }
+    const br = appOf() !== "Codex" && per === thisWeek ? (resetSoon() ? beforeReset(false) : S.qbr ? beforeReset(true) : "") : "";
+    const brLink = appOf() !== "Codex" && per === thisWeek && !resetSoon() ? `<p class="q-brp"><button class="w-link" data-w="q:br">${S.qbr ? "Hide the before-reset card" : "Preview the card that shows before the weekly reset"}</button></p>` : "";
     const canvas = `<div class="q-wk">
       <div class="q-pace-b${S.qsel === "limit" ? " sel" : ""}" data-w="q:plate:limit" role="button" tabindex="0" aria-pressed="${S.qsel === "limit"}" aria-label="Claude's weekly limit: open What used up my limit?"><span class="q-h">${per === thisWeek ? "How much of Claude's weekly limit you've used" : "How much of Claude's weekly limit you used"} <small>${hasCodex() ? "Claude Code, Cowork and the Claude app share this limit. " : ""}${noClaudeReadings() ? "" : per === thisWeek ? "It resets Monday morning." : `It reset on Monday, ${esc(day(per))}.`}</small></span>${pace(per, hasCodex())}</div>
-      <div class="q-ch"><p class="q-h">What changed${hasCodex() ? " in Claude" : ""} ${wk(per)} <small ${tip("Crossview compares the week with the four weeks before it, by fixed rules: a connector used far more than usual or for the first time, a skill you made, a subagent far above usual, or a different project taking 40% or more of the week. The ones that can send, delete or act as you come first.")} tabindex="0" class="q-hint">compared with the four weeks before</small></p>
-        ${shown.length ? shown.map((c) => row(c.id, c.title, c.line, miniOf(c), c.hot, c.kind)).join("") : `<p class="q-quiet">Nothing else changed ${wk(per)}, compared with the four weeks before.</p>`}
-        ${rest.length ? row("more", `${plural(rest.length, "more change")}`, rest.map((c) => c.title).join(". ") + ".", "") : ""}</div>
-      <div class="q-plan-b${S.qsel === "plan" ? " sel" : ""}" data-w="q:plate:plan" role="button" tabindex="0" aria-pressed="${S.qsel === "plan"}" aria-label="Your plans: open Am I on the right plan?"><span class="q-h">${hasCodex() ? "Your plan for Claude" : "Your plans"}</span>${plansBlock(per, hasCodex() ? "Claude" : null)}</div>
-      <div class="q-ch standing"><p class="q-h">Your setup <small>as it is now, the same until you change it</small></p>${row("reach", "What can Claude reach outside my Mac?", ans("reach"), "", false)}${row("carry", "What have I set up that I never use?", ans("carry"), "", false)}</div></div>`;
+${brLink}</div>`;
+    void miniOf; void row;
     const k = ids.indexOf(S.qsel), c = ch.find((x) => x.id === S.qsel);
     const titles = { limit: per === thisWeek ? "How much of Claude's weekly limit you've used" : "How much of Claude's weekly limit you used", plan: "Am I on the right plan?", reach: "What can Claude reach outside my Mac?", carry: "What have I set up that I never use?", more: `${plural(rest.length, "more change")} ${wk(per)}` };
     const body = c ? changePanel(c, per) : S.qsel === "more" ? `<ul class="q-list">${rest.map((x) => `<li><b>${esc(x.title)}</b><br><small>${esc(x.line)}</small></li>`).join("")}</ul>` : `<div class="q-page-pick">${html[S.qsel]}</div>`;
-    const key = `<span class="q-cue" aria-hidden="true">More below ↓</span><span><i class="q-k ink"></i>${noClaudeReadings() ? "From your logs" : "From your logs and the Claude app's readings"}</span><span><i class="q-k blue"></i>What you pay</span><span><i class="y-jack hot" aria-hidden="true"></i>Something you can act on</span>`;
+    const key = `<span><i class="q-k ink"></i>${noClaudeReadings() ? "From your logs" : "From your logs and the Claude app's readings"}</span>`;
     const strip = `<span ${tip("A subagent is a separate AI with its own instructions, which Claude Code can hand part of a job to.")}>${esc(agentsLine(per))}</span>`;
-    return `${empty()}${St.page({ lead, title: `Your week ${per === thisWeek ? "so far" : ""}`.trim(), headRight, hint: false, canvas, key, strip, cls: "q-page q-new", panel: { k, n: ids.length, act: "q:plate:", unit: "Item", title: c ? c.title : titles[S.qsel], line: c ? esc(c.why || c.line) : "", body } })}${sheet(per)}`;
+    return `${empty()}${St.page({ lead, title: `Claude's weekly limit ${wk(per)}`, headRight, hint: false, canvas, key, strip, cls: "q-page q-new", panel: { k: 0, n: 1, act: "q:plate:", unit: "Item", title: c ? c.title : titles[S.qsel], line: c ? esc(c.why || c.line) : "", body } })}${br}${sheet(per)}`;
   }
   function idsFor(per) {
     if (appOf() === "Codex") return ["limit"].concat(codexChanges(per).map((c) => c.id), ["plan"]);
@@ -775,9 +844,19 @@ window.GBAnswers = function (X) {
     if (v === "q:front") { S.nview = null; if (S.hback && location.hash === "#detail") { S.allw = true; S.hback = false; S.fromHistory = true; history.back(); return "top"; } S.hback = false; if (location.hash === "#detail") history.replaceState(null, "", "#week"); return "top"; }
     if (v.startsWith("q:sheet:")) { S.qopen = v.slice(8); S.qerr = null; S.qcopied = null; S.qfocus = true; return "stay"; }
     if (v === "q:close") { const k = S.qopen; S.qopen = null; S.qerr = null; S.qback = k; if (k === "plans") S.qplans = null; return "stay"; }
+    // an answer to one of the three writing questions: kept on this computer, and the suggested rules follow it
+    if (v.startsWith("q:ans:")) {
+      const [, , q, a] = v.split(":"), A = answers(), was = (RULE_FOR[q] || {})[A[q]];
+      A[q] = A[q] === a ? undefined : a; try { localStorage.setItem(ansKey(), JSON.stringify(A)); } catch (e) {}
+      // only the rule this answer points to changes; rules you ticked or unticked yourself stay as they are (QA, Oct 20)
+      S.qpick = S.qpick || {}; const P = S.qpick.writing || (S.qpick.writing = suggested()), now = (RULE_FOR[q] || {})[A[q]];
+      if (was && was !== now && !suggested().has(was)) P.delete(was); if (now) P.add(now);
+      return "stay";
+    }
+    if (v === "q:br") { S.qbr = !S.qbr; S.qbrGo = S.qbr; return "stay"; }
     if (v.startsWith("q:pick:")) {
       const [, , q, ...rest] = v.split(":"), name = rest.join(":");
-      S.qpick = S.qpick || {}; if (!S.qpick[q]) (q === "limit" ? limitSheet : reachSheet)(per);
+      S.qpick = S.qpick || {}; if (!S.qpick[q]) (q === "limit" ? limitSheet : q === "writing" ? writingSheet : reachSheet)(per);
       const set = S.qpick[q]; set.has(name) ? set.delete(name) : set.add(name);
       return "stay";
     }
@@ -824,5 +903,32 @@ window.GBAnswers = function (X) {
     }
     return null;
   }
-  return { page, click, step, open: () => !!S.qopen, close: () => { const k = S.qopen; S.qopen = null; S.qerr = null; S.qback = k; } };
+  // ---------- the home's "Worth a look" (release 1 of the redesign, Oct 18): up to three, from the same rules as the answers
+  // above, hot ones first; each opens Your week at the answer it comes from ----------
+  function worth(per) {
+    const out = [];
+    try {
+      const { ports, open } = reachFacts(per), asYou = ports.filter((p) => p.as_you);
+      // the card counts what the change will cover when you open it: the connectors ticked to start with (QA, Oct 20)
+      const askable = open.filter((p) => p.pick);
+      if (askable.length) out.push({ hot: true, title: `Make ${askable.length === 1 ? "one connector" : `${askable.length} connectors`} ask before sending or deleting`, line: "Claude Code would ask you first. Open it to see the change.", go: "reach" });
+      else if (asYou.length) out.push({ hot: true, title: `${list(asYou.map((p) => p.name))} can act as you`, line: `${asYou.length === 1 ? "It works" : "They work"} inside your own browser, signed in as you. Open it to see what ${asYou.length === 1 ? "it has" : "they have"} done.`, go: "asyou", pick: asYou[0].name });
+    } catch (e) {}
+    // a change opens where it lives: connectors and skills in Setup, a project in Work (his call, Oct 19, night: three rooms)
+    const where = (c) => (c.kind === "spike" || c.kind === "new" ? "setup:connectors" : c.kind === "skills" ? "setup:skills" : c.kind === "sub" || c.kind === "subs" ? "setup:helpers" : c.kind === "proj" ? "work:" + c.w : "limit");
+    try { changes(per).filter((c) => c.hot).slice(0, 2).forEach((c) => out.push({ hot: true, title: c.title, line: c.line, go: where(c) })); } catch (e) {}
+    try {
+      const f = limitFacts(per);
+      const pk = f.cands.filter((h) => h.pick);  // the ones the change ticks to start with
+      if (pk.length && !active("limit")[0]) out.push({ hot: false, title: `${plural(pk.length, "subagent")} could run on a smaller model`, line: `You can switch ${list(pk.map((h) => h.type))} to Sonnet, a smaller model. Undo puts it back.`, go: "limit" });
+    } catch (e) {}
+    try { const w = wroteLast(); if (w >= 100000) out.push({ hot: false, title: `Claude wrote about ${bigW(w)} words last week`, line: "Three questions about what you needed, then a rule you can add.", go: "writing" }); } catch (e) {}
+    try {
+      const c = carryFacts(per);
+      if (c.unused.length) out.push({ hot: false, title: `${c.unused.length} of your ${c.sk.length} skills haven't been used${since("Claude Code") ? ` since ${since("Claude Code")}` : ""}`, line: "Claude reads a short description of every skill at the start of each chat, used or not.", go: "carry" });
+    } catch (e) {}
+    try { const r = resetSoon(); if (r && per === thisWeek) out.unshift({ hot: true, first: true, title: `Claude's weekly limit resets in about ${plural(r.hours, "hour")}`, line: "See what's left and what could stop a long run before then.", go: "beforereset" }); } catch (e) {}
+    return out.sort((a, b) => (b.first ? 2 : b.hot ? 1 : 0) - (a.first ? 2 : a.hot ? 1 : 0)).slice(0, 3);
+  }
+  return { page, click, step, worth, sheetOver: () => sheet(S.nper || thisWeek), open: () => !!S.qopen, close: () => { const k = S.qopen; S.qopen = null; S.qerr = null; S.qback = k; } };
 };

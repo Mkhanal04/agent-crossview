@@ -28,7 +28,7 @@ const diff = (label, a, b) => { Object.keys(a).forEach((s) => { const x = JSON.s
   a = snap(WEEK); click($(".w-oc-act summary")); await wait(120); b = snap(WEEK); diff("The week in detail: open Add it", a, b);
   click($(".w-oc-act summary")); await wait(60);
   const WORK = BAR.concat([".y-page", ".y-list", ".y-main", ".g-canvas", ".g-panel", ".a-ph"]);
-  click($('[data-go="screen:machine"]')); await wait(150);
+  ((location.hash = "#chats"), 0); await wait(150);
   a = snap(WORK); click(document.querySelectorAll(".y-proj")[1]); await wait(120); b = snap(WORK); diff("Your work: project 1->2", a, b);
   a = snap(WORK); click($(`[data-nper="${TW()}"]`)); await wait(120); b = snap(WORK); diff("Your work: last->this week", a, b);
   click($(`[data-nper="${LW()}"]`)); await wait(120);
@@ -44,20 +44,20 @@ const diff = (label, a, b) => { Object.keys(a).forEach((s) => { const x = JSON.s
   a = snap(PANEL); click($('[data-a="filter:never"]')); await wait(120); b = snap(PANEL); diff("Setup: filter never used", a, b);
   // Your AI's instructions: picking another project or opening a sheet moves nothing outside the picture
   const SHP = BAR.concat([".g-page", ".g-stage", ".g-canvas", ".g-panel", ".a-ph"]);
-  click($('[data-go="screen:shapes"]')); await wait(150);
+  ((location.hash = "#instructions"), 0); await wait(150);
   for (const app of ["Cowork", "Codex", "Claude Code"]) { const btn = $(`[data-w="s:app:${app}"]`); if (!btn) continue; a = snap(BAR.concat([".g-stage", ".g-panel"])); click(btn); await wait(120); b = snap(BAR.concat([".g-stage", ".g-panel"])); diff(`Your AI's instructions: to ${app}`, a, b); }
   const pj = document.querySelectorAll('[data-w^="s:proj:"]');
   if (pj.length > 1) { a = snap(SHP); click(pj[1]); await wait(120); b = snap(SHP); diff("Your AI's instructions: another project", a, b); }
   for (const id of ["main", "notes", "skills", "main"]) { const p = $(`.s-g .a-plate[data-w="s:plate:${id}"]`); if (!p) continue; a = snap(SHP); click(p); await wait(100); b = snap(SHP); diff(`What shapes Claude: pick ${id}`, a, b); }
   for (const k of ["memory", "fixes", "archive"]) { const pl = $(`.s-g .a-plate[data-w="s:plate:${k === "fixes" ? "main" : "notes"}"]`); if (pl) { click(pl); await wait(80); } const btn = $(`[data-w="s:sheet:${k}"]`); if (!btn) continue; a = snap(SHP); click(btn); await wait(120); b = snap(SHP); diff(`What shapes Claude: open the ${k} sheet`, a, b); click($('[data-w="s:close"]')); await wait(80); }
-  a = snap(BAR); click($('[data-go="screen:note"]')); await wait(150); b = snap(BAR); diff("Bar: setup->this week", a, b);
-  a = snap(BAR); click($('[data-go="screen:machine"]')); await wait(150); b = snap(BAR); diff("Bar: this week->work", a, b);
+  a = snap(BAR); ((location.hash = "#limits"), 0); await wait(150); b = snap(BAR); diff("Bar: setup->this week", a, b);
+  a = snap(BAR); ((location.hash = "#chats"), 0); await wait(150); b = snap(BAR); diff("Bar: this week->work", a, b);
   if ($('[data-nper="all"]')) { a = snap(BAR); click($('[data-nper="all"]')); await wait(150); b = snap(BAR); diff("Bar: work->all weeks", a, b); click($(`[data-nper="${TW()}"]`)); await wait(120); }
   // All weeks (release 2 QA, pattern D): picking a week, stepping, opening every limit stop and going back move nothing
   // but the panel's words; on Your work, the stage stands where it stands on This week, and a pick keeps the list's scroll
   if ($('[data-nper="all"]')) {
     const ALL = BAR.concat([".g-page", ".g-stage", ".g-canvas", ".h-svg", ".g-panel", ".a-ph", ".a-step", ".g-strip"]);
-    click($('[data-go="screen:note"]')); await wait(150); click($('[data-nper="all"]')); await wait(200);
+    ((location.hash = "#limits"), 0); await wait(150); click($('[data-nper="all"]')); await wait(200);
     const wk = () => document.querySelectorAll(".h-svg .h-week");
     a = snap(ALL); click(wk()[wk().length - 1]); await wait(120); b = snap(ALL); diff("All weeks: pick this week", a, b);
     a = snap(ALL); click($('[data-w="h:week:step:-1"]')); await wait(120); b = snap(ALL); diff("All weeks: Earlier", a, b);
@@ -65,7 +65,7 @@ const diff = (label, a, b) => { Object.keys(a).forEach((s) => { const x = JSON.s
     if ($('[data-w="h:stops"]')) { a = snap(ALL); click($('[data-w="h:stops"]')); await wait(120); b = snap(ALL); diff("All weeks: every limit stop", a, b); a = snap(ALL); click($('[data-w="h:back"]')); await wait(120); b = snap(ALL); diff("All weeks: back from the stops", a, b); }
     a = snap(ALL); click($(".h-svg .h-week.sel")); await wait(120); b = snap(ALL); diff("All weeks: unpick, back to all weeks", a, b);
     const YW = BAR.concat([".g-page", ".g-stage", ".g-canvas", ".g-panel", ".a-ph"]);
-    click($('[data-go="screen:machine"]')); await wait(150); click($(`[data-nper="${TW()}"]`)); await wait(150);
+    ((location.hash = "#chats"), 0); await wait(150); click($(`[data-nper="${TW()}"]`)); await wait(150);
     a = snap([".g-stage", ".g-panel"]); click($('[data-nper="all"]')); await wait(150); b = snap([".g-stage", ".g-panel"]);
     if (JSON.stringify(a[".g-stage"].map((r) => r[1])) !== JSON.stringify(b[".g-stage"].map((r) => r[1]))) out.push(`MOVED Your work: this week->all weeks: the stage's top ${JSON.stringify(a[".g-stage"])} -> ${JSON.stringify(b[".g-stage"])}`);
     const cv = $(".y-allpage .g-canvas"), rows = document.querySelectorAll(".y-allrow");

@@ -16,33 +16,32 @@
   },
   "skills": {}
  },
- "adf608cc-f2e0-3bfd-1c8b-78bf3e38a666": {
-  "agents": {
-   "general-purpose": 2,
-   "Plan": 1
-  },
-  "skills": {
-   "okr-check": 3,
-   "dataviz": 1,
-   "prd-template": 1
-  }
- },
- "0fbda4bb-7f1f-f68b-2b39-898819b513c0": {
-  "agents": {
-   "Plan": 1
-  },
-  "skills": {
-   "dataviz": 1,
-   "okr-check": 1
-  }
- },
- "6c79e2e2-c4fd-468c-6c53-248bf68851ea": {
+ "f608ccf2-e03b-fd1c-8b78-bf3e38a666cc": {
   "agents": {
    "general-purpose": 1,
+   "Plan": 2
+  },
+  "skills": {
+   "dataviz": 1,
+   "prd-template": 3
+  }
+ },
+ "a570e5d3-7f05-3bc6-1142-3669ed8b3223": {
+  "agents": {
+   "Explore": 1,
+   "general-purpose": 1
+  },
+  "skills": {
+   "okr-check": 2,
+   "dataviz": 1
+  }
+ },
+ "c16ce9e3-615e-445f-fb53-fb352180a2f4": {
+  "agents": {
    "Plan": 1
   },
   "skills": {
-   "prd-template": 1
+   "okr-check": 1
   }
  },
  "local_2f82afe8-b6ac-d37e-8d1c-8a29789681e1": {
@@ -62,235 +61,248 @@
    "prd-template": 1
   }
  },
- "8c933e51-0515-ee8d-66e0-407e27e6a032": {
+ "933e5105-15ee-8d66-e040-7e27e6a0326a": {
   "agents": {
    "ux-reviewer": 1
   },
   "skills": {
-   "prd-template": 2,
-   "okr-check": 1
+   "dataviz": 1
   }
  },
- "36e16ca7-9eda-0b6b-aa2b-00758f55c928": {
+ "987e964a-4691-8f1a-c8ab-0fa12e5bd7c8": {
   "agents": {
-   "Plan": 1,
+   "ux-reviewer": 1,
+   "spec-writer": 1,
    "Explore": 1
   },
   "skills": {
-   "okr-check": 1
+   "okr-check": 1,
+   "dataviz": 2
   }
  },
- "c6a3e1bf-5788-5ae8-30d2-6358962a0b5e": {
+ "local_a0b5e6c8-79de-ac0c-724f-f83147f74ba3": {
   "agents": {
+   "general-purpose": 2
+  },
+  "skills": {}
+ },
+ "31c7bb65-accc-0f31-8c26-a88d3f7006ab": {
+  "agents": {
+   "spec-writer": 1,
+   "ux-reviewer": 2,
    "general-purpose": 1
   },
   "skills": {
    "dataviz": 1,
+   "prd-template": 2
+  }
+ },
+ "f5473a46-f7bf-bbe2-abeb-e4120df37c5e": {
+  "agents": {
+   "spec-writer": 1
+  },
+  "skills": {
    "okr-check": 1
   }
  },
- "234404c7-e418-fd5c-d46c-9f5385c95531": {
+ "local_3de2db7b-1cac-c680-eade-d4a72d0d987a": {
+  "agents": {
+   "general-purpose": 3
+  },
+  "skills": {}
+ },
+ "local_0f67d060-375c-8051-3649-d9e7bfc59965": {
+  "agents": {
+   "general-purpose": 1
+  },
+  "skills": {}
+ },
+ "local_444bf5e0-f5af-566f-fe8f-09c523d0c1b3": {
+  "agents": {
+   "general-purpose": 2
+  },
+  "skills": {}
+ },
+ "4af507fd-a9cb-7d06-8be5-be4ac4307abe": {
+  "agents": {
+   "ux-reviewer": 2
+  },
+  "skills": {
+   "dataviz": 1,
+   "prd-template": 1
+  }
+ },
+ "local_46626834-9303-56d6-aef6-f2470e80d1fc": {
+  "agents": {
+   "general-purpose": 4
+  },
+  "skills": {}
+ },
+ "d957ada6-065b-6427-64ed-368ec026f117": {
+  "agents": {
+   "ux-reviewer": 1,
+   "general-purpose": 1
+  },
+  "skills": {
+   "dataviz": 1,
+   "okr-check": 2
+  }
+ },
+ "local_40974fdd-77db-3c85-01d9-bf22706c1b84": {
+  "agents": {
+   "general-purpose": 2
+  },
+  "skills": {}
+ },
+ "local_90c9cacc-db5d-2706-a970-bb71958f37e9": {
+  "agents": {
+   "general-purpose": 1
+  },
+  "skills": {}
+ },
+ "c86e3af0-96fc-869d-1080-15583f629585": {
+  "agents": {
+   "Plan": 1,
+   "ux-reviewer": 2,
+   "Explore": 1,
+   "spec-writer": 1
+  },
+  "skills": {
+   "dataviz": 1,
+   "prd-template": 1
+  }
+ },
+ "local_56f4cae1-cbf8-d64c-355e-fd4fcf2d55ae": {
+  "agents": {
+   "general-purpose": 1
+  },
+  "skills": {}
+ },
+ "323ce68e-4e4a-fa67-278b-2ac520dc9a70": {
+  "agents": {},
+  "skills": {
+   "okr-check": 2
+  }
+ },
+ "local_8a1c10fc-d589-ab01-436f-f99b7e9ca3d4": {
+  "agents": {
+   "general-purpose": 1
+  },
+  "skills": {}
+ },
+ "local_17be579c-0513-4611-7a6a-4a3511aee096": {
+  "agents": {
+   "general-purpose": 1
+  },
+  "skills": {}
+ },
+ "local_36c19f3e-b5c7-bf1f-97e0-2a1dae5fd2c9": {
+  "agents": {
+   "general-purpose": 3
+  },
+  "skills": {}
+ },
+ "local_a3d35446-20db-2f72-30f0-2a355488e781": {
+  "agents": {
+   "general-purpose": 1
+  },
+  "skills": {}
+ },
+ "local_d0b4cee0-2145-bb9f-43a6-0f2a8b58da25": {
+  "agents": {
+   "general-purpose": 1
+  },
+  "skills": {}
+ },
+ "e818b4aa-45ee-db1f-18c0-37414be3b0ba": {
+  "agents": {
+   "Explore": 2
+  },
+  "skills": {
+   "prd-template": 1,
+   "carrier-glossary": 1
+  }
+ },
+ "e89f2bfd-0126-588a-1564-88232c38e37d": {
+  "agents": {
+   "spec-writer": 1
+  },
+  "skills": {}
+ },
+ "7e7d4b8e-7ccb-80e6-2854-3386588bca33": {
+  "agents": {
+   "qa-checker": 1,
+   "Explore": 1
+  },
+  "skills": {
+   "code-review": 2
+  }
+ },
+ "823f8e12-7128-755e-de03-2b28ae4be970": {
   "agents": {},
   "skills": {
    "prd-template": 1
   }
  },
- "local_7f3de2db-7b1c-acc6-80ea-ded4a72d0d98": {
+ "6c0ddaca-af08-4ece-a9e0-39f8db8060b3": {
   "agents": {
-   "general-purpose": 1
+   "qa-checker": 1
   },
   "skills": {}
  },
- "d1b8b7ab-ab3b-d91b-0b63-b0273e341fd3": {
+ "64085a61-b688-e6f0-32c1-e1a05b7bd31a": {
   "agents": {
    "Explore": 1
   },
   "skills": {
-   "dataviz": 1
+   "code-review": 2
   }
  },
- "35715400-fd54-31d2-3f1d-399769097e6e": {
+ "91fb1eec-7a8c-73b7-27c6-8866d5d620d1": {
   "agents": {
-   "general-purpose": 1,
-   "Plan": 1,
-   "ux-reviewer": 1
+   "Explore": 3
   },
   "skills": {
-   "dataviz": 2,
-   "prd-template": 2
+   "code-review": 1,
+   "carrier-glossary": 1
   }
  },
- "local_07b1f1ab-ca77-166b-faa1-07bf8da3c482": {
-  "agents": {
-   "general-purpose": 3
-  },
-  "skills": {}
- },
- "local_faa939e3-a7d4-6626-8349-30356d6aef6f": {
-  "agents": {
-   "general-purpose": 2
-  },
-  "skills": {}
- },
- "3a8f6809-f9b0-d539-b360-884d52d53d64": {
-  "agents": {
-   "Plan": 1
-  },
-  "skills": {
-   "okr-check": 1
-  }
- },
- "17f78552-7591-ac48-fdc7-1f0223e4856a": {
-  "agents": {
-   "spec-writer": 1,
-   "general-purpose": 1
-  },
-  "skills": {
-   "okr-check": 2
-  }
- },
- "71109b80-e08b-ab7e-cd0f-fd73b411d658": {
-  "agents": {
-   "general-purpose": 1
-  },
-  "skills": {
-   "prd-template": 2,
-   "dataviz": 1
-  }
- },
- "local_be059a57-5de5-534a-7202-588efbc759f7": {
-  "agents": {
-   "general-purpose": 1
-  },
-  "skills": {}
- },
- "0e31dc72-7346-b38f-0526-64c459048a06": {
-  "agents": {
-   "spec-writer": 1
-  },
-  "skills": {
-   "okr-check": 1
-  }
- },
- "local_65a3f81d-bbe4-b23f-4f4c-c92abe121913": {
-  "agents": {
-   "general-purpose": 3
-  },
-  "skills": {}
- },
- "1e50ce80-2900-c66a-64ee-fd7c9203ab07": {
-  "agents": {
-   "general-purpose": 1
-  },
-  "skills": {
-   "dataviz": 1
-  }
- },
- "local_f4446f70-82ab-dc5a-00bd-59890ea1f8a1": {
-  "agents": {
-   "general-purpose": 1
-  },
-  "skills": {}
- },
- "local_a3511aee-0961-ba21-d477-f45d96a10cb7": {
-  "agents": {
-   "general-purpose": 1
-  },
-  "skills": {}
- },
- "local_2a1dae5f-d2c9-2dde-7694-e043723c1022": {
-  "agents": {
-   "general-purpose": 2
-  },
-  "skills": {}
- },
- "local_dde96d6a-e147-d040-3b71-f0e928baa0c3": {
-  "agents": {
-   "general-purpose": 2
-  },
-  "skills": {}
- },
- "401f3034-cfec-965a-3dbb-4b4d725b7498": {
-  "agents": {
-   "Explore": 1,
-   "spec-writer": 1
-  },
-  "skills": {
-   "code-review": 1
-  }
- },
- "dac3232e-77af-6f17-7251-4bb35eb984cb": {
-  "agents": {
-   "Explore": 2,
-   "spec-writer": 1
-  },
-  "skills": {
-   "prd-template": 1,
-   "carrier-glossary": 2
-  }
- },
- "3244e051-57e2-931b-9f57-a1b2470b127b": {
-  "agents": {},
-  "skills": {
-   "carrier-glossary": 1,
-   "code-review": 1
-  }
- },
- "e35331fc-da58-f5e8-75c9-baa770669d57": {
+ "f86e5218-c010-4650-c90b-95193afc4bbd": {
   "agents": {},
   "skills": {
    "carrier-glossary": 1
   }
  },
- "df72fb8e-a969-9001-4535-9d79f7061877": {
+ "aa143920-5121-cd26-3390-71d749834e55": {
   "agents": {
-   "Explore": 1
-  },
-  "skills": {}
- },
- "b0d49447-c164-085a-61b6-88e6f032c1e1": {
-  "agents": {
-   "spec-writer": 1
-  },
-  "skills": {
-   "prd-template": 2
-  }
- },
- "184ca126-4f81-7d2a-f389-8cc84eb6a252": {
-  "agents": {
-   "qa-checker": 1
-  },
-  "skills": {
-   "prd-template": 2
-  }
- },
- "local_132a5c93-4bd1-5354-87ec-f8cb26782f08": {
-  "agents": {
-   "general-purpose": 2
-  },
-  "skills": {}
- },
- "25d52ceb-47be-29d1-955e-69601f651cee": {
-  "agents": {
-   "research-synth": 1
-  },
-  "skills": {}
- },
- "4d2d7836-01e6-2eaf-4bbb-651d72541224": {
-  "agents": {
-   "research-synth": 3
+   "research-synth": 2
   },
   "skills": {
    "interview-notes": 1
   }
  },
- "local_6380ff93-1cd8-bbf6-f952-a66571dd8558": {
+ "74d2d783-601e-62ea-f4bb-b651d7254122": {
   "agents": {
-   "general-purpose": 1
+   "research-synth": 3
+  },
+  "skills": {
+   "meeting-notes": 1,
+   "interview-notes": 1
+  }
+ },
+ "0ff931cd-8bbf-6f95-2a66-571dd8558dc7": {
+  "agents": {
+   "research-synth": 1
   },
   "skills": {}
  },
- "2407640f-4510-a664-cbfa-de83dbe7c74f": {
+ "local_77382427-1006-3af1-3c09-a2395ce5fc7e": {
+  "agents": {
+   "general-purpose": 2
+  },
+  "skills": {}
+ },
+ "95df0658-197c-d97b-1fbf-78e607c168c4": {
   "agents": {
    "research-synth": 1
   },
@@ -298,14 +310,23 @@
    "meeting-notes": 1
   }
  },
- "0cfc456d-4843-8621-a2a5-9355413a3dc2": {
-  "agents": {},
+ "d6045253-4315-2a4f-659a-a4806a60e07c": {
+  "agents": {
+   "research-synth": 1
+  },
   "skills": {
-   "meeting-notes": 2,
    "interview-notes": 1
   }
  },
- "f6334ebb-4fa2-654e-c4e0-14927d8155a4": {
+ "4c30a995-d051-bfe5-e924-3ab62f7d3d37": {
+  "agents": {
+   "research-synth": 3
+  },
+  "skills": {
+   "meeting-notes": 1
+  }
+ },
+ "431edf9c-6ffa-a5f9-704e-3292aba5c72c": {
   "agents": {
    "research-synth": 2
   },
@@ -313,51 +334,71 @@
    "interview-notes": 1
   }
  },
- "551ed675-c526-7ddc-d38c-27c6092f8a4b": {
-  "agents": {
-   "research-synth": 2
-  },
-  "skills": {
-   "interview-notes": 1
-  }
- },
- "local_455acb5d-196a-76fd-0c11-7929ead81663": {
+ "local_fe280cd7-0482-28ed-8c6a-d276099d3c3d": {
   "agents": {
    "general-purpose": 1
   },
   "skills": {}
  },
- "local_0296942b-2883-6bf8-1e58-c4ce027fb57d": {
+ "c3f526a5-bca4-bb62-9e63-6db35a996032": {
+  "agents": {
+   "research-synth": 2
+  },
+  "skills": {
+   "meeting-notes": 3
+  }
+ },
+ "local_59dc3057-7552-f8cb-2f14-5d336430590c": {
   "agents": {
    "general-purpose": 2
   },
   "skills": {}
  },
- "local_387d5938-5c9c-5d8a-df44-1457bcba959a": {
+ "e33b8ab2-50c2-45e3-6b65-ed0e01b84b53": {
+  "agents": {},
+  "skills": {
+   "interview-notes": 1
+  }
+ },
+ "local_9de18f6b-0b3a-236f-7397-18189365259b": {
+  "agents": {
+   "general-purpose": 2
+  },
+  "skills": {}
+ },
+ "local_771a6398-f905-bdcd-e6a0-2267c24a3d82": {
   "agents": {
    "general-purpose": 3
   },
   "skills": {}
  },
- "local_b06a9713-8cfa-f934-310d-ee64ab313778": {
+ "local_12474b89-0d3e-c2a1-dc5f-b55953f8dee2": {
   "agents": {
    "general-purpose": 1
   },
   "skills": {}
  },
- "local_6523869b-bb89-b489-3318-91d5ead2cd5a": {
-  "agents": {
-   "general-purpose": 1
-  },
-  "skills": {}
- },
- "local_82b9a21f-0dba-47af-aa93-1c7ebfa3ffab": {
+ "local_c3d171b8-fdc5-1729-320a-8d8542a79f5c": {
   "agents": {
    "general-purpose": 2
   },
   "skills": {}
  },
- "c3d171b8-fdc5-1729-320a-8d8542a79f5c": {
+ "local_7a7d21c3-483e-c597-37f8-9f999748266a": {
+  "agents": {
+   "general-purpose": 2
+  },
+  "skills": {}
+ },
+ "e2eb65a8-d113-af7a-c405-3357c0801c5f": {
+  "agents": {
+   "Explore": 1
+  },
+  "skills": {
+   "sql-helper": 2
+  }
+ },
+ "548cff16-21d1-8ed8-2f72-5bcbde9bfd2e": {
   "agents": {
    "Explore": 1
   },
@@ -365,62 +406,77 @@
    "sql-helper": 3
   }
  },
- "9ac3ed1d-6731-1b6e-235f-49764e1d8bb5": {
+ "9d8ea63d-2cc6-c939-d47e-fd6017483ede": {
   "agents": {
-   "Plan": 1
-  },
-  "skills": {}
- },
- "042d2f18-cd3a-30b4-b119-06d171d7a37a": {
-  "agents": {
-   "qa-checker": 1,
-   "Plan": 1
+   "Plan": 1,
+   "general-purpose": 1
   },
   "skills": {
+   "run": 1,
    "claude-api": 1
   }
  },
- "bfd2ebdd-c3e0-ce47-af88-7f27c50f7649": {
+ "549b1892-6039-6758-24cf-71563be323a3": {
   "agents": {
-   "qa-checker": 1,
-   "Plan": 1
-  },
-  "skills": {
-   "run": 1
-  }
- },
- "edd77626-ceec-589d-8ea6-3d2cc6c939d4": {
-  "agents": {},
-  "skills": {
-   "skill-creator": 1
-  }
- },
- "eb29b91a-97cc-c274-d596-e61fed1de992": {
-  "agents": {
-   "claude-code-guide": 1
-  },
-  "skills": {
-   "skill-creator": 1
-  }
- },
- "64e26a80-5c38-4c3e-1c4f-c50b1a87a0ff": {
-  "agents": {
-   "claude-code-guide": 1
-  },
-  "skills": {
-   "skill-creator": 1
-  }
- },
- "eed3c16a-289b-6596-a3f0-d97d312e4a10": {
-  "agents": {
-   "claude-code-guide": 2
+   "qa-checker": 1
   },
   "skills": {}
  },
- "ea56207d-941f-5684-4f1c-33b279e07766": {
+ "0ceac23e-b6f2-364b-76cb-9eadfdb38433": {
+  "agents": {},
+  "skills": {
+   "simplify": 1
+  }
+ },
+ "28ea0764-e26a-805c-384c-3e1c4fc50b1a": {
   "agents": {},
   "skills": {
    "skill-creator": 1
+  }
+ },
+ "e4094a19-6545-04c6-f810-a099e4438441": {
+  "agents": {
+   "claude-code-guide": 2
+  },
+  "skills": {
+   "skill-creator": 1
+  }
+ },
+ "d0e308fc-295f-9a03-156c-b3c145b0c161": {
+  "agents": {
+   "claude-code-guide": 1
+  },
+  "skills": {
+   "skill-creator": 1
+  }
+ },
+ "8df1b4c8-adfd-2531-e83e-81f84afcdaf4": {
+  "agents": {},
+  "skills": {
+   "update-config": 2
+  }
+ },
+ "4adc145d-bc7d-d353-d8da-c59769fe2df7": {
+  "agents": {
+   "claude-code-guide": 1
+  },
+  "skills": {
+   "update-config": 1
+  }
+ },
+ "db2d0eb0-c65d-f5df-8f6f-e83988acc150": {
+  "agents": {
+   "claude-code-guide": 1
+  },
+  "skills": {}
+ },
+ "c488e2e1-f0ab-4fb7-4f8b-83b2436b0c7b": {
+  "agents": {
+   "claude-code-guide": 1
+  },
+  "skills": {
+   "skill-creator": 1,
+   "update-config": 1
   }
  }
 }

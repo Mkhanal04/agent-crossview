@@ -17,7 +17,7 @@ window.GBWeek = function (X) {
   const span = (w) => { const e = plus(w, 6); return mon(w) === mon(e) ? `${day(w)} to ${Number(e.slice(8))}` : `${day(w)} to ${day(e)}`; };
   const pct = (a, b) => (b ? Math.round((100 * a) / b) : 0);
   const pctText = (a, b) => (b && a > 0 && pct(a, b) < 1 ? "under 1%" : pct(a, b) + "%");
-  const workName = (w) => (w === "Not sure yet" ? "Not grouped yet" : w);
+  const workName = (w) => (w === "Not sure yet" ? "Not in a project yet" : w);
   const daysSince = (d) => (d ? Math.round((new Date(G.today + "T12:00:00") - new Date(d + "T12:00:00")) / 864e5) : null);
   const tip = (t) => `data-tip="${esc(t)}"`;
   const ampm = (s) => s.replace(" AM", " am").replace(" PM", " pm");
@@ -247,7 +247,9 @@ window.GBWeek = function (X) {
   function board() {
     const per = S.nper;
     if (S.allw && HI && S.nview !== "detail") return HI.page();
-    if (QA && S.nview !== "detail") return QA.page(per);
+    // Home's limit page, one level down from Home with one way back (his call, Oct 19, night)
+    // in the receipt's frame, so Home's two pages read as one app (Gemini's turn 27)
+    if (QA && S.nview !== "detail") return `<main class="r-panel q-lim"><p class="r-crumb q-crumb"><button class="w-link" data-go="screen:home">Home</button> › <b>${per === thisWeek ? "Will I hit a limit this week?" : "Did I hit a limit last week?"}</b></p>${QA.page(per)}</main>`;
     return `<div class="w-page">${QA ? `<nav class="q-back"><button class="w-link" data-w="q:front">← Your week</button><span>The week in detail, with your limits, your subagents and what you paid</span></nav>` : ""}${strip(per)}${((pd) => `<div class="w-row"><div class="w-col">${agents(per, [])}${others()}</div><div class="w-col">${pd}<div class="w-doors"><button class="w-door" data-go="screen:machine">${screws}<i class="w-door-ic" aria-hidden="true"></i><span><b>Show me one project</b><small>Who worked on it and what it cost</small></span><span class="w-arrow" aria-hidden="true">→</span></button>
       <button class="w-door" data-go="screen:armory">${screws}<i class="w-door-ic" aria-hidden="true"></i><span><b>Show me how my setup is built</b><small>Every part of Claude Code, Cowork and Codex, layer by layer</small></span><span class="w-arrow" aria-hidden="true">→</span></button></div></div></div>`)(paid(per))}</div>`;
   }
@@ -268,7 +270,7 @@ window.GBWeek = function (X) {
       mark(); cv.onscroll = mark;
     }
     if (S.qfocus) { const h = document.querySelector(".q-sheet h3"); if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); } S.qfocus = false; }
-    if (S.qback) { const b = document.querySelector(`[data-w="q:sheet:${CSS.escape(S.qback)}"]`) || document.querySelector(`[data-q-card] .w-btn`); if (b) b.focus({ preventScroll: true }); S.qback = null; }
+    if (S.qback && (!document.activeElement || document.activeElement === document.body)) { const b = document.querySelector(`[data-w="q:sheet:${CSS.escape(S.qback)}"]`) || document.querySelector(`[data-q-card] .w-btn`); if (b) b.focus({ preventScroll: true }); } S.qback = null;
     const board = document.querySelector(".w-board"), svg = board && board.querySelector(".w-wires");
     if (!svg) return;
     const R = board.getBoundingClientRect(), out = [], count = {}, idx = {};
@@ -325,5 +327,5 @@ window.GBWeek = function (X) {
     else return false;
         return true;
   }
-  return { board, kept, after, click, barRight, step: (d) => (S.allw && HI && S.nview !== "detail" ? HI.step(d) : QA && S.nview !== "detail" && QA.step ? QA.step(d) : false), closeSheet: () => (S.allw && HI && S.nview !== "detail" ? HI.close() : QA && QA.open() ? (QA.close(), true) : false) };
+  return { board, kept, after, click, barRight, sheetOver: () => (QA && QA.sheetOver ? QA.sheetOver() : ""), worth: (per) => (QA && QA.worth ? QA.worth(per) : []), plansSheet: () => { S.qopen = "plans"; }, step: (d) => (S.allw && HI && S.nview !== "detail" ? HI.step(d) : QA && S.nview !== "detail" && QA.step ? QA.step(d) : false), closeSheet: () => (S.allw && HI && S.nview !== "detail" ? HI.close() : QA && QA.open() ? (QA.close(), true) : false) };
 };

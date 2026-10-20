@@ -26,7 +26,7 @@ function check(where) {
     if (el.tagName.toLowerCase() === "text" && el.getScreenCTM) { const m = el.getScreenCTM(); px = px * Math.hypot(m.a, m.b); }
     if (px < 10.5 && !seen.has("s" + name)) { seen.add("s" + name); out.push(`OVERFLOW ${where}: ${name} is drawn at ${px.toFixed(1)}px, under 11`); }
     const clips = cs.overflow !== "visible" || cs.textOverflow === "ellipsis";
-    if (el.tagName.toLowerCase() !== "text" && clips && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 2) && !seen.has("c" + name)) { seen.add("c" + name); out.push(`OVERFLOW ${where}: ${name} is cut off`); }
+    if (el.tagName.toLowerCase() !== "text" && clips && !el.closest("[data-clip]") && (el.scrollWidth > el.clientWidth + 1 || el.scrollHeight > el.clientHeight + 2) && !seen.has("c" + name)) { seen.add("c" + name); out.push(`OVERFLOW ${where}: ${name} is cut off`); }
   });
   // a key next to its ring stays inside the ring's card (QA recheck, Oct 15: the "Made by you" keys ran into the edge at 1280)
   document.querySelectorAll(".a-leg").forEach((el) => { const box = el.closest(".a-rings, .a-viz"), r = el.getBoundingClientRect(), b = box && box.getBoundingClientRect(); if (b && r.width && r.right > b.right + 1) out.push(`OVERFLOW ${where}: the key "${el.innerText.split("\n")[0].slice(0, 30)}" runs ${Math.round(r.right - b.right)}px past its card`); });
@@ -74,26 +74,30 @@ function bar(where) {
 (async () => {
   await wait(400);
   const width = window.innerWidth;
-  for (const [sc, name] of [["note", "Your week"], ["machine", "Your work"], ["armory", "Your setup"], ["shapes", "Your AI's instructions"]]) {
-    click($(`[data-go="screen:${sc}"]`)); await wait(200); check(`${name} at ${width}px`); bar(`${name} at ${width}px`);
+  // the three rooms and the two pages one level down (his call, Oct 19, night)
+  for (const [h, name] of [["home", "the home"], ["limits", "the limit page"], ["cost", "the receipt"], ["chats", "Work"], ["setup", "Setup"]]) {
+    location.hash = "#" + h; await wait(250); check(`${name} at ${width}px`); bar(`${name} at ${width}px`);
   }
   // All weeks, on both tabs that have it: the overview, a picked week, every limit stop, and Your work's every project
   const TW = () => document.querySelectorAll("[data-nper]")[0].dataset.nper;
-  click($('[data-go="screen:note"]')); await wait(150);
+  ((location.hash = "#limits"), 0); await wait(150);
   if ($('[data-nper="all"]')) {
     click($('[data-nper="all"]')); await wait(200);
     check(`All weeks at ${width}px`); bar(`All weeks at ${width}px`);
     const wk = document.querySelectorAll(".h-svg .h-week"); if (wk.length) { click(wk[Math.max(0, wk.length - 2)]); await wait(150); check(`All weeks, last week picked, at ${width}px`); }
     if ($('[data-w="h:stops"]')) { click($('[data-w="h:stops"]')); await wait(150); check(`Every limit stop at ${width}px`); click($('[data-w="h:stops"]')); await wait(100); }
-    click($('[data-go="screen:machine"]')); await wait(200); check(`Your work, all weeks, at ${width}px`); bar(`Your work, all weeks, at ${width}px`);
+    ((location.hash = "#chats"), 0); await wait(200); check(`Your work, all weeks, at ${width}px`); bar(`Your work, all weeks, at ${width}px`);
     const rows = document.querySelectorAll(".y-allrow"); if (rows.length > 3) { click(rows[3]); await wait(150); check(`Your work, all weeks, a project picked, at ${width}px`); }
     click($(`[data-nper="${TW()}"]`)); await wait(150);
   }
-  click($('[data-go="screen:note"]')); await wait(150);
+  ((location.hash = "#limits"), 0); await wait(150);
   for (const k of ["reach", "carry"]) { if ($('[data-w="q:sheet:reach"]') || $('[data-w="q:sheet:carry"]')) break; click($(`[data-w="q:plate:${k}"]`)); await wait(80); }
   const sh = $('[data-w="q:sheet:reach"]') || $('[data-w="q:sheet:carry"]');
   if (sh) { click(sh); await wait(120); const r = $(".q-sheet").getBoundingClientRect(); if (r.left < 0 || r.right > window.innerWidth || r.top < 0 || r.bottom > window.innerHeight) out.push(`OVERFLOW a prepared change at ${width}px doesn't fit the window`); out.push(`FIT a prepared change at ${width}px`); click($('[data-w="q:close"]')); await wait(60); }
-  click($('[data-w="q:detail"]')); await wait(200); check(`The week in detail at ${width}px`);
+  if ($(".q-sheet")) { key("Escape"); await wait(120); }
+  // closing a sheet leaves the card scrolled to the button you pressed; the layout is measured from the top of each card
+  document.querySelectorAll(".g-stage, .g-canvas, .g-body, .q-more-b").forEach((e) => (e.scrollTop = 0)); await wait(60);
+  check(`The limit page after a change sheet, at ${width}px`);
   click($('[data-go="screen:armory"]')); await wait(150);
   click($('[data-a="layer:connectors"]')); await wait(150); check(`Your setup connectors at ${width}px`);
   for (const l of ["skills", "helpers", "folder", "settings"]) { click($(`[data-a="layer:${l}"]`)); await wait(150); check(`Your setup ${l} at ${width}px`); }

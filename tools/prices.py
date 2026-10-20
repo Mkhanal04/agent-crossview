@@ -1,12 +1,12 @@
 """List prices per million tokens, used to estimate what logged work would cost on pay-per-token plans.
 These are estimates, never his bill: Claude and ChatGPT subscriptions are flat fees.
 
-Claude: https://platform.claude.com/docs/en/about-claude/pricing (read Oct 10 2026).
-OpenAI: https://developers.openai.com/api/docs/pricing (read Oct 10 2026; GPT-5.6 Sol at its promotional
+Claude: https://platform.claude.com/docs/en/about-claude/pricing (read Oct 10 2026, rechecked Oct 19 2026).
+OpenAI: https://developers.openai.com/api/docs/pricing (read Oct 10 2026, rechecked Oct 19 2026; GPT-5.6 Sol at its promotional
 rate, which the page says runs at least through Nov 21 2026).
 Prices are today's, applied to all past work, so older work is priced at today's rates."""
 
-CHECKED = "Oct 10, 2026"
+CHECKED = "Oct 19, 2026"  # rechecked live Oct 19 (research/25): no changes since Oct 10
 SOURCES = {"Claude": "platform.claude.com/docs/en/about-claude/pricing", "OpenAI": "developers.openai.com/api/docs/pricing"}
 
 # Claude: input, 5-minute cache write, 1-hour cache write, cache read, output ($ per million tokens)

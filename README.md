@@ -12,11 +12,9 @@ It reads the records those apps already keep, and nothing it reads leaves your c
 
 ## What you'll see
 
-- **Your week:** how much of your plan's limit you used, what changed from earlier weeks, and whether your plans cover the work.
-- **Your work:** each project, which apps and subagents worked on it, and what that work would cost if you paid per use instead of a monthly plan. A subagent is a separate AI that Claude Code hands part of a job to.
-- **Your setup:** how each app is put together, layer by layer. It includes your connectors, the links to other apps like Google Drive or Slack, and which of them can send, change or delete things there.
-- **Your AI's instructions:** what Claude reads before every message, from your rule files (CLAUDE.md) to the notes Claude saves about you between chats.
-- **All weeks:** every week Crossview has found, side by side.
+- **Home:** three answers for the week. Will you hit a limit? What did the work cost, and would it cost more if you paid per use instead of a monthly plan? What can your apps reach? Below them, up to three changes worth a look, each with Undo.
+- **Setup:** how each app is put together, layer by layer, from its folder on your computer up to your projects. It includes your rule files (CLAUDE.md), skills, subagents and connectors, the links to other apps like Google Drive or Slack, and which of them can send, change or delete things there. A subagent is a separate AI that Claude Code hands part of a job to.
+- **Work:** each project and chat, with the subagents each chat called, and what that work would cost if you paid per use.
 
 Where it can't see something for an app, it says so.
 
@@ -43,7 +41,7 @@ The full list is on the "How Crossview counts" page, linked at the bottom of eve
    - If your Mac says it can't be opened because it's from an unidentified developer, right-click it, choose **Open**, then **Open** again.
    - If your Mac offers to install the command line developer tools, say yes. They're Apple's own, and Crossview needs the Python that comes with them. It takes a few minutes, once.
 3. A Terminal window reads your records, which takes about a minute the first time. Then your browser opens Crossview at http://127.0.0.1:8765.
-4. On Your week, open **Your plans** and choose the plans you pay for. Crossview uses them to compare what you pay with the work you did.
+4. The first screen asks which plans you pay for. Crossview uses them to compare what you pay with the work you did. To change them later, open the cost card on Home and choose **Change my plans**.
 
 To stop it, close the Terminal window. To remove it, delete the folder. Crossview doesn't install anything outside it.
 
@@ -68,7 +66,7 @@ On a work laptop, check your company's rules on installing tools first.
 3. Double-click **Agent Crossview (Windows).cmd** in that folder.
    - If Windows shows a blue box saying it protected your PC, click **More info**, then **Run anyway**. The file is a short list of steps you can open in Notepad to read first.
 4. A window reads your records, which takes about a minute the first time. Then your browser opens Crossview at http://127.0.0.1:8765.
-5. On Your week, open **Your plans** and choose the plans you have.
+5. The first screen asks which plans you have.
 
 To stop it, close the window. To remove it, delete the folder.
 
@@ -90,17 +88,17 @@ Where Crossview looks on Windows (the refresh lists what it found, and where it 
 
 ## On a work plan
 
-If your company pays for Claude or ChatGPT (Claude Team or Enterprise, ChatGPT Business or Enterprise), pick that plan in **Your plans** (or **Not sure which plan**) and choose **My company pays for it**. You don't need to know the seat's price. Paying per use with an API key is there too.
+If your company pays for Claude or ChatGPT (Claude Team or Enterprise, ChatGPT Business or Enterprise), pick that plan when Crossview asks for your plans (or **Not sure which plan**) and choose **My company pays for it**. You don't need to know the seat's price. Paying per use with an API key is there too.
 
-- Your week then shows what your work would cost at pay-per-use prices, without comparing it with a price you don't pay. It never suggests a bigger plan; where a change is your company's to make, it says to ask your admin.
+- The cost card then shows what your work would cost at pay-per-use prices, without comparing it with a price you don't pay. It never suggests a bigger plan; where a change is your company's to make, it says to ask your admin.
 - Company plans usually don't record limit readings on your computer, so the weekly limit chart says so. In Claude Code, type `/usage` to see yours.
-- Settings your company manages for Claude Code show in Your setup as their own layer, **Set by your company**. Crossview only reads them, and it turns off any change of its own that one of them would override.
+- Settings your company manages for Claude Code show in Setup as their own layer, **Set by your company**. Crossview only reads them, and it turns off any change of its own that one of them would override.
 
 ## No chats on this computer?
 
 Crossview only sees what the apps keep on this computer. Chats on the Claude or ChatGPT websites, and Cowork tasks that run in the cloud, may leave nothing here. In that case the first screen says so.
 
-To see what it shows with real use, choose **Show the demo company** under More, or add `?demo` to the address: http://127.0.0.1:8765/?demo. The demo company, Quillmark, is made up, and its numbers come from made-up files in `demo/data`.
+To see what it shows with real use, open the demo company: the first screen offers it when no apps are found, or add `?demo` to the address: http://127.0.0.1:8765/?demo. The demo company, Quillmark, is made up, and its numbers come from made-up files in `demo/data`.
 
 ## Linux
 
@@ -108,9 +106,9 @@ Crossview hasn't been tested on Linux. The two Terminal lines in the Mac section
 
 ## What's still rough
 
-- The weekly limit chart fills in from the Claude app's own readings. You can also switch on a short line at the bottom of Claude Code that shows your limits; Your week offers it, and Undo on the same card takes it out.
+- The weekly limit chart fills in from the Claude app's own readings. You can also switch on a short line at the bottom of Claude Code that shows your limits; the limit page offers it, and Undo on the same card takes it out.
 - Newer versions of Codex can compress older chats. Python 3.14 or later reads them on its own. With an older Python, a small tool called zstd is needed; on a Mac, developers can add it with `brew install zstd`. The refresh says when there are chats it couldn't read.
-- Prices are the published pay-per-use prices on the date shown in `tools/prices.py`. Your plan's own price is whatever you choose in Your plans.
+- Prices are the published pay-per-use prices on the date shown in `tools/prices.py`. Your plan's own price is whatever you choose for your plans.
 
 If something looks wrong, please open an issue on this page and say what you expected to see.
 
@@ -120,7 +118,7 @@ If something looks wrong, please open an issue on this page and say what you exp
 
 There's no build step and nothing to install from the internet: the app is plain HTML, CSS and JavaScript, and the scripts use only Python's standard library.
 
-- `app/`: the app. `index.html` loads one script per tab (`week.js`, `work.js`, `anatomy.js`, `shapes.js`); `stage.js` is the layout they share; `system.html` shows the design system.
+- `app/`: the app. `index.html` loads the scripts: `home.js` (Home), `answers.js` and `week.js` (the limit page and the change sheets), `receipt.js` (the cost page), `anatomy.js` (Setup), `worklist.js` (Work); `stage.js` is the layout they share; `system.html` shows the design system.
 - `tools/`: the scripts that read the records. `paths.py` is the one place that knows where each app keeps its records on a Mac and on Windows; `refresh.py` runs the scripts in order; `serve.py` serves the app and saves your answers; `changes.py` makes and undoes the prepared changes; `statusline.py` is the optional status line for Claude Code; `prices.py` holds the published prices and when they were checked.
 - `demo/data/`: the demo company's made-up files. `tools/demo_company.py` writes them and runs the same scripts on them, so the demo always matches what the app shows for real records.
 - `docs/design-system-v0.md` and `docs/voice.md`: the colors, type and parts, and how the screens are worded.

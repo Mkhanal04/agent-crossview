@@ -9,10 +9,9 @@ py -3 -c "import sys; sys.exit(sys.version_info < (3, 9))" >nul 2>&1 && set "PY=
 if not defined PY python -c "import sys; sys.exit(sys.version_info < (3, 9))" >nul 2>&1 && set "PY=python"
 if not defined PY python3 -c "import sys; sys.exit(sys.version_info < (3, 9))" >nul 2>&1 && set "PY=python3"
 if not defined PY goto nopython
-echo Refreshing Crossview from your logs, which takes about a minute the first time...
-%PY% -X utf8 tools\refresh.py
+echo Opening Crossview in your browser. It reads your newest records while you watch.
+%PY% -X utf8 tools\serve.py --open --refresh
 if errorlevel 1 goto failed
-%PY% -X utf8 tools\serve.py --open
 exit /b 0
 
 :nopython

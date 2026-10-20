@@ -12,6 +12,7 @@ H = os.path.expanduser("~")
 load = lambda n: json.load(open(os.path.join(DATA, n)))
 LG = load("ledger.json"); rows = load("sessions-grouped.json"); inv = load("inventory.json")
 work_of = {r["id"]: r["work"] for r in rows if r.get("id")}
+CHAT_FOLDERS = sorted({r["folder"] for r in rows if r.get("folder") and r.get("tool") == "Claude Code"})
 LA = LG["agents"]
 
 # Log times are UTC; days and weeks here are this Mac's own (Monday to Sunday).
@@ -24,7 +25,7 @@ def wk(day): d = datetime.date.fromisoformat(day); return (d - datetime.timedelt
 # ---------- who did each piece of work, and what it used, by week ----------
 def blank(): return {"usd": 0.0, "replies": 0, "sessions": set(), "agents": collections.defaultdict(lambda: {"usd": 0.0, "runs": set()}),
                      "models": collections.Counter(), "kinds": collections.Counter(), "connectors": collections.Counter(), "days": set(),
-                     "app_sessions": collections.defaultdict(set)}
+                     "app_sessions": collections.defaultdict(set), "ckinds": collections.Counter(), "cusd": 0.0}
 P = collections.defaultdict(lambda: collections.defaultdict(blank))  # period -> work -> totals
 TL = collections.defaultdict(lambda: collections.defaultdict(lambda: {"sessions": set(), "usd": 0.0, "helper_usd": 0.0}))  # period -> app -> totals
 for x in LG["rows"]:
@@ -42,7 +43,10 @@ for x in LG["rows"]:
         a = t["agents"][key]; a["usd"] += x["usd"]
         if x["agent"] != "main": a["runs"].add(x["agent"])
         t["models"][x["model"]] += x["usd"]
-        for k, v in split_usd(x["model"], x).items(): t["kinds"][k] += v
+        for k, v in split_usd(x["model"], x).items():
+            t["kinds"][k] += v
+            if x["tool"] != "Codex": t["ckinds"][k] += v  # Claude's apps only: Claude's limit never counts Codex's work (Oct 20)
+        if x["tool"] != "Codex": t["cusd"] += x["usd"]
 
 # ---------- connector uses per session and day, from Claude Code's logs (main sessions and helpers) ----------
 CACHE = os.path.join(DATA, "connector-uses.json")
@@ -131,6 +135,7 @@ def server_args(name):
     except Exception: pass
     try: look(json.load(open(claude_app_dir() + "claude_desktop_config.json")).get("mcpServers"))
     except Exception: pass
+    for sv, _ in mcp_files(): look(sv)  # a browser connector set up in one folder's .mcp.json (Codex audit, Oct 19)
     for f in files(claude_dir() + "/plugins/marketplaces/*/external_plugins/*/.mcp.json") + files(claude_dir() + "/plugins/cache/*/*/*/.mcp.json"):
         try: d = json.load(open(f)); look(d.get("mcpServers") or d)
         except Exception: pass
@@ -139,6 +144,24 @@ def server_args(name):
 # address) acts on that service, so its changes and deletes land outside the Mac (release 3: stitch's delete removes a
 # project on Google's service). Read from how it's set up, never from its name; key names only, never their values.
 ONLINE_KEY = re.compile(r"cloud|project|api[_-]?key|token|account|secret", re.I)
+# Connectors whose start command names a package that works on an online service, with no key or web address in its
+# settings (Codex audit, Oct 19: NotebookLM edits notebooks online; the gws command works on Google Drive and Sheets).
+# The one place to add more: matched against the command and its arguments, never the connector's own name.
+ONLINE_PACKAGE = re.compile(r"notebooklm-mcp|(^|/)gws$", re.I)
+def mcp_files():
+    """The .mcp.json files Claude Code reads: one in a folder applies to chats started in that folder (Codex audit, Oct 19:
+    a connector set up this way, never used, was missing). Folders come from claude.json's project list and the chats."""
+    if DEMO: return []
+    folders = [claude_dir()]
+    try: folders += list((json.load(open(claude_json())).get("projects") or {}).keys())
+    except Exception: pass
+    out = []
+    for d in dict.fromkeys(folders + CHAT_FOLDERS):
+        f = os.path.join(d, ".mcp.json")
+        if os.path.isfile(f):
+            try: d_ = json.load(open(f)); out.append((d_.get("mcpServers") or {}, d))
+            except Exception: pass
+    return out
 def online_setup(name):
     if DEMO: return False
     def look(servers):
@@ -146,11 +169,13 @@ def online_setup(name):
             if k.lower() != name.lower() or not isinstance(v, dict): continue
             if v.get("url") or v.get("type") in ("http", "sse"): return True
             if any(ONLINE_KEY.search(e) for e in (v.get("env") or {})): return True
+            if any(ONLINE_PACKAGE.search(str(a)) for a in [v.get("command") or ""] + list(v.get("args") or [])): return True
         return False
     try:
         cj = json.load(open(claude_json()))
         if look(cj.get("mcpServers")) or any(look(p.get("mcpServers")) for p in (cj.get("projects") or {}).values()): return True
     except Exception: pass
+    if any(look(sv) for sv, _ in mcp_files()): return True
     try: return look(json.load(open(claude_app_dir() + "claude_desktop_config.json")).get("mcpServers"))
     except Exception: return False
 def reach_of(i, name):
@@ -182,7 +207,7 @@ for c in inv["connectors"]:
 # set up on this Mac but never seen in the logs
 def add_setup(name, where):
     if any(p["name"].lower() == name.lower() or p["id"].lower() == name.lower() for p in ports.values()): return
-    ports["setup:" + name] = {"id": "setup:" + name, "name": name, "group": "mac", "inferred": False, "actions": 0, "kinds": [], "did": [], "offered": 0, "from_list": False, "as_you": False, "outside": False, "set_up_only": True, "where": where}
+    ports["setup:" + name] = {"id": "setup:" + name, "name": name, "group": "mac", "inferred": False, "actions": 0, "kinds": [], "did": [], "offered": 0, "from_list": False, "as_you": False, "outside": online_setup(name), "set_up_only": True, "where": where}
 APP = os.path.join(DATA, "") if DEMO else claude_app_dir()
 try:
     if DEMO: raise FileNotFoundError  # the demo's setup is all in its own files
@@ -191,6 +216,8 @@ try:
     for proj in (cj.get("projects") or {}).values():
         for n in (proj.get("mcpServers") or {}): add_setup(n, "Claude Code, one folder")
 except Exception: pass
+for servers, folder in mcp_files():
+    for n in servers: add_setup(n, "Claude Code, one folder")
 try:
     for n in (json.load(open(APP + "claude_desktop_config.json")).get("mcpServers") or {}): add_setup(n, "the Claude app")
 except Exception: pass
@@ -263,7 +290,7 @@ codex_plan = {}
 try:
     if DEMO: raise FileNotFoundError
     cut = datetime.datetime.now() - datetime.timedelta(days=15)
-    seen, rd = set(), []
+    seen, rd, plan_type = set(), [], None
     for f in codex_logs():
         if datetime.datetime.fromtimestamp(os.path.getmtime(f)) < cut: continue
         for line in open(f, encoding="utf-8", errors="ignore"):  # plain logs only, as before (compressed ones: a follow-up)
@@ -272,6 +299,7 @@ try:
             except Exception: continue
             rl = (d.get("payload") or {}).get("rate_limits") or {}
             pr, se = rl.get("primary") or {}, rl.get("secondary") or {}
+            if rl.get("plan_type"): plan_type = rl["plan_type"]  # the plan Codex says you're on (plus, pro, business...), for the first open's plan question
             if se.get("used_percent") is None or not d.get("timestamp"): continue
             t = datetime.datetime.fromisoformat(d["timestamp"].replace("Z", "+00:00")).astimezone().replace(tzinfo=None)
             if t < cut: continue
@@ -285,7 +313,7 @@ try:
     if rd:
         # a new weekly window starts when the reset time moves on: Codex's week runs from first use, not from Monday
         starts = [r[0] for i, r in enumerate(rd) if i and r[3] and rd[i - 1][3] and r[3] > rd[i - 1][3]]
-        codex_plan = {"readings": rd, "window_starts": starts, "latest": {"sd": rd[-1][1], "fh": rd[-1][2], "at": rd[-1][0], "resets": rd[-1][3]}}
+        codex_plan = {"readings": rd, "window_starts": starts, "latest": {"sd": rd[-1][1], "fh": rd[-1][2], "at": rd[-1][0], "resets": rd[-1][3]}, "plan_type": plan_type}
 except Exception: pass
 
 def out_period(per):
@@ -295,11 +323,67 @@ def out_period(per):
                   "day_list": sorted(t["days"]) if per != "all" else [], "app_sessions": {k: len(v) for k, v in t["app_sessions"].items()},
                   "agents": {k: {"usd": round(a["usd"], 2), "runs": len(a["runs"])} for k, a in sorted(t["agents"].items(), key=lambda kv: -kv[1]["usd"])},
                   "models": {k: round(v, 2) for k, v in t["models"].most_common(6) if v > 0},
-                  "kinds": {k: round(v, 2) for k, v in t["kinds"].items()}, "connectors": dict(t["connectors"].most_common())}
+                  "kinds": {k: round(v, 2) for k, v in t["kinds"].items()}, "connectors": dict(t["connectors"].most_common()),
+                  "ckinds": {k: round(v, 2) for k, v in t["ckinds"].items()}, "cusd": round(t["cusd"], 2)}
     return res
 weeks = sorted(k for k in P if k != "all")
 apps = lambda per: {k: {"sessions": len(v["sessions"]), "usd": round(v["usd"], 2), "helper_usd": round(v["helper_usd"], 2)} for k, v in TL[per].items()}
-out = {"periods": {k: out_period(k) for k in weeks[-10:] + ["all"]}, "apps": {k: apps(k) for k in weeks[-10:] + ["all"]}, "ports": sorted(ports.values(), key=lambda p: (p["group"], -p["actions"])), "plan": plan, "codex_plan": codex_plan, "pace": pace}
+# day by day for the last six weeks, by plan family (Claude: Claude Code and Cowork; Codex), at pay-per-use prices: the
+# home's limits module compares this week with the usual week when a plan records no limit readings (Oct 18)
+_cut = (datetime.date.today() - datetime.timedelta(days=42)).isoformat()
+daily = collections.defaultdict(lambda: collections.Counter())
+for x in LG["rows"]:
+    d = local_day(x["hour"])
+    if d >= _cut: daily[d]["Codex" if x["tool"] == "Codex" else "Claude"] += x["usd"]
+daily = {d: {k: round(v, 2) for k, v in c.items()} for d, c in sorted(daily.items())}
+# ---------- the receipt (release 2, Oct 19): per week and in all, the same work at per-use prices split the ways the
+# receipt shows it: by app (logged, with the estimate for subagent records kept only in part), by kind of use, by model, your
+# chats against subagents, and replies with no published price (counted, never priced). Chats count only priced replies, so
+# Codex's "Approve for me" reviews aren't counted as chats.
+def receipt_blank(): return {"tools": collections.defaultdict(lambda: {"usd": 0.0, "est": 0.0, "chats": set(), "out": 0}), "kinds": collections.Counter(),
+                             "models": collections.Counter(), "who": collections.Counter(), "unpriced": collections.Counter()}
+RC = collections.defaultdict(receipt_blank)
+for x in LG["rows"]:
+    day = local_day(x["hour"]); priced = x.get("priced", True)
+    for per in (wk(day), "all"):
+        r = RC[per]; t = r["tools"][x["tool"]]
+        t["usd"] += x["usd"]; t["est"] += x.get("usd_est", 0) or 0; t["out"] += x.get("out", 0) or 0  # what it wrote, in tokens (release 3)
+        if x["agent"] == "main" and priced: t["chats"].add(x["session"])
+        if not priced: r["unpriced"][x["model"]] += x.get("replies", 0)
+        r["models"][x["model"]] += x["usd"]
+        r["who"][("main:" if x["agent"] == "main" else "helper:") + x["tool"]] += x["usd"]
+        for k, v in split_usd(x["model"], x).items(): r["kinds"][k] += v
+# ---------- the work list (release 2 slice 4, Oct 19): per week and in all, every chat with its project, app, days, per-use
+# price (with the estimate for subagent records kept only in part), main model and the subagents it called, by type
+CH = collections.defaultdict(lambda: collections.defaultdict(lambda: {"usd": 0.0, "est": 0.0, "days": set(), "models": collections.Counter(), "main_usd": 0.0,
+                                                                        "helpers": collections.defaultdict(lambda: {"usd": 0.0, "runs": set()}), "tool": None, "priced": False, "replies": 0}))
+RUN_HOME = {}
+for x in LG["rows"]:
+    day = local_day(x["hour"])
+    for per in (wk(day), "all"):
+        c = CH[per][x["session"]]; c["tool"] = c["tool"] or x["tool"]
+        c["usd"] += x["usd"]; c["est"] += x.get("usd_est", 0) or 0; c["days"].add(day); c["models"][x["model"]] += x["usd"]
+        c["priced"] = c["priced"] or x.get("priced", True)
+        if x["agent"] == "main": c["main_usd"] += x["usd"]; c["replies"] += x.get("replies", 0)
+        else:
+            # a subagent run counts once a week, under the first chat it appears in (a run can show up in two chats' records,
+            # Oct 19: Work said 149 runs where the limit page said 147)
+            h = c["helpers"][LA.get(x["agent"], {}).get("type", "general-purpose")]; h["usd"] += x["usd"]
+            if RUN_HOME.setdefault((per, x["agent"]), x["session"]) == x["session"]: h["runs"].add(x["agent"])
+def chats_out(k):
+    out_ = []
+    for sid, c in CH.get(k, {}).items():
+        out_.append({"id": sid, "work": work_of.get(sid, "Not sure yet"), "tool": c["tool"], "usd": round(c["usd"], 2), "est": round(c["est"], 2),
+                     "main_usd": round(c["main_usd"], 2), "days": sorted(c["days"]), "model": c["models"].most_common(1)[0][0] if c["models"] else None,
+                     "priced": c["priced"], "replies": c["replies"],
+                     "helpers": sorted(({"type": t, "usd": round(h["usd"], 2), "runs": len(h["runs"])} for t, h in c["helpers"].items()), key=lambda h: -h["usd"])})
+    return sorted(out_, key=lambda o: -o["usd"])
+def receipt_out(k):
+    r = RC.get(k) or receipt_blank()
+    return {"tools": {a: {"usd": round(t["usd"], 2), "est": round(t["est"], 2), "chats": len(t["chats"]), "out": t["out"]} for a, t in r["tools"].items()},
+            "kinds": {a: round(v, 2) for a, v in r["kinds"].items()}, "models": {a: round(v, 2) for a, v in r["models"].items() if v or a in r["unpriced"]},
+            "who": {a: round(v, 2) for a, v in r["who"].items()}, "unpriced": dict(r["unpriced"])}
+out = {"daily": daily, "periods": {k: out_period(k) for k in weeks[-10:] + ["all"]}, "apps": {k: apps(k) for k in weeks[-10:] + ["all"]}, "ports": sorted(ports.values(), key=lambda p: (p["group"], -p["actions"])), "plan": plan, "codex_plan": codex_plan, "pace": pace, "receipt": {k: receipt_out(k) for k in weeks[-10:] + ["all"]}, "chats": {k: chats_out(k) for k in weeks[-10:]}}
 # which apps' logs Glass Box can see subagents and connectors in, so a picture never says "none" when it means "unknown"
 # (QA run 4, finding 2): subagents come from Claude Code's and the Claude app's logs; connector uses only from Claude
 # Code's logs (~/.claude/projects), since the Claude app and Codex record theirs elsewhere and Glass Box doesn't read them yet

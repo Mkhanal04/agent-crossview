@@ -45,6 +45,18 @@ class Refused(Exception):
     pass
 
 
+# 7. writing-rule (release 3 slice 2): one or more lines from this fixed list, added to your main rule file
+#    (~/.claude/CLAUDE.md) under one heading, so Claude writes to you the way you answered the weekly three questions.
+#    The page sends only which ones; the words live here. Undo takes out exactly the lines it added, and the heading if
+#    nothing else sits under it, and leaves anything you changed since alone.
+WRITING = {
+    "plans-on-ask": "Write plan, summary and handoff files only when I ask for one.",
+    "short-replies": "Keep replies short: the answer first, then only what I need to act on.",
+    "quiet-updates": "While you work, send me an update only when you need a decision from me.",
+}
+WRITING_HEAD = "## How Claude writes to me (added by Crossview)"
+
+
 def _real(p):
     """A path you gave as ~/..., inside your home folder, or refused."""
     if not isinstance(p, str) or not p.startswith("~/"): raise Refused("a file in your home folder, written as ~/...")
@@ -238,6 +250,24 @@ def make(req):
             if new == text: continue
             items.append({"file": tilde, "copy": _keep_copy(cid, full), "after": new})
             _write(full, new)
+    elif kind == "writing-rule":
+        ids = [i for i in dict.fromkeys(req.get("rules") or []) if i in WRITING]
+        if not ids or len(ids) != len(req.get("rules") or []): raise Refused("only the writing rules this page offers")
+        full = os.path.join(HOME, ".claude", "CLAUDE.md")
+        text = open(full, encoding="utf-8").read() if os.path.exists(full) else ""
+        lines = [f"- {WRITING[i]}" for i in ids if f"- {WRITING[i]}" not in text]
+        if lines:
+            copy = _keep_copy(cid, full) if os.path.exists(full) else None
+            nl = "\n"
+            if WRITING_HEAD in text:
+                at = text.index(WRITING_HEAD) + len(WRITING_HEAD)
+                new = text[:at] + nl + nl.join(lines) + text[at:]
+            else:
+                new = text.rstrip(nl) + (nl + nl if text.strip() else "") + WRITING_HEAD + nl + nl.join(lines) + nl
+            os.makedirs(os.path.dirname(full), exist_ok=True)
+            if not os.path.exists(full): open(full, "w").write("")
+            _write(full, new)
+            items.append({"file": "~/.claude/CLAUDE.md", "added": lines, "head": WRITING_HEAD not in text, "copy": copy, "after": new})
     elif kind == "ask-first":
         rules = req.get("rules") or []
         if not rules or len(rules) > 200 or not all(isinstance(r, str) and RULE.match(r) for r in rules): raise Refused("only rules for connectors (mcp__...)")
@@ -315,6 +345,19 @@ def undo(cid):
             if s.get("statusLine") != it["value"]: left.append(it["file"]); continue
             del s["statusLine"]
             _save_settings(full, open(full, encoding="utf-8").read(), s)
+        elif c["kind"] == "writing-rule":
+            text = open(full, encoding="utf-8").read()
+            if text == it.get("after"):
+                # untouched since: put the file back exactly as it was (or take away the file this change made)
+                if it.get("copy"): _write(full, open(os.path.join(BOX, it["copy"]), encoding="utf-8").read())
+                else: os.remove(full)
+                continue
+            new = text
+            for l in it["added"]:
+                if new.count(l + "\n") == 1: new = new.replace(l + "\n", "", 1)
+                else: left.append(it["file"])
+            if it.get("head") and new.rstrip("\n").endswith(WRITING_HEAD): new = new.rstrip("\n")[: -len(WRITING_HEAD)].rstrip("\n") + "\n"
+            if new != text: _write(full, new)
         elif c["kind"] == "ask-first":
             raw = open(full, encoding="utf-8").read().lstrip("\ufeff")
             try: s = json.loads(raw)

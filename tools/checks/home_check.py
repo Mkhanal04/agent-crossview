@@ -6,6 +6,7 @@ For each: copies the app to a temporary folder, runs the refresh against the mad
   - the business setup shows the settings its company manages, read-only, and the personal one shows none;
   - "Make this change" and Undo keep a file's line endings (CRLF on Windows) and put it back byte for byte, and a
     change to a setting the company manages is refused;
+  - the first open reads the records in the background and says what it found;
   - the local server starts, serves the app, and saves a plan the company pays for.
 Nothing here reads your own records. Usage: python3 tools/checks/home_check.py [--keep <folder>] [--browser]
 --keep leaves the two copies (and their made-up homes) in <folder>, for a person or the qa agent to look at.
@@ -110,6 +111,45 @@ def one(kind, top, port):
         check("admin" in both[1].get("refused", ""), "business: a rule the company's settings override is refused, and it says to ask the admin")
     else:
         check(both[1].get("ok") and open(settings, "rb").read() == before[settings], "personal: an ask-first rule is added and Undo puts the settings file back byte for byte")
+
+    # the writing rules (release 3 slice 2): lines added to the main rule file, then Undo puts it back byte for byte; a
+    # rule the page doesn't offer is refused. The made-up home may have no main rule file yet, and Undo then removes it
+    main_rules = os.path.join(home, ".claude", "CLAUDE.md"); had = os.path.exists(main_rules); mr0 = open(main_rules, "rb").read() if had else None
+    wr = ("import sys, json; sys.path.insert(0, 'tools'); import changes\n"
+          "out = {}\n"
+          "try: cid = changes.make({'kind': 'writing-rule', 'rules': ['plans-on-ask', 'short-replies']}); out['mid'] = open(changes.os.path.join(changes.HOME, '.claude', 'CLAUDE.md'), encoding='utf-8').read(); out['left'] = changes.undo(cid)\n"
+          "except changes.Refused as e: out['refused'] = str(e)\n"
+          "try: changes.make({'kind': 'writing-rule', 'rules': ['anything else']}); out['odd'] = 'made'\n"
+          "except changes.Refused: out['odd'] = 'refused'\n"
+          "print(json.dumps(out))")
+    r4 = subprocess.run([sys.executable, "-c", wr], cwd=app, env=ch_env, capture_output=True, text=True)
+    w = json.loads(r4.stdout or "{}")
+    check("Write plan, summary and handoff files only when I ask for one." in (w.get("mid") or "") and (open(main_rules, "rb").read() == mr0 if had else not os.path.exists(main_rules)), f"{kind}: two writing rules are added and Undo puts the main rule file back byte for byte ({w.get('refused') or r4.stderr[-200:]})")
+    check(w.get("odd") == "refused", f"{kind}: a writing rule the page doesn't offer is refused")
+
+    # the first open: the server starts at once and reads the records in the background, saying what it found
+    os.remove(os.path.join(app, "data", "plans.json"))
+    srv = subprocess.Popen([sys.executable, "tools/serve.py", "--refresh"], cwd=app, env=dict(env, GLASSBOX_PORT=str(port)), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    try:
+        st, seen_running = {}, False
+        for _ in range(240):
+            try:
+                with urllib.request.urlopen(f"http://127.0.0.1:{port}/api/scan", timeout=5) as r: st = json.loads(r.read() or b"{}")
+                if not st.get("done"): seen_running = True
+                if st.get("done"): break
+            except Exception: pass
+            time.sleep(0.5)
+        check(seen_running and st.get("done") and not st.get("error"), f"{kind}: the first open shows the reading as it happens and finishes ({st.get('error') or 'no error'})")
+        found = " ".join(st.get("found") or [])
+        check(all(f"Found {a}" in found for a in ("Claude Code", "Codex", "Cowork")) and "Can't see" in found, f"{kind}: the first open says what it found and what it can't see")
+        mp = json.load(open(os.path.join(app, "data", "machine.json"), encoding="utf-8"))
+        check((mp.get("codex_plan") or {}).get("plan_type") == ("business" if kind == "business" else "plus"), f"{kind}: Codex's own record of its plan is read, for the plan question")
+        check(bool(mp.get("daily")), f"{kind}: day-by-day use is there for the limits module")
+    finally:
+        srv.terminate()
+        try: srv.wait(10)
+        except Exception: srv.kill()
+    with open(os.path.join(app, "data", "plans.json"), "w", encoding="utf-8") as f: json.dump(plans, f)
 
     # the local server: the app loads, and a plan the company pays for is saved
     srv = subprocess.Popen([sys.executable, "tools/serve.py"], cwd=app, env=dict(env, GLASSBOX_PORT=str(port)), stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)

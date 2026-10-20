@@ -1,0 +1,197 @@
+{
+ "note": "The one place Crossview keeps plan facts it can't read from the apps' records: plan names, monthly prices, and what comes with each plan. Update this file when a vendor changes a plan; nothing else in the app hardcodes them (his call, Oct 17: avoid hardcoding). Work plans have no price here, since seat prices vary: the company pays, or you type what you pay. ChatGPT Pro is sold at three prices; the price tells them apart on screen.",
+ "checked": "Oct 19, 2026",
+ "claude": [
+  {
+   "key": "none",
+   "name": "No Claude plan",
+   "monthly_usd": 0,
+   "kind": "none"
+  },
+  {
+   "key": "pro",
+   "name": "Claude Pro",
+   "monthly_usd": 20,
+   "kind": "personal",
+   "next_step": "Max 5x costs $100 a month and gives you five times as much room as Pro in each 5-hour window."
+  },
+  {
+   "key": "max5",
+   "name": "Claude Max 5x",
+   "monthly_usd": 100,
+   "includes": [
+    {
+     "what": "API credits",
+     "monthly_usd": 100,
+     "counts_toward_total": false,
+     "note": "Claude Max includes $100 a month for building with Claude's API. They don't cover Claude Code, and unused credits expire each month. Crossview reads only this computer, so it can't see whether you've claimed them.",
+     "where_to_check": "Settings, then Billing on claude.ai",
+     "source": "platform.claude.com/docs/en/about-claude/api-credits-for-subscribers",
+     "checked": "Oct 19, 2026",
+     "links": [
+      {
+       "label": "Claim them in Claude's settings",
+       "url": "https://claude.ai/settings/billing",
+       "note": "Settings, then Billing, then API credits"
+      },
+      {
+       "label": "See the balance in the Claude Console",
+       "url": "https://platform.claude.com/settings/billing",
+       "note": "Promotional credits, with the amount and when they expire"
+      }
+     ]
+    }
+   ],
+   "kind": "personal",
+   "next_step": "Max 20x costs $100 more a month and gives you four times as much room in each 5-hour window. Anthropic doesn't say how much bigger the weekly limit gets."
+  },
+  {
+   "key": "max20",
+   "name": "Claude Max 20x",
+   "monthly_usd": 200,
+   "includes": [
+    {
+     "what": "API credits",
+     "monthly_usd": 200,
+     "counts_toward_total": false,
+     "note": "Claude Max includes $200 a month for building with Claude's API. They don't cover Claude Code, and unused credits expire each month. Crossview reads only this computer, so it can't see whether you've claimed them.",
+     "where_to_check": "Settings, then Billing on claude.ai",
+     "source": "platform.claude.com/docs/en/about-claude/api-credits-for-subscribers",
+     "checked": "Oct 19, 2026",
+     "links": [
+      {
+       "label": "Claim them in Claude's settings",
+       "url": "https://claude.ai/settings/billing",
+       "note": "Settings, then Billing, then API credits"
+      },
+      {
+       "label": "See the balance in the Claude Console",
+       "url": "https://platform.claude.com/settings/billing",
+       "note": "Promotional credits, with the amount and when they expire"
+      }
+     ]
+    }
+   ],
+   "kind": "personal",
+   "next_step": "You're already on the largest Max plan. The next step up is a Team plan or an API plan."
+  },
+  {
+   "key": "team_std",
+   "name": "Claude Team, Standard seat",
+   "monthly_usd": null,
+   "kind": "work"
+  },
+  {
+   "key": "team_prem",
+   "name": "Claude Team, Premium seat",
+   "monthly_usd": null,
+   "kind": "work"
+  },
+  {
+   "key": "ent",
+   "name": "Claude Enterprise",
+   "monthly_usd": null,
+   "kind": "work"
+  },
+  {
+   "key": "work",
+   "name": "Not sure which plan",
+   "monthly_usd": null,
+   "kind": "work"
+  },
+  {
+   "key": "api",
+   "name": "I pay per use with an API key",
+   "monthly_usd": null,
+   "kind": "api"
+  },
+  {
+   "key": "other",
+   "name": "Another Claude plan",
+   "monthly_usd": null,
+   "kind": "other"
+  }
+ ],
+ "chatgpt": [
+  {
+   "key": "none",
+   "name": "No ChatGPT plan",
+   "monthly_usd": 0,
+   "kind": "none"
+  },
+  {
+   "key": "plus",
+   "name": "ChatGPT Plus",
+   "monthly_usd": 20,
+   "kind": "personal"
+  },
+  {
+   "key": "pro100",
+   "name": "ChatGPT Pro",
+   "monthly_usd": 100,
+   "kind": "personal"
+  },
+  {
+   "key": "pro200",
+   "name": "ChatGPT Pro",
+   "monthly_usd": 200,
+   "kind": "personal"
+  },
+  {
+   "key": "pro500",
+   "name": "ChatGPT Pro",
+   "monthly_usd": 500,
+   "kind": "personal"
+  },
+  {
+   "key": "free",
+   "name": "ChatGPT Free",
+   "monthly_usd": 0,
+   "kind": "personal"
+  },
+  {
+   "key": "go",
+   "name": "ChatGPT Go",
+   "monthly_usd": 8,
+   "kind": "personal"
+  },
+  {
+   "key": "business",
+   "name": "ChatGPT Business",
+   "monthly_usd": null,
+   "kind": "work"
+  },
+  {
+   "key": "ent",
+   "name": "ChatGPT Enterprise",
+   "monthly_usd": null,
+   "kind": "work"
+  },
+  {
+   "key": "work",
+   "name": "Not sure which plan",
+   "monthly_usd": null,
+   "kind": "work"
+  },
+  {
+   "key": "api",
+   "name": "I pay per use with an API key",
+   "monthly_usd": null,
+   "kind": "api"
+  },
+  {
+   "key": "other",
+   "name": "Another ChatGPT plan",
+   "monthly_usd": null,
+   "kind": "other"
+  }
+ ],
+ "unpriced": {
+  "codex-auto-review": {
+   "name": "Codex's \"Approve for me\" reviews",
+   "note": "With Codex's \"Approve for me\" setting on, a separate reviewer decides whether an action can go ahead without stopping to ask you. OpenAI doesn't publish a per-use price for it.",
+   "source": "learn.chatgpt.com/docs/sandboxing/auto-review",
+   "checked": "Oct 19, 2026"
+  }
+ }
+}

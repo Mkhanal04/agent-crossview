@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Agent Crossview design system</title>
 <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="tab-home.css">
 <link rel="stylesheet" href="tab-work.css">
 <link rel="stylesheet" href="tab-shapes.css">
 <link rel="stylesheet" href="tab-week.css">
@@ -112,11 +113,11 @@
   <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
     <header class="w-mh"><h3><i class="w-led idle"></i>The top bar, the app switch and the footer</h3><span class="w-mh-note">Added Oct 16</span></header>
     <div class="body grid g2">
-      <div><h4>The tabs</h4><nav class="tabs" style="display:inline-flex" aria-label="Example tabs"><button aria-pressed="true"><i class="w-led"></i>Your week</button><button aria-pressed="false"><i class="w-led"></i>Your work</button><button aria-pressed="false"><i class="w-led"></i>Your setup</button><button aria-pressed="false"><i class="w-led"></i>Your AI's instructions</button></nav>
-        <span class="cap">Four tabs, the same on every screen. "Crossview" beside them goes back to Your week. The More menu holds Design system and Show the demo company.</span>
+      <div><h4>The tabs</h4><nav class="tabs" style="display:inline-flex" aria-label="Example tabs"><button aria-pressed="true"><i class="w-led"></i>Home</button><button aria-pressed="false"><i class="w-led"></i>Setup</button><button aria-pressed="false"><i class="w-led"></i>Work</button></nav>
+        <span class="cap">Three tabs, the same on every screen, and one is always lit. "Agent Crossview" beside them goes back to Home. The More menu holds Design system; inside the demo it also holds Leave the demo.</span>
         <h4 style="margin-top:var(--sp-5)">The week switch and the date chip</h4>
-        <div class="row"><div class="w-seg" role="group" aria-label="Week"><button aria-pressed="false">This week</button><button aria-pressed="false">Last week</button><button aria-pressed="true">All weeks</button></div><span class="w-asof" style="min-width:0;width:162px"><i class="w-led idle"></i><span>Aug 13 to Oct 18</span></span></div>
-        <span class="cap">Your week and Your work have all three choices. Your setup has This week and Last week. Your AI's instructions shows only when the logs were read.</span>
+        <div class="row"><div class="w-seg" role="group" aria-label="Week"><button aria-pressed="true">This week</button><button aria-pressed="false">Last week</button></div><span class="w-asof" style="min-width:0;width:162px"><i class="w-led idle"></i><span>Aug 13 to Oct 18</span></span></div>
+        <span class="cap">Home, Setup and Work have This week and Last week. All weeks left the click paths on Oct 19 and comes back into Work in release 4.</span>
         <span class="cap">The chip holds only the dates of what you're looking at. Point at it for when the logs were read.</span></div>
       <div><h4>The app switch, in the picture's header</h4>
         <div class="w-seg q-app" role="group" aria-label="Which app" style="display:inline-flex"><button aria-pressed="true">Claude</button><button aria-pressed="false">Codex<i class="q-app-dot" aria-label="a Codex limit stopped you"></i></button></div>
@@ -225,6 +226,18 @@
   </section>
 
   <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <header class="w-mh"><h3><i class="w-led idle"></i>The home: the Faceplate</h3><span class="w-mh-note">Added Oct 18 · app/home.js, app/tab-home.css</span></header>
+    <div class="body grid g2">
+      <div class="state"><div class="h-label" style="width:100%"><h1 class="h-lead" style="font-size:20px">This week's work fits easily in your plans.</h1><span class="h-tag">Reads this computer only ›</span></div><span class="cap">the panel's label: one sentence answering "am I okay?" (stops first, then pace, who pays, cost); the pill opens How Crossview counts</span></div>
+      <div class="state"><article class="h-mod m4" style="width:100%"><p class="h-q">What did this week's work cost?</p><p class="h-big">$28 paid</p><p class="h-line">The same work would cost about $880 if you paid per use.</p></article><span class="cap">a module: its question, one bold answer, the object, one line; orange answer only when it needs you</span></div>
+      <div class="state"><div class="h-receipt" style="width:100%"><div class="h-rr"><span>Claude Max 5x</span><span>$100/mo</span><b>$23</b></div><div class="h-rr tot paid"><span>What you paid this week</span><b>$28</b></div><div class="h-perf"></div><div class="h-rr dim"><span>Claude Code</span><span>13 chats</span><b>$859</b></div><div class="h-rr tot"><span>If you'd paid per use</span><b>≈ $880</b></div></div><span class="cap">the receipt starts with what you paid; the pay-per-use price comes after the perforation</span></div>
+      <div class="state"><div class="h-receipt" style="width:100%"><div class="h-stamp">Paid by your company</div><div class="h-perf"></div><div class="h-rr tot"><span>If you'd paid per use</span><b>≈ $880</b></div></div><span class="cap">a plan the company pays: a stamp, never a price</span></div>
+      <div class="state"><div class="h-look" style="width:100%"><span class="h-lh">Worth a look</span><button class="h-pin hot"><i></i><span><b>Claude in Chrome can act as you</b><small>It works inside your own browser.</small></span></button><button class="h-pin"><i></i><span><b>37 skills never used</b><small>They still take up room.</small></span></button></div><span class="cap">up to three, orange only when something can act as you or a limit is near</span></div>
+      <div class="state"><div class="h-tape" style="width:100%"><ol><li>Found Claude Code: 80 chats kept since Apr 14, 14 this week.</li><li class="miss">Can't see: chats on the Claude and ChatGPT websites.</li><li class="now">Reading how each app is set up…</li></ol></div><div class="h-fresh" style="width:100%"><i></i><span>Reading your newest records…</span><small>step 3 of 15</small></div><span class="cap">the first open's tape, and the slim strip when numbers are already here</span></div>
+    </div>
+  </section>
+
+  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
     <header class="w-mh"><h3><i class="w-led idle"></i>Plans, personal and through work</h3><span class="w-mh-note">Added Oct 17</span></header>
     <div class="body grid g2">
       <div class="state"><div class="q-grp q-sheet-b" style="padding:0"><div class="q-radios"><label class="q-radio"><input type="radio" name="ds-plan"><span>Claude Max 5x <small>$100 a month</small></span></label><p class="q-sub">Through work</p><label class="q-radio on"><input type="radio" name="ds-plan" checked><span>Claude Team, Premium seat</span></label><span class="q-who"><label class="q-radio sub on"><input type="radio" name="ds-who" checked><span>My company pays for it</span></label><label class="q-radio sub"><input type="radio" name="ds-who"><span>I pay for it<span class="q-amt">$<input type="number" value="" aria-label="Monthly price"> a month</span></span></label></span></div></div><span class="cap">the plan picker: a work plan asks who pays, and needs no price when the company does</span></div>
@@ -255,17 +268,7 @@
     <div class="body" style="padding-top:0"><p class="cap">The check for a screen is the five-second read: someone who sees it for five seconds can say what it's for and the one thing it says. A screen over budget moves the extra part one click deeper.</p></div>
   </section>
 
-  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
-    <header class="w-mh"><h3><i class="w-led idle"></i>The first-minute walk</h3></header>
-    <div class="body"><div style="position:relative;background:rgba(21,23,27,.58);border-radius:var(--r-lg);padding:28px;max-width:560px">
-      <div class="wk-card" style="position:static;max-width:420px"><p class="wk-n">2 of 3</p><h2 class="wk-lead">Your plans are covering the cost of this week's work.</h2>
-        <div class="wk-nums"><div><span>This week's share of your $100 a month</span><b>about $20</b></div><div><span>The same work at pay-per-use prices</span><b>about $250</b></div></div>
-        <p class="wk-sup">The pay-per-use price isn't your bill. It's what the same work would cost at published prices.</p>
-        <div class="wk-foot"><button class="wk-skip">Skip</button><span class="wk-dots" aria-hidden="true"><i></i><i class="on"></i><i></i></span><button class="w-btn main wk-go">Show me one thing in my setup</button></div></div></div>
-      <p class="cap">Three steps on the first open, over the real screens. The rest of the screen dims and the part a step talks about stays lit with a white edge. The card sits in the panel's place when there's one on the right, and under the lit part on narrower windows. One sentence, the numbers in their own slots, one line of support, "Skip" (or "Done" on the last step) and one button that says what happens next. Esc closes it, and the footer opens it again.</p></div>
-  </section>
-
-  <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
+    <section class="w-mod"><i class="w-screw tl"></i><i class="w-screw tr"></i><i class="w-screw bl"></i><i class="w-screw br"></i>
     <header class="w-mh"><h3><i class="w-led idle"></i>Rules every screen keeps</h3></header>
     <div class="body"><ul class="rules">
       <li><b>One job per color.</b> Orange marks what's worth your attention now. What ran in the week shown is the darkest grey. Blue says where something came from. Selection is an ink outline. Project colors stay clear of orange and blue.</li>

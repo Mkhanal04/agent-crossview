@@ -2,16 +2,16 @@
  "Claude Code": {
   "folder": {
    "where": "a hidden folder in your home folder (.claude)",
-   "session_logs": 47,
-   "helper_logs": 56,
+   "session_logs": 54,
+   "helper_logs": 69,
    "project_folders": 9,
    "mb": 840,
-   "first": "2026-08-10",
-   "last": "2026-10-16",
+   "first": "2026-08-17",
+   "last": "2026-10-20",
    "parts": [
     [
      "Session logs",
-     "47 chats"
+     "54 chats"
     ],
     [
      "Your main rule file",
@@ -79,14 +79,14 @@
  "Cowork": {
   "folder": {
    "where": "inside the Claude app's own folder (Application Support)",
-   "session_logs": 38,
+   "session_logs": 40,
    "mb": 310,
-   "first": "2026-08-10",
-   "last": "2026-10-16",
+   "first": "2026-08-17",
+   "last": "2026-10-20",
    "parts": [
     [
      "Task folders",
-     "38 kept on this Mac"
+     "40 kept on this Mac"
     ],
     [
      "Task logs",
@@ -117,14 +117,14 @@
  "Codex": {
   "folder": {
    "where": "a hidden folder in your home folder (.codex)",
-   "session_logs": 14,
+   "session_logs": 5,
    "mb": 120,
-   "first": "2026-08-10",
-   "last": "2026-10-16",
+   "first": "2026-08-17",
+   "last": "2026-10-20",
    "parts": [
     [
      "Session logs",
-     "14 chats"
+     "5 chats"
     ],
     [
      "Settings file",
@@ -173,5 +173,5 @@
    "node_repl"
   ]
  },
- "read": "2026-10-16T20:13"
+ "read": "2026-10-20T10:26"
 }

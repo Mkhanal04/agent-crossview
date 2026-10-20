@@ -4,7 +4,7 @@
    "service": "Claude API",
    "month": "2026-10",
    "usd": 18.4,
-   "entered": "2026-10-12T09:12"
+   "entered": "2026-10-19T09:12"
   }
  ],
  "plans": [
@@ -31,5 +31,5 @@
  "plans_asked": true,
  "sources": [],
  "bills_folder": "data/bills",
- "read": "2026-10-16T20:13"
+ "read": "2026-10-20T10:26"
 }

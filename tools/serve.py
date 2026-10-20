@@ -4,7 +4,8 @@ POST /api/move {"session": id, "work": name or null} moves a session to another 
 then regroups and rebuilds in about a second. The Progress page re-reads TASKS.md on every load.
 POST /api/change and /api/undo make or undo one of the prepared changes on Your week, only when you press the
 button (tools/changes.py says exactly which files and lines it may touch).
-Usage: python3 tools/serve.py [--open]"""
+Usage: python3 tools/serve.py [--open] [--refresh]
+--refresh reads every app's records in the background while the page shows it happening (the first open)."""
 import re, http.server, json, os, subprocess, sys, datetime, webbrowser, threading
 if os.name == "nt" and not sys.flags.utf8_mode:  # Windows: read and write every file as UTF-8, as on a Mac
     os.environ["PYTHONUTF8"] = "1"
@@ -14,6 +15,26 @@ import changes
 ROOT = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), ".."))
 PORT = int(os.environ.get("GLASSBOX_PORT", "8765"))  # another port only for testing
 OVR = os.path.join(ROOT, "data", "work-overrides.json")
+SCAN = os.path.join(ROOT, "data", "scan.json")
+
+
+def scan_in_background():
+    """The first open (Oct 18): the page opens at once and shows the refresh as it happens, instead of waiting behind a
+    terminal window. The refresh writes its progress to data/scan.json, which /api/scan serves."""
+    try: os.remove(SCAN)
+    except OSError: pass
+    with open(SCAN, "w", encoding="utf-8") as f: json.dump({"done": False, "now": "Looking for your AI apps", "found": [], "step": 0, "of": 1}, f)
+    def go():
+        r = run("tools/refresh.py", "--progress", SCAN)
+        if r.returncode:
+            print(r.stdout[-1500:], r.stderr[-1500:])
+            try:
+                s = json.load(open(SCAN, encoding="utf-8"))
+                if not s.get("done"): s.update(done=True, error="The refresh stopped. The window that opened Crossview says where.")
+                json.dump(s, open(SCAN, "w", encoding="utf-8"))
+            except Exception: pass
+        else: print("Read every app's records. The page has the newest numbers.")
+    threading.Thread(target=go, daemon=True).start()
 HIDE = {"Day job", "Personal"}
 
 
@@ -39,6 +60,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 
     def do_GET(self):
         if self.path.split("?")[0] == "/progress.js": run("tools/progress.py")
+        if self.path.split("?")[0] == "/api/scan":
+            # the scan the page shows on opening: what the refresh is doing and what it found so far
+            try: body = open(SCAN, "rb").read()
+            except OSError: body = json.dumps({"done": True, "none": True}).encode()
+            self.send_response(200); self.send_header("Content-Type", "application/json"); self.send_header("Content-Length", str(len(body))); self.end_headers(); self.wfile.write(body); return
         return super().do_GET()
 
     def reply(self, code, obj):
@@ -113,6 +139,12 @@ class Handler(http.server.SimpleHTTPRequestHandler):
             r = run("tools/bills.py")
             if not r.returncode: r = run("tools/build_app.py", "--fast")
             return self.reply(500 if r.returncode else 200, {"error": r.stderr[-800:]} if r.returncode else {"ok": True})
+        if self.path == "/api/rescan":
+            # a second double-click while Crossview is open: read the newest records again, shown on the page as before
+            try: running = not json.load(open(SCAN, encoding="utf-8")).get("done")
+            except Exception: running = False
+            if not running: scan_in_background()
+            return self.reply(200, {"ok": True})
         if self.path == "/api/refresh":
             r = run("tools/refresh.py")
             return self.reply(500 if r.returncode else 200, {"ok": not r.returncode, "log": r.stdout[-1500:]})
@@ -122,9 +154,15 @@ class Handler(http.server.SimpleHTTPRequestHandler):
 if __name__ == "__main__":
     url = f"http://127.0.0.1:{PORT}/"
     try: srv = http.server.ThreadingHTTPServer(("127.0.0.1", PORT), Handler)
-    except OSError:  # already running from an earlier double-click: just open it
+    except OSError:  # already running from an earlier double-click: ask it to read the newest records, then open it
+        if "--refresh" in sys.argv:
+            try:
+                import urllib.request
+                urllib.request.urlopen(urllib.request.Request(url + "api/rescan", data=b"{}", method="POST", headers={"X-Glass-Box": "1", "Content-Type": "application/json"}), timeout=5)
+            except Exception: pass
         print(f"Crossview is already running at {url}"); webbrowser.open(url); sys.exit(0)
     print(f"Crossview is open at {url}  (this computer only). Close this window to stop it.")
+    if "--refresh" in sys.argv: scan_in_background()
     if "--open" in sys.argv: threading.Timer(0.5, lambda: webbrowser.open(url)).start()
     try: srv.serve_forever()
     except KeyboardInterrupt: pass

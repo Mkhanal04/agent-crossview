@@ -56,7 +56,7 @@ window.GBStage = (function () {
     // across (pn.across) for pictures read left to right, like weeks: Earlier and Later with the ← → keys;
     // chip, prevOff and nextOff let a tab say what the panel shows when nothing is picked (All weeks' overview)
     const sw = pn.across ? [["◀", "Earlier", "Shows the week before. The ← key works too."], ["▶", "Later", "Shows the week after. The → key works too."]]
-      : [["▲", "Above", "Shows the one above. The ↑ key works too."], ["▼", "Below", "Shows the one below. The ↓ key works too."]];
+      : [["▲", "Above", "Shows the layer above. The ↑ key works too."], ["▼", "Below", "Shows the layer below. The ↓ key works too."]];
     const step = n > 1 ? `<header class="a-ph"><div class="a-step" role="group" aria-label="Move between ${esc(unit.toLowerCase())}s">
         <button class="w-btn w-sbtn" data-w="${esc(pn.act)}step:-1" ${(pn.prevOff != null ? pn.prevOff : k === 0) ? "disabled" : ""} data-tip="${sw[0][2]}"><span aria-hidden="true">${sw[0][0]}</span> ${sw[0][1]}</button>
         <span class="a-chip">${esc(pn.chip || `${unit} ${k + 1} of ${n}`)}</span>
@@ -85,7 +85,7 @@ window.GBStage = (function () {
     return cut.replace(/[,;:]$/, "") + "…";
   }
   // one name for each of Codex's parts and settings, on every tab (release 1 QA, pattern D)
-  const NAMES = { "unified-computer-use": "Engine behind Browser and Computer control", "computer-use": "Computer control", node_repl: "Code runner", chrome: "Chrome", browser: "Browser",
+  const NAMES = { "unified-computer-use": "The part that runs Browser and Computer control", "computer-use": "Computer control", node_repl: "Code runner", chrome: "Chrome", browser: "Browser",
     "codex-app-tools": "Codex app tools", "code-review": "Code review", "template-creator": "Template creator", visualize: "Visualize", documents: "Documents", pdf: "PDF", spreadsheets: "Spreadsheets", presentations: "Presentations",
     "Approval rule": "When it asks you", Sandbox: "What it may change", "Thinking effort": "How hard it thinks", "Auto mode notes": "Notes for when it works without asking" };
   const VALUES = { default: "Codex's default", never: "Never asks", "on-request": "Decides when to ask", untrusted: "Asks before most actions", "on-failure": "Asks only after something fails", "danger-full-access": "Anything on this Mac", "workspace-write": "Only the folder it works in", "read-only": "Nothing; it only reads", };
@@ -94,5 +94,17 @@ window.GBStage = (function () {
   const ACTS_AS_YOU = new Set(["computer-use", "chrome"]);
   const name = (n) => NAMES[n] || n, value = (v) => VALUES[v] || v, actsAsYou = (n) => ACTS_AS_YOU.has(n);
   const model = (v) => (/^gpt-/i.test(v || "") ? "GPT-" + v.slice(4).split("-").map((x, i) => (i ? x.charAt(0).toUpperCase() + x.slice(1) : x)).join(" ") : v);
-  return { stack, page, stepIn, short, screws, esc, name, value, actsAsYou, model };
+  function planFact(PF, p) {
+    const list = ((p.covers || []).includes("Codex") ? (PF || {}).chatgpt : (PF || {}).claude) || [];
+    if (p.plan) { const k = list.find((f) => f.key === p.plan); if (k) return k; }
+    const n = String(p.name || "").replace(/\s*\(for Codex\)$/i, "").trim().toLowerCase(), mine = list.filter((f) => f.kind === "personal");
+    const same = mine.filter((f) => f.name.toLowerCase() === n);
+    if (same.length === 1) return same[0];
+    if (same.length > 1) return same.find((f) => f.monthly_usd === p.monthly_usd) || null;
+    if (n && !/\b(team|enterprise|business|seat|api)\b/.test(n)) { const fam = mine.filter((f) => f.name.toLowerCase().startsWith(n) && f.monthly_usd === p.monthly_usd); if (fam.length === 1) return fam[0]; }
+    return null;
+  }
+  // a personal plan shows its catalog name; a work, per-use or custom plan keeps the name it was saved with (Codex recheck)
+  const planName = (PF, p) => { const f = planFact(PF, p); return f && f.kind === "personal" ? f.name : String(p.name || "").replace(/\s*\(for Codex\)$/i, ""); };
+  return { stack, page, stepIn, short, screws, esc, name, value, actsAsYou, model, planFact, planName };
 })();
