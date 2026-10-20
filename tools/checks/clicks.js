@@ -146,7 +146,7 @@ const level = (pk, el) => { if (!pk || !el) return false; const a = pk.querySele
   // slice 2: how Claude writes, from the home's Worth a look; answers tick the rules they point to
   click($('[data-go="screen:home"]')); await wait(150);
   const wl = $('[data-h="look:writing"]');
-  ok("the home offers the writing questions when last week's writing was long", !!wl || !window.GB.machine || !(((window.GB.machine.receipt || {})[Object.keys(window.GB.machine.receipt || {}).filter((k) => k < window.GB.week_start).sort().pop()] || {}).tools || {})["Claude Code"], [...document.querySelectorAll('[data-h^="look:"]')].map((e) => e.dataset.h).join(","));
+  ok("the home offers the writing questions only when Claude wrote 100,000 words or more last week", !!wl === (() => { const d = new Date(window.GB.week_start + "T12:00:00"); d.setDate(d.getDate() - 7); const lw = d.toISOString().slice(0, 10); return Math.round(((((((window.GB.machine || {}).receipt || {})[lw] || {}).tools || {})["Claude Code"] || {}).out || 0) * 0.75) >= 100000; })(), [...document.querySelectorAll('[data-h^="look:"]')].map((e) => e.dataset.h).join(","));
   if (wl) { try { localStorage.removeItem("gb:writing:" + window.GB.week_start); } catch (e) {} click(wl); await wait(150);
     ok("the writing questions open over the home", !!$(".q-sheet") && document.querySelectorAll(".q-ask").length === 3 && location.hash === "#home");
     click($('[data-w="q:ans:files:few"]')); await wait(120);
